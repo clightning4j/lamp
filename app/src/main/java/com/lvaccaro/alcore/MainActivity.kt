@@ -3,7 +3,7 @@ package com.lvaccaro.alcore
 import android.Manifest
 import androidx.appcompat.app.AppCompatActivity
 import android.app.DownloadManager
-import android.content.Context
+import android.content.*
 import android.net.Uri
 import android.util.Log
 import java.io.*
@@ -12,13 +12,12 @@ import org.apache.commons.compress.compressors.xz.XZCompressorInputStream
 import org.apache.commons.compress.utils.IOUtils
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry
 import android.view.View
-import android.content.Intent
-import android.content.BroadcastReceiver
-import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.Color
+import android.net.wifi.WifiManager
 import android.os.*
+import android.text.format.Formatter
 import android.text.method.ScrollingMovementMethod
 import android.view.Menu
 import android.view.MenuItem
@@ -32,6 +31,8 @@ import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel
 import com.google.zxing.qrcode.encoder.Encoder
 import org.jetbrains.anko.doAsync
 import java.lang.Exception
+import java.net.NetworkInterface
+import java.util.*
 import java.util.logging.Logger
 
 
@@ -106,15 +107,29 @@ class MainActivity : AppCompatActivity() {
             val res = LightningCli().exec(this, arrayOf("getinfo"), true)
             val json = LightningCli().toJSONObject(res)
             val id = json["id"].toString()
+            val address = getWifiIPAddress() ?: getMobileIPAddress() ?: ""
+            val sharedPref = PreferenceManager.getDefaultSharedPreferences(applicationContext)
+            val port = sharedPref.getString("port", "9735").toString()
+            val text = "${id}@${address}:${port}"
             runOnUiThread {
-                findViewById<TextView>(R.id.textViewQr).text = id
-                findViewById<ImageView>(R.id.qrcodeImageView).setImageBitmap(getQrCode(id))
+                findViewById<TextView>(R.id.textViewQr).text = text
+                findViewById<ImageView>(R.id.qrcodeImageView).setImageBitmap(getQrCode(text))
+                findViewById<ImageView>(R.id.qrcodeImageView).setOnClickListener {
+                    val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                    val clip: ClipData = ClipData.newPlainText("peernode", text)
+                    clipboard.setPrimaryClip(clip)
+                    Toast.makeText(this, "Copied to clipboard", Toast.LENGTH_LONG).show()
+                }
+                findViewById<TextView>(R.id.textViewQr).visibility = View.VISIBLE
+                findViewById<TextView>(R.id.qrcodeImageView).visibility = View.VISIBLE
                 findViewById<Button>(R.id.start).isEnabled = false
                 findViewById<Button>(R.id.stop).isEnabled = true
             }
         }catch (e: Exception) {
             log.info("---" + e.localizedMessage + "---")
             runOnUiThread {
+                findViewById<TextView>(R.id.textViewQr).visibility = View.GONE
+                findViewById<TextView>(R.id.qrcodeImageView).visibility = View.GONE
                 findViewById<Button>(R.id.start).isEnabled = true
                 findViewById<Button>(R.id.stop).isEnabled = false
             }
@@ -313,5 +328,27 @@ class MainActivity : AppCompatActivity() {
             }
             else -> super.onOptionsItemSelected(item)
         }
+    }
+
+    fun getWifiIPAddress(): String? {
+        val wifiMgr= getApplicationContext().getSystemService(WIFI_SERVICE) as WifiManager
+        val wifiInfo = wifiMgr.getConnectionInfo()
+        val ip = wifiInfo.getIpAddress()
+        return Formatter.formatIpAddress(ip)
+    }
+
+    fun getMobileIPAddress(): String? {
+        try {
+            val interfaces = Collections.list(NetworkInterface.getNetworkInterfaces());
+            for (intf in interfaces) {
+                val addrs = Collections.list(intf.getInetAddresses());
+                for (addr in addrs) {
+                    if (!addr.isLoopbackAddress()) {
+                        return  addr.getHostAddress()
+                    }
+                }
+            }
+        } catch (ex: Exception) { }
+        return null
     }
 }
