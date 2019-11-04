@@ -1,0 +1,43 @@
+<resources>
+    <string name="app_name">ALCore</string>
+    <string name="id_downloading">Downloading</string>
+    <string name="id_settings">Settings</string>
+    <string name="id_getinfo">GetInfo</string>
+    <string name="id_newaddress">New Address</string>
+    <string name="id_connect">Connect</string>
+    <string name="id_start">Start</string>
+    <string name="id_stop">Stop</string>
+    <string name="title_activity_settings">Settings</string>
+
+    <!-- Preference Titles -->
+    <string name="messages_header">Messages</string>
+    <string name="sync_header">Sync</string>
+
+    <!-- Messages Preferences -->
+    <string name="signature_title">Your signature</string>
+    <string name="reply_title">Default reply action</string>
+
+    <!-- Sync Preferences -->
+    <string name="sync_title">Sync email periodically</string>
+    <string name="attachment_title">Download incoming attachments</string>
+    <string name="attachment_summary_on">Automatically download attachments for incoming emails
+    </string>
+    <string name="attachment_summary_off">Only download attachments when manually requested</string>
+    <string name="id_lightning_daemon_options">Lightning daemon options</string>
+    <string name="id_select_the_network_parameters">Select the network parameters</string>
+    <string name="id_log_level">Log level</string>
+    <string name="id_bitcoind_rpc_options">Bitcoind RPC options</string>
+    <string name="id_bitcoind_rpc_username">Bitcoind RPC username</string>
+    <string name="id_bitcoind_rpc_password">Bitcoind RPC password</string>
+    <string name="id_bitcoind_rpc_host">Bitcoind RPC host to connect to</string>
+    <string name="id_bitcoind_rpc_port">Bitcoind RPC port</string>
+    <string name="id_clear_memory">Clear memory</string>
+    <string name="id_erase_logs_file">Erase logs file</string>
+    <string name="id_erase_data_dir">Erase data dir</string>
+    <string name="id_erase_binary_dir">Erase binary dir</string>
+    <string name="title_activity_log">LogActivity</string>
+    <string name="id_log">Log</string>
+    <string name="id_download">Download</string>
+    <string name="title_activity_console">Console</string>
+    <string name="id_console">Console</string>
+</resources>

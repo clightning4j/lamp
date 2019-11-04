@@ -1,0 +1,65 @@
+<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <PreferenceCategory app:title="@string/id_lightning_daemon_options">
+
+        <ListPreference
+            app:defaultValue="testnet"
+            app:entries="@array/networks"
+            app:entryValues="@array/networks"
+            app:key="network"
+            app:title="@string/id_select_the_network_parameters"
+            app:useSimpleSummaryProvider="true" />
+
+        <ListPreference
+            app:defaultValue="io"
+            app:entries="@array/loglevels"
+            app:entryValues="@array/loglevels"
+            app:key="log-level"
+            app:title="@string/id_log_level"
+            app:useSimpleSummaryProvider="true" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory app:title="@string/id_bitcoind_rpc_options">
+
+        <EditTextPreference
+            app:key="bitcoin-rpcuser"
+            app:title="@string/id_bitcoind_rpc_username"
+            app:useSimpleSummaryProvider="true" />
+
+        <EditTextPreference
+            app:key="bitcoin-rpcpassword"
+            app:title="@string/id_bitcoind_rpc_password"
+            app:useSimpleSummaryProvider="true" />
+
+        <EditTextPreference
+            app:key="bitcoin-rpcconnect"
+            app:title="@string/id_bitcoind_rpc_host"
+            app:useSimpleSummaryProvider="true"
+            app:defaultValue="127.0.0.1" />
+
+        <EditTextPreference
+            app:key="bitcoin-rpcport"
+            app:title="@string/id_bitcoind_rpc_port"
+            app:useSimpleSummaryProvider="true"
+            app:defaultValue="9753" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory app:title="@string/id_clear_memory">
+
+        <Preference
+            app:key="clearlogs"
+            app:title="@string/id_erase_logs_file" />
+
+        <Preference
+            app:key="cleardata"
+            app:title="@string/id_erase_data_dir" />
+
+        <Preference
+            app:key="clearbinary"
+            app:title="@string/id_erase_binary_dir" />
+
+    </PreferenceCategory>
+
+</PreferenceScreen>
