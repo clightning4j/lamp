@@ -40,4 +40,6 @@
     <string name="id_download">Download</string>
     <string name="title_activity_console">Console</string>
     <string name="id_console">Console</string>
+    <string name="title_activity_scan">ScanActivity</string>
+    <string name="id_scan">Scan</string>
 </resources>

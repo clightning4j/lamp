@@ -27,6 +27,8 @@ import androidx.core.app.ActivityCompat
 import androidx.core.net.toUri
 import androidx.preference.PreferenceManager
 import com.google.zxing.WriterException
+import com.google.zxing.integration.android.IntentIntegrator
+import com.google.zxing.integration.android.IntentResult
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel
 import com.google.zxing.qrcode.encoder.Encoder
 import org.jetbrains.anko.doAsync
@@ -121,7 +123,7 @@ class MainActivity : AppCompatActivity() {
                     Toast.makeText(this, "Copied to clipboard", Toast.LENGTH_LONG).show()
                 }
                 findViewById<TextView>(R.id.textViewQr).visibility = View.VISIBLE
-                findViewById<TextView>(R.id.qrcodeImageView).visibility = View.VISIBLE
+                findViewById<ImageView>(R.id.qrcodeImageView).visibility = View.VISIBLE
                 findViewById<Button>(R.id.start).isEnabled = false
                 findViewById<Button>(R.id.stop).isEnabled = true
             }
@@ -129,7 +131,7 @@ class MainActivity : AppCompatActivity() {
             log.info("---" + e.localizedMessage + "---")
             runOnUiThread {
                 findViewById<TextView>(R.id.textViewQr).visibility = View.GONE
-                findViewById<TextView>(R.id.qrcodeImageView).visibility = View.GONE
+                findViewById<ImageView>(R.id.qrcodeImageView).visibility = View.GONE
                 findViewById<Button>(R.id.start).isEnabled = true
                 findViewById<Button>(R.id.stop).isEnabled = false
             }
@@ -326,9 +328,28 @@ class MainActivity : AppCompatActivity() {
                 startActivity(Intent(this, ConsoleActivity::class.java))
                 true
             }
+            R.id.action_scan -> {
+                IntentIntegrator(this@MainActivity).initiateScan()
+                true
+            }
             else -> super.onOptionsItemSelected(item)
         }
     }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        var result: IntentResult? = IntentIntegrator.parseActivityResult(requestCode, resultCode, data)
+        if(result != null){
+            if(result.contents != null) {
+                Toast.makeText(this@MainActivity, result.contents, Toast.LENGTH_LONG).show()
+            } else {
+                Toast.makeText(this@MainActivity, "Scan failed", Toast.LENGTH_LONG).show()
+            }
+        } else {
+            super.onActivityResult(requestCode, resultCode, data)
+        }
+    }
+
+
 
     fun getWifiIPAddress(): String? {
         val wifiMgr= getApplicationContext().getSystemService(WIFI_SERVICE) as WifiManager
