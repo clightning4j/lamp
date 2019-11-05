@@ -112,9 +112,9 @@ class MainActivity : AppCompatActivity() {
             val id = json["id"].toString()
             val address = getWifiIPAddress() ?: getMobileIPAddress() ?: ""
             val sharedPref = PreferenceManager.getDefaultSharedPreferences(applicationContext)
-            val announceaddr = sharedPref.getString("announce-addr", null)
+            val announceaddr = sharedPref.getString("announce-addr", "").toString()
 
-            val text = "${id}@" + (announceaddr ?: "${address}:9735")
+            val text = "${id}@" + if (!announceaddr.isEmpty()) announceaddr else "${address}"
             runOnUiThread {
                 findViewById<TextView>(R.id.textViewQr).text = text
                 findViewById<ImageView>(R.id.qrcodeImageView).setImageBitmap(getQrCode(text))
@@ -363,7 +363,7 @@ class MainActivity : AppCompatActivity() {
                         .show()
                 })
             } catch (e: Exception) {
-                runOnUiThread(Runnable { Toast.makeText(this@MainActivity, "Operation failed", Toast.LENGTH_LONG).show() })
+                runOnUiThread(Runnable { Toast.makeText(this@MainActivity, e.localizedMessage, Toast.LENGTH_LONG).show() })
             }
         }
     }

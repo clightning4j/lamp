@@ -56,10 +56,10 @@ class LightningService : IntentService("LightningService") {
             String.format("--bitcoin-rpcport=%s", rpcport),
             String.format("--bitcoin-rpcpassword=%s", rpcpassword))
 
-        if (proxy != null) {
+        if (proxy != null && !proxy.isEmpty()) {
             options.add(String.format("--proxy=%s", proxy))
         }
-        if (announceaddr != null) {
+        if (announceaddr != null && !announceaddr.isEmpty()) {
             options.add(String.format("--announce-addr=%s", announceaddr))
         }
 
