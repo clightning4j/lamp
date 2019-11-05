@@ -49,4 +49,5 @@
     <string name="id_accounce_address">Announce address</string>
     <string name="id_proxy">Proxy</string>
     <string name="id_network_options">Network options</string>
+    <string name="id_invoice">Invoice</string>
 </resources>

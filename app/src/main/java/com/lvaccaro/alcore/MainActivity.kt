@@ -120,10 +120,7 @@ class MainActivity : AppCompatActivity() {
                 findViewById<TextView>(R.id.textViewQr).text = text
                 findViewById<ImageView>(R.id.qrcodeImageView).setImageBitmap(getQrCode(text))
                 findViewById<ImageView>(R.id.qrcodeImageView).setOnClickListener {
-                    val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                    val clip: ClipData = ClipData.newPlainText("peernode", text)
-                    clipboard.setPrimaryClip(clip)
-                    Toast.makeText(this, "Copied to clipboard", Toast.LENGTH_LONG).show()
+                    copyToClipboard("peernode", text)
                 }
                 findViewById<TextView>(R.id.textViewQr).visibility = View.VISIBLE
                 findViewById<ImageView>(R.id.qrcodeImageView).visibility = View.VISIBLE
@@ -313,6 +310,10 @@ class MainActivity : AppCompatActivity() {
                 IntentIntegrator(this@MainActivity).initiateScan()
                 true
             }
+            R.id.action_invoice -> {
+                buildInvoice()
+                true
+            }
             R.id.action_paste -> {
                 val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
                 val clip = clipboard.primaryClip
@@ -419,6 +420,83 @@ class MainActivity : AppCompatActivity() {
             .show()
     }
 
+    fun buildInvoice() {
+        val msatoshi = EditText(this)
+        val label = EditText(this)
+        val description = EditText(this)
+        msatoshi.inputType = InputType.TYPE_CLASS_NUMBER
+        msatoshi.hint = "msatoshi"
+        label.hint = "label"
+        description.hint = "description"
+
+        val container = LinearLayout(this)
+        container.orientation = LinearLayout.VERTICAL
+        container.layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT)
+        container.addView(msatoshi)
+        container.addView(label)
+        container.addView(description)
+
+        AlertDialog.Builder(this@MainActivity)
+            .setTitle("Build invoice")
+            .setView(container)
+            .setPositiveButton("confirm") { dialog, which ->
+                try {
+                    val cli = LightningCli()
+                    val res = cli.exec(this@MainActivity, arrayOf("invoice",
+                        msatoshi.text.toString(), label.text.toString(), description.text.toString()), true)
+                    val json = cli.toJSONObject(res)
+                    val bolt11 = json["bolt11"].toString()
+                    showInvoice(bolt11, label.text.toString())
+                } catch (e: Exception) {
+                    runOnUiThread(Runnable { Toast.makeText(this@MainActivity, e.localizedMessage, Toast.LENGTH_LONG).show() })
+                }
+            }
+            .setNegativeButton("cancel") { dialog, which -> }
+            .show()
+    }
+
+    fun showInvoice(bolt11: String, label: String) {
+        val editText = EditText(this)
+        val qr = ImageView(this)
+
+        editText.setText(bolt11)
+        qr.setImageBitmap(getQrCode(bolt11))
+        qr.layoutParams = LinearLayout.LayoutParams(300, 300)
+
+        val container = LinearLayout(this)
+        container.orientation = LinearLayout.VERTICAL
+        container.layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT)
+        container.addView(editText)
+        container.addView(qr)
+
+        AlertDialog.Builder(this@MainActivity)
+            .setTitle("Invoice")
+            .setMessage("Label: ${label}")
+            .setView(container)
+            .setNeutralButton("clipboard") { dialog, which ->
+                copyToClipboard("invoice", bolt11)
+            }
+            .setPositiveButton("wait") { dialog, which ->
+                try {
+                    val cli = LightningCli()
+                    val res = cli.exec(this@MainActivity, arrayOf("waitinvoice", label), true)
+                    val json = cli.toJSONObject(res)
+                    runOnUiThread(Runnable { Toast.makeText(this@MainActivity, "Invoice paid", Toast.LENGTH_LONG).show() })
+                } catch (e: Exception) {
+                    runOnUiThread(Runnable { Toast.makeText(this@MainActivity, e.localizedMessage, Toast.LENGTH_LONG).show() })
+                }
+            }
+            .setNegativeButton("cancel") { dialog, which -> }
+            .setCancelable(false)
+            .show()
+    }
+
+    fun copyToClipboard(key:String, text: String) {
+        val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+        val clip: ClipData = ClipData.newPlainText(key, text)
+        clipboard.setPrimaryClip(clip)
+        Toast.makeText(this, "Copied to clipboard", Toast.LENGTH_LONG).show()
+    }
     fun getWifiIPAddress(): String? {
         val wifiMgr= getApplicationContext().getSystemService(WIFI_SERVICE) as WifiManager
         val wifiInfo = wifiMgr.getConnectionInfo()
