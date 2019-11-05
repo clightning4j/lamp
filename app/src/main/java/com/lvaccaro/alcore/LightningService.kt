@@ -48,7 +48,7 @@ class LightningService : IntentService("LightningService") {
             String.format("--lightning-dir=%s", lightningDir.path),
             String.format("--bitcoin-cli=%s/bitcoin-cli", binaryDir.canonicalPath),
             String.format("--bitcoin-datadir=%s", bitcoinDir.path),
-            String.format("--plugin-dir==%s", bitcoinDir.path + "/plugins"),
+            String.format("--plugin-dir=%s", File(binaryDir.path , "plugins").path),
             String.format("--bitcoin-rpcconnect=%s", rpcconnect),
             String.format("--bitcoin-rpcuser=%s", rpcuser),
             String.format("--bitcoin-rpcport=%s", rpcport),
