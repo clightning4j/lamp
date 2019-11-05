@@ -17,8 +17,8 @@ class LightningCli {
 
     @Throws(Exception::class)
     fun exec(c: Context, options: Array<String>, json: Boolean = true): InputStream {
-        val binaryDir = rootDir(c)
-        val lightningDir = File(rootDir(c), ".lightning")
+        val binaryDir = c.rootDir()
+        val lightningDir = File(c.rootDir(), ".lightning")
 
         val args =
             arrayOf( String.format("%s/%s", binaryDir.canonicalPath, command),
@@ -40,15 +40,9 @@ class LightningCli {
         }
         return process.inputStream
     }
-
-    fun rootDir(c: Context): File {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            return c.noBackupFilesDir
-        }
-        return c.filesDir
-    }
 }
 
+// extension to convert inputStream in text
 fun InputStream.toText(): String {
     val reader =  bufferedReader()
     val builder = StringBuilder()
@@ -62,8 +56,17 @@ fun InputStream.toText(): String {
     return builder.toString()
 }
 
+// extension to convert inputStream in json object
 fun InputStream.toJSONObject(): JSONObject {
     val text = toText()
     val json = JSONObject(text)
     return json
+}
+
+// extension to provide the rootDir
+fun Context.rootDir(): File {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+        return noBackupFilesDir
+    }
+    return filesDir
 }

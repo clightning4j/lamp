@@ -30,33 +30,24 @@ class SettingsActivity : AppCompatActivity() {
         override fun onPreferenceTreeClick(preference: Preference?): Boolean {
             return when (preference?.key) {
                 "clearlogs" -> {
-                    File(rootDir(), "log").delete()
+                    File(activity?.rootDir(), "log").delete()
                     true
                 }
                 "cleardata" -> {
-                    File(rootDir(), ".lightning").delete()
+                    File(activity?.rootDir(), ".lightning").delete()
                     true
                 }
                 "clearbinary" -> {
-                    File(activity!!.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS)!!, MainActivity.TAR_FILENAME).delete()
-                    File(rootDir(), "plugins").delete()
-                    File(rootDir(), "lightningd").delete()
-                    File(rootDir(), "lightning-cli").delete()
-                    File(rootDir(), "bitcoin-cli").delete()
+                    File(activity?.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS)!!, MainActivity.TAR_FILENAME).delete()
+                    File(activity?.rootDir(), "plugins").delete()
+                    File(activity?.rootDir(), "lightningd").delete()
+                    File(activity?.rootDir(), "lightning-cli").delete()
+                    File(activity?.rootDir(), "bitcoin-cli").delete()
                     true
                 } else -> {
                     super.onPreferenceTreeClick(preference)
                 }
             }
         }
-
-        fun rootDir(): File {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                return activity!!.noBackupFilesDir
-            }
-            return activity!!.filesDir
-        }
     }
-
-
 }

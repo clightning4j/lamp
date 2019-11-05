@@ -34,13 +34,6 @@ class LogActivity : AppCompatActivity() {
         readLog()
     }
 
-    fun rootDir(): File {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            return noBackupFilesDir
-        }
-        return filesDir
-    }
-
     fun readLog() {
         val logFile = File(rootDir(),"log")
         val et = findViewById<EditText>(R.id.editText)

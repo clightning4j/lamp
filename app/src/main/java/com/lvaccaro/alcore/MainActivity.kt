@@ -57,12 +57,6 @@ class MainActivity : AppCompatActivity() {
     val cli = LightningCli()
     lateinit var downloadmanager: DownloadManager
     fun dir(): File { return getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS)!! }
-    fun rootDir(): File {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            return noBackupFilesDir
-        }
-        return filesDir
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

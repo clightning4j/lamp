@@ -109,11 +109,4 @@ class LightningService : IntentService("LightningService") {
         process?.destroy()
         process = null
     }
-
-    fun rootDir(): File {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            return noBackupFilesDir
-        }
-        return filesDir
-    }
 }
