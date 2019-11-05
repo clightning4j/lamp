@@ -17,6 +17,7 @@ import android.graphics.Bitmap
 import android.graphics.Color
 import android.net.wifi.WifiManager
 import android.os.*
+import android.text.InputType
 import android.text.format.Formatter
 import android.text.method.ScrollingMovementMethod
 import android.view.Menu
@@ -115,7 +116,7 @@ class MainActivity : AppCompatActivity() {
             val announceaddr = sharedPref.getString("announce-addr", "").toString()
 
             val text = "${id}@" + if (!announceaddr.isEmpty()) announceaddr else "${address}"
-            runOnUiThread {
+            runOnUiThread(Runnable {
                 findViewById<TextView>(R.id.textViewQr).text = text
                 findViewById<ImageView>(R.id.qrcodeImageView).setImageBitmap(getQrCode(text))
                 findViewById<ImageView>(R.id.qrcodeImageView).setOnClickListener {
@@ -128,15 +129,15 @@ class MainActivity : AppCompatActivity() {
                 findViewById<ImageView>(R.id.qrcodeImageView).visibility = View.VISIBLE
                 findViewById<Button>(R.id.start).isEnabled = false
                 findViewById<Button>(R.id.stop).isEnabled = true
-            }
+            })
         }catch (e: Exception) {
             log.info("---" + e.localizedMessage + "---")
-            runOnUiThread {
+            runOnUiThread(Runnable {
                 findViewById<TextView>(R.id.textViewQr).visibility = View.GONE
                 findViewById<ImageView>(R.id.qrcodeImageView).visibility = View.GONE
                 findViewById<Button>(R.id.start).isEnabled = true
                 findViewById<Button>(R.id.stop).isEnabled = false
-            }
+            })
         }
     }
 
@@ -360,6 +361,8 @@ class MainActivity : AppCompatActivity() {
                     AlertDialog.Builder(this@MainActivity)
                         .setTitle("connect")
                         .setMessage(json.toString())
+                        .setPositiveButton("fund channel") { dialog, which -> showFundChannel(text) }
+                        .setNegativeButton("cancel") { dialog, which -> }
                         .show()
                 })
             } catch (e: Exception) {
@@ -375,13 +378,45 @@ class MainActivity : AppCompatActivity() {
             val json = cli.toJSONObject(res)
             runOnUiThread(Runnable {
                 AlertDialog.Builder(this@MainActivity)
-                    .setTitle("connect")
+                    .setTitle("paied")
                     .setMessage(json.toString())
                     .show()
             })
         } catch (e: Exception) {
             runOnUiThread(Runnable { Toast.makeText(this@MainActivity, e.localizedMessage, Toast.LENGTH_LONG).show() })
         }
+    }
+
+    fun fundChannel(id: String, satoshi: String) {
+        try {
+            val cli = LightningCli()
+            val res = cli.exec(this@MainActivity, arrayOf("fundchannel", id, satoshi), true)
+            val json = cli.toJSONObject(res)
+            runOnUiThread(Runnable {
+                AlertDialog.Builder(this@MainActivity)
+                    .setTitle("Funded")
+                    .setMessage(json.toString())
+                    .show()
+            })
+        } catch (e: Exception) {
+            runOnUiThread(Runnable { Toast.makeText(this@MainActivity, e.localizedMessage, Toast.LENGTH_LONG).show() })
+        }
+    }
+
+    fun showFundChannel(id: String) {
+        val input = EditText(this)
+        val lp = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT)
+        input.setLayoutParams(lp)
+        input.inputType = InputType.TYPE_CLASS_NUMBER
+        input.hint = "satoshi"
+
+        AlertDialog.Builder(this@MainActivity)
+            .setTitle("fund a channel")
+            .setMessage("with ${id}")
+            .setView(input)
+            .setPositiveButton("confirm") { dialog, which -> fundChannel(id, input.text.toString()) }
+            .setNegativeButton("cancel") { dialog, which -> }
+            .show()
     }
 
     fun getWifiIPAddress(): String? {
