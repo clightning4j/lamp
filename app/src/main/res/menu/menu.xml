@@ -8,6 +8,10 @@ tools:context="example.javatpoint.com.kotlinoptionsmenu.MainActivity">
         android:orderInCategory="100"
         android:title="@string/id_scan"/>
     <item
+        android:id="@+id/action_paste"
+        android:orderInCategory="100"
+        android:title="@string/id_paste_from_clipboard"/>
+    <item
         android:id="@+id/action_settings"
         android:orderInCategory="100"
         android:title="@string/id_settings"/>

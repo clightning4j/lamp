@@ -42,4 +42,5 @@
     <string name="id_console">Console</string>
     <string name="title_activity_scan">ScanActivity</string>
     <string name="id_scan">Scan</string>
+    <string name="id_paste_from_clipboard">Paste from clipboard</string>
 </resources>

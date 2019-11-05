@@ -32,6 +32,7 @@ import com.google.zxing.integration.android.IntentResult
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel
 import com.google.zxing.qrcode.encoder.Encoder
 import org.jetbrains.anko.doAsync
+import org.json.JSONObject
 import java.lang.Exception
 import java.net.NetworkInterface
 import java.util.*
@@ -210,15 +211,6 @@ class MainActivity : AppCompatActivity() {
         Toast.makeText(this, "Start downloading", Toast.LENGTH_SHORT).show()
     }
 
-    fun ls(directory: File) {
-        val files = directory!!.listFiles()
-        Log.d("Files", "Path: " + directory.absolutePath)
-        Log.d("Files", "Size: " + files.size)
-        for (i in files.indices) {
-            Log.d("Files", "FileName:" + files[i].name)
-        }
-    }
-
     fun uncompress(inputFile: File, outputDir: File) {
         runOnUiThread {
             findViewById<ProgressBar>(R.id.progressBar).visibility = View.VISIBLE
@@ -332,6 +324,14 @@ class MainActivity : AppCompatActivity() {
                 IntentIntegrator(this@MainActivity).initiateScan()
                 true
             }
+            R.id.action_paste -> {
+                val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                val clip = clipboard.primaryClip
+                val item = clip?.getItemAt(0)
+                val text = item?.text.toString()
+                doAsync { scanned(text) }
+                true
+            }
             else -> super.onOptionsItemSelected(item)
         }
     }
@@ -341,6 +341,7 @@ class MainActivity : AppCompatActivity() {
         if(result != null){
             if(result.contents != null) {
                 Toast.makeText(this@MainActivity, result.contents, Toast.LENGTH_LONG).show()
+                doAsync { scanned(result.contents) }
             } else {
                 Toast.makeText(this@MainActivity, "Scan failed", Toast.LENGTH_LONG).show()
             }
@@ -349,7 +350,51 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    fun scanned(text: String) {
+        val cli = LightningCli()
+        try {
+            val res = cli.exec(this@MainActivity, arrayOf("decodepay", text), true)
+            val json = cli.toJSONObject(res)
+            runOnUiThread(Runnable {
+                AlertDialog.Builder(this@MainActivity)
+                    .setTitle("decodepay")
+                    .setMessage(json.toString())
+                    .setCancelable(true)
+                    .setPositiveButton("pay") { dialog, which -> pay(text) }
+                    .setNegativeButton("cancel") { dialog, which -> }
+                    .show()
+            })
+        } catch (e: Exception) {
+            try {
+                val res = cli.exec(this@MainActivity, arrayOf("connect", text), true)
+                val json = cli.toJSONObject(res)
+                runOnUiThread(Runnable {
+                    AlertDialog.Builder(this@MainActivity)
+                        .setTitle("connect")
+                        .setMessage(json.toString())
+                        .show()
+                })
+            } catch (e: Exception) {
+                runOnUiThread(Runnable { Toast.makeText(this@MainActivity, "Operation failed", Toast.LENGTH_LONG).show() })
+            }
+        }
+    }
 
+    fun pay(bolt11: String) {
+        try {
+            val cli = LightningCli()
+            val res = cli.exec(this@MainActivity, arrayOf("pay", bolt11), true)
+            val json = cli.toJSONObject(res)
+            runOnUiThread(Runnable {
+                AlertDialog.Builder(this@MainActivity)
+                    .setTitle("connect")
+                    .setMessage(json.toString())
+                    .show()
+            })
+        } catch (e: Exception) {
+            runOnUiThread(Runnable { Toast.makeText(this@MainActivity, e.localizedMessage, Toast.LENGTH_LONG).show() })
+        }
+    }
 
     fun getWifiIPAddress(): String? {
         val wifiMgr= getApplicationContext().getSystemService(WIFI_SERVICE) as WifiManager
