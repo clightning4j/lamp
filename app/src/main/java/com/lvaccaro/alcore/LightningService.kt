@@ -1,7 +1,7 @@
 package com.lvaccaro.alcore
 
-import android.app.IntentService
-import android.app.Service
+import android.app.*
+import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.util.Log
@@ -13,6 +13,7 @@ class LightningService : IntentService("LightningService") {
 
     val log = Logger.getLogger(LightningService::class.java.name)
     var process: Process? = null
+    val NOTIFICATION_ID = 573948
 
     override fun onHandleIntent(workIntent: Intent?) {
         val dataString = workIntent!!.dataString
@@ -73,7 +74,33 @@ class LightningService : IntentService("LightningService") {
         //return super.onStartCommand(intent, flags, startId)
         log.info("exit lightningd service")
 
+        startForeground()
         return Service.START_STICKY
+    }
+
+    fun startForeground() {
+        val intent = Intent(this, MainActivity::class.java)
+        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        val pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_ONE_SHOT)
+
+        val notification = Notification.Builder(this)
+            .setContentTitle("ALCore is running")
+            .setContentIntent(pendingIntent)
+            .setSmallIcon(R.mipmap.ic_launcher)
+            .setOngoing(true)
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val importance = NotificationManager.IMPORTANCE_LOW
+            val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            val channelName = "channel_00"
+            val channel = NotificationChannel(channelName, "ALCore", importance)
+            channel.enableLights(true)
+            channel.enableVibration(true)
+            notificationManager.createNotificationChannel(channel)
+            notification.setChannelId(channelName)
+        }
+
+        startForeground(NOTIFICATION_ID, notification.build())
     }
 
     override fun onDestroy() {
