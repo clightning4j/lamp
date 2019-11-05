@@ -56,9 +56,7 @@ class ConsoleActivity : AppCompatActivity() {
             this.params = params[0]
             val args = params[0].split(" ").toTypedArray()
             try {
-                val res = LightningCli().exec(this@ConsoleActivity, args, false)
-                val output = LightningCli().toString(res)
-                return output
+                return LightningCli().exec(this@ConsoleActivity, args, false).toString()
             }catch (e: Exception) {
                 e.printStackTrace()
                 return e.localizedMessage

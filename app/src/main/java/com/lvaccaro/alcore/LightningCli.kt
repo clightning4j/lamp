@@ -32,37 +32,13 @@ class LightningCli {
         val process = pb.start()
         val code = process.waitFor()
         if (code == null || code != 0) {
-            val error = toString(process.errorStream)
-            val input = toString(process.inputStream)
+            val error = process.errorStream.toText()
+            val input = process.inputStream.toText()
             log.info(error)
             log.info(input)
             throw Exception(if(!error.isEmpty()) error else input)
         }
         return process.inputStream
-
-    }
-
-    fun toJSONObject(stream: InputStream): JSONObject {
-        log.info("--- start ---")
-        val text = toString(stream)
-        val json = JSONObject(text)
-        log.info(json.toString())
-        log.info("--- end ---")
-        return json
-    }
-
-    fun toString(stream: InputStream): String {
-        val reader =  stream.bufferedReader()
-        val builder = StringBuilder()
-        var line = reader.readLine()
-        while (line != null) {
-            log.info(line)
-            if (!line.startsWith("**")) {
-                builder.append(line)
-            }
-            line = reader.readLine()
-        }
-        return builder.toString()
     }
 
     fun rootDir(c: Context): File {
@@ -71,4 +47,23 @@ class LightningCli {
         }
         return c.filesDir
     }
+}
+
+fun InputStream.toText(): String {
+    val reader =  bufferedReader()
+    val builder = StringBuilder()
+    var line = reader.readLine()
+    while (line != null) {
+        if (!line.startsWith("**")) {
+            builder.append(line)
+        }
+        line = reader.readLine()
+    }
+    return builder.toString()
+}
+
+fun InputStream.toJSONObject(): JSONObject {
+    val text = toText()
+    val json = JSONObject(text)
+    return json
 }

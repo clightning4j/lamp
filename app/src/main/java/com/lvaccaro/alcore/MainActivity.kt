@@ -54,6 +54,7 @@ class MainActivity : AppCompatActivity() {
     val log = Logger.getLogger(MainActivity::class.java.name)
     val TAG = "MainActivity"
     var downloadID = 0L
+    val cli = LightningCli()
     lateinit var downloadmanager: DownloadManager
     fun dir(): File { return getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS)!! }
     fun rootDir(): File {
@@ -108,9 +109,8 @@ class MainActivity : AppCompatActivity() {
     fun getInfo() {
         // if lightning is up and running update link
         try {
-            val res = LightningCli().exec(this, arrayOf("getinfo"), true)
-            val json = LightningCli().toJSONObject(res)
-            val id = json["id"].toString()
+            val res = LightningCli().exec(this, arrayOf("getinfo"), true).toJSONObject()
+            val id = res["id"].toString()
             val address = getWifiIPAddress() ?: getMobileIPAddress() ?: ""
             val sharedPref = PreferenceManager.getDefaultSharedPreferences(applicationContext)
             val announceaddr = sharedPref.getString("announce-addr", "").toString()
@@ -128,6 +128,7 @@ class MainActivity : AppCompatActivity() {
                 findViewById<Button>(R.id.stop).isEnabled = true
             })
         }catch (e: Exception) {
+            // if lightning is down
             log.info("---" + e.localizedMessage + "---")
             runOnUiThread(Runnable {
                 findViewById<TextView>(R.id.textViewQr).visibility = View.GONE
@@ -341,14 +342,12 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun scanned(text: String) {
-        val cli = LightningCli()
         try {
-            val res = cli.exec(this@MainActivity, arrayOf("decodepay", text), true)
-            val json = cli.toJSONObject(res)
+            val res = cli.exec(this@MainActivity, arrayOf("decodepay", text), true).toJSONObject()
             runOnUiThread(Runnable {
                 AlertDialog.Builder(this@MainActivity)
                     .setTitle("decodepay")
-                    .setMessage(json.toString())
+                    .setMessage(res.toString())
                     .setCancelable(true)
                     .setPositiveButton("pay") { dialog, which -> pay(text) }
                     .setNegativeButton("cancel") { dialog, which -> }
@@ -356,12 +355,11 @@ class MainActivity : AppCompatActivity() {
             })
         } catch (e: Exception) {
             try {
-                val res = cli.exec(this@MainActivity, arrayOf("connect", text), true)
-                val json = cli.toJSONObject(res)
+                val res = cli.exec(this@MainActivity, arrayOf("connect", text), true).toJSONObject()
                 runOnUiThread(Runnable {
                     AlertDialog.Builder(this@MainActivity)
                         .setTitle("connect")
-                        .setMessage(json.toString())
+                        .setMessage(res.toString())
                         .setPositiveButton("fund channel") { dialog, which -> showFundChannel(text) }
                         .setNegativeButton("cancel") { dialog, which -> }
                         .show()
@@ -374,13 +372,11 @@ class MainActivity : AppCompatActivity() {
 
     fun pay(bolt11: String) {
         try {
-            val cli = LightningCli()
-            val res = cli.exec(this@MainActivity, arrayOf("pay", bolt11), true)
-            val json = cli.toJSONObject(res)
+            val res = cli.exec(this@MainActivity, arrayOf("pay", bolt11), true).toJSONObject()
             runOnUiThread(Runnable {
                 AlertDialog.Builder(this@MainActivity)
                     .setTitle("paied")
-                    .setMessage(json.toString())
+                    .setMessage(res.toString())
                     .show()
             })
         } catch (e: Exception) {
@@ -390,13 +386,11 @@ class MainActivity : AppCompatActivity() {
 
     fun fundChannel(id: String, satoshi: String) {
         try {
-            val cli = LightningCli()
-            val res = cli.exec(this@MainActivity, arrayOf("fundchannel", id, satoshi), true)
-            val json = cli.toJSONObject(res)
+            val res = cli.exec(this@MainActivity, arrayOf("fundchannel", id, satoshi), true).toJSONObject()
             runOnUiThread(Runnable {
                 AlertDialog.Builder(this@MainActivity)
                     .setTitle("Funded")
-                    .setMessage(json.toString())
+                    .setMessage(res.toString())
                     .show()
             })
         } catch (e: Exception) {
@@ -441,11 +435,9 @@ class MainActivity : AppCompatActivity() {
             .setView(container)
             .setPositiveButton("confirm") { dialog, which ->
                 try {
-                    val cli = LightningCli()
                     val res = cli.exec(this@MainActivity, arrayOf("invoice",
-                        msatoshi.text.toString(), label.text.toString(), description.text.toString()), true)
-                    val json = cli.toJSONObject(res)
-                    val bolt11 = json["bolt11"].toString()
+                        msatoshi.text.toString(), label.text.toString(), description.text.toString()), true).toJSONObject()
+                    val bolt11 = res["bolt11"].toString()
                     showInvoice(bolt11, label.text.toString())
                 } catch (e: Exception) {
                     runOnUiThread(Runnable { Toast.makeText(this@MainActivity, e.localizedMessage, Toast.LENGTH_LONG).show() })
@@ -478,9 +470,7 @@ class MainActivity : AppCompatActivity() {
             }
             .setPositiveButton("wait") { dialog, which ->
                 try {
-                    val cli = LightningCli()
-                    val res = cli.exec(this@MainActivity, arrayOf("waitinvoice", label), true)
-                    val json = cli.toJSONObject(res)
+                    val res = cli.exec(this@MainActivity, arrayOf("waitinvoice", label), true).toJSONObject()
                     runOnUiThread(Runnable { Toast.makeText(this@MainActivity, "Invoice paid", Toast.LENGTH_LONG).show() })
                 } catch (e: Exception) {
                     runOnUiThread(Runnable { Toast.makeText(this@MainActivity, e.localizedMessage, Toast.LENGTH_LONG).show() })
