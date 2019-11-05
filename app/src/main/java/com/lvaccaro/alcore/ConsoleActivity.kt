@@ -59,7 +59,7 @@ class ConsoleActivity : AppCompatActivity() {
                 return LightningCli().exec(this@ConsoleActivity, args, false).toString()
             }catch (e: Exception) {
                 e.printStackTrace()
-                return e.localizedMessage
+                return e.localizedMessage ?: "Error, params: ${args}"
             }
         }
 

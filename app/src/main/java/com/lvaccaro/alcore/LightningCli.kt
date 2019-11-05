@@ -23,7 +23,7 @@ class LightningCli {
         val args =
             arrayOf( String.format("%s/%s", binaryDir.canonicalPath, command),
             String.format("--lightning-dir=%s", lightningDir.path),
-            String.format("--%s", if (json === true) "json" else "raw" ))
+            String.format("--%s", if (json == true) "json" else "raw" ))
 
         val pb = ProcessBuilder((args + options).asList())
         pb.directory(binaryDir)
@@ -31,7 +31,7 @@ class LightningCli {
 
         val process = pb.start()
         val code = process.waitFor()
-        if (code == null || code != 0) {
+        if (code != 0) {
             val error = process.errorStream.toText()
             val input = process.inputStream.toText()
             log.info(error)
