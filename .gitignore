@@ -8,4 +8,7 @@
 /captures
 .externalNativeBuild
 .cxx
-app/release/
+app/release
+app/libs
+app/build
+keystore*
