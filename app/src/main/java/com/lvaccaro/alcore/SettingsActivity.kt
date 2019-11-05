@@ -3,6 +3,7 @@ package com.lvaccaro.alcore
 import android.os.Build
 import android.os.Bundle
 import android.os.Environment
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
@@ -30,11 +31,15 @@ class SettingsActivity : AppCompatActivity() {
         override fun onPreferenceTreeClick(preference: Preference?): Boolean {
             return when (preference?.key) {
                 "clearlogs" -> {
-                    File(activity?.rootDir(), "log").delete()
+                    val log = File(activity?.rootDir(), "log")
+                    log.delete()
+                    Toast.makeText(context, "Erased log: ${log.path}", Toast.LENGTH_LONG).show()
                     true
                 }
                 "cleardata" -> {
-                    File(activity?.rootDir(), ".lightning").delete()
+                    val datadir = File(activity?.rootDir(), ".lightning")
+                    datadir.delete()
+                    Toast.makeText(context, "Erased datadir: ${datadir.path}", Toast.LENGTH_LONG).show()
                     true
                 }
                 "clearbinary" -> {
@@ -43,6 +48,8 @@ class SettingsActivity : AppCompatActivity() {
                     File(activity?.rootDir(), "lightningd").delete()
                     File(activity?.rootDir(), "lightning-cli").delete()
                     File(activity?.rootDir(), "bitcoin-cli").delete()
+                    val dir = File(activity?.rootDir(), "")
+                    Toast.makeText(context, "Erased binary in: ${dir.path}", Toast.LENGTH_LONG).show()
                     true
                 } else -> {
                     super.onPreferenceTreeClick(preference)
