@@ -250,7 +250,7 @@ class MainActivity : AppCompatActivity() {
         }
         IOUtils.closeQuietly(input)
         inputFile.delete()
-        doAsync { reload() }
+        runOnUiThread(Runnable { reload() })
     }
 
     fun onStart(view: View?) {
