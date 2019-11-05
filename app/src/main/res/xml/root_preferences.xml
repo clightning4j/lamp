@@ -65,7 +65,7 @@
             app:key="bitcoin-rpcport"
             app:title="@string/id_bitcoind_rpc_port"
             app:useSimpleSummaryProvider="true"
-            app:defaultValue="9753" />
+            app:defaultValue="18332" />
 
     </PreferenceCategory>
 
