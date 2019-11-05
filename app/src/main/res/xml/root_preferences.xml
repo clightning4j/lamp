@@ -20,6 +20,29 @@
 
     </PreferenceCategory>
 
+    <PreferenceCategory app:title="@string/id_network_options">
+
+        <EditTextPreference
+            app:key="announce-addr"
+            app:title="@string/id_accounce_address"
+            app:summary="@string/id_set_an_ip_address"
+            app:useSimpleSummaryProvider="true" />
+
+        <SwitchPreference
+            app:key="proxy-enabled"
+            app:defaultValue="false"
+            app:title="@string/id_activate_a_proxy" />
+
+        <EditTextPreference
+            app:key="proxy"
+            app:dependency="proxy-enabled"
+            app:title="@string/id_proxy"
+            app:summary="@string/id_set_a_socks_v5"
+            app:useSimpleSummaryProvider="true"
+            app:defaultValue="127.0.0.1:9050" />
+
+    </PreferenceCategory>
+
     <PreferenceCategory app:title="@string/id_bitcoind_rpc_options">
 
         <EditTextPreference

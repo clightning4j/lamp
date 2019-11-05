@@ -112,8 +112,9 @@ class MainActivity : AppCompatActivity() {
             val id = json["id"].toString()
             val address = getWifiIPAddress() ?: getMobileIPAddress() ?: ""
             val sharedPref = PreferenceManager.getDefaultSharedPreferences(applicationContext)
-            val port = sharedPref.getString("port", "9735").toString()
-            val text = "${id}@${address}:${port}"
+            val announceaddr = sharedPref.getString("announce-addr", null)
+
+            val text = "${id}@" + (announceaddr ?: "${address}:9735")
             runOnUiThread {
                 findViewById<TextView>(R.id.textViewQr).text = text
                 findViewById<ImageView>(R.id.qrcodeImageView).setImageBitmap(getQrCode(text))

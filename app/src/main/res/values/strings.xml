@@ -43,4 +43,10 @@
     <string name="title_activity_scan">ScanActivity</string>
     <string name="id_scan">Scan</string>
     <string name="id_paste_from_clipboard">Paste from clipboard</string>
+    <string name="id_set_a_socks_v5">Set a socks v5 proxy IP address and port</string>
+    <string name="id_activate_a_proxy">Activate a proxy</string>
+    <string name="id_set_an_ip_address">Set an IP address (v4 or v6) or .onion v2/v3 to announce, but not listen on</string>
+    <string name="id_accounce_address">Announce address</string>
+    <string name="id_proxy">Proxy</string>
+    <string name="id_network_options">Network options</string>
 </resources>
