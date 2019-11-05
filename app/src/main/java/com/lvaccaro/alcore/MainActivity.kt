@@ -212,11 +212,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun uncompress(inputFile: File, outputDir: File) {
-        runOnUiThread {
-            findViewById<ProgressBar>(R.id.progressBar).visibility = View.VISIBLE
-            findViewById<ProgressBar>(R.id.progressBar).progress = 0
-        }
-
         if (!outputDir.exists()) {
             outputDir.mkdir()
         }
@@ -249,20 +244,12 @@ class MainActivity : AppCompatActivity() {
             val mode = (entry as TarArchiveEntry).mode
             //noinspection ResultOfMethodCallIgnored
             f.setExecutable(true, mode and 1 == 0)
-            runOnUiThread {
-                findViewById<ProgressBar>(R.id.progressBar).progress = counter / 12
-            }
-
             entry = input.nextEntry
             counter++
         }
         IOUtils.closeQuietly(input)
         inputFile.delete()
-
-        runOnUiThread {
-            findViewById<ProgressBar>(R.id.progressBar).visibility = View.GONE
-            Toast.makeText(this, "Extraction completed", Toast.LENGTH_LONG).show()
-        }
+        doAsync { reload() }
     }
 
     fun onStart(view: View?) {
