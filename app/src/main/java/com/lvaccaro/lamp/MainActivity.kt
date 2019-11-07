@@ -32,6 +32,7 @@ import com.google.zxing.integration.android.IntentResult
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel
 import com.google.zxing.qrcode.encoder.Encoder
 import org.jetbrains.anko.doAsync
+import org.json.JSONObject
 import java.lang.Exception
 import java.net.NetworkInterface
 import java.util.*
@@ -45,7 +46,8 @@ class MainActivity : AppCompatActivity() {
         var PACKAGE = "lightning"
         var RELEASE = "release_0.2"
         var TAR_FILENAME = "${ARCH}-${PACKAGE}.tar.xz"
-        var URL = "https://github.com/lvaccaro/clightning_ndk/releases/download/${RELEASE}/${TAR_FILENAME}"
+        var URL =
+            "https://github.com/lvaccaro/clightning_ndk/releases/download/${RELEASE}/${TAR_FILENAME}"
         val WRITE_REQUEST_CODE = 101
     }
 
@@ -54,7 +56,9 @@ class MainActivity : AppCompatActivity() {
     var downloadID = 0L
     val cli = LightningCli()
     lateinit var downloadmanager: DownloadManager
-    fun dir(): File { return getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS)!! }
+    fun dir(): File {
+        return getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS)!!
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -64,10 +68,14 @@ class MainActivity : AppCompatActivity() {
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (checkSelfPermission(android.Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED ||
-                checkSelfPermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                checkSelfPermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED
+            ) {
                 ActivityCompat.requestPermissions(
                     this,
-                    arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE),
+                    arrayOf(
+                        Manifest.permission.READ_EXTERNAL_STORAGE,
+                        Manifest.permission.WRITE_EXTERNAL_STORAGE
+                    ),
                     WRITE_REQUEST_CODE
                 )
             }
@@ -119,7 +127,7 @@ class MainActivity : AppCompatActivity() {
                 findViewById<Button>(R.id.start).isEnabled = false
                 findViewById<Button>(R.id.stop).isEnabled = true
             })
-        }catch (e: Exception) {
+        } catch (e: Exception) {
             // if lightning is down
             log.info("---" + e.localizedMessage + "---")
             runOnUiThread(Runnable {
@@ -154,8 +162,10 @@ class MainActivity : AppCompatActivity() {
         unregisterReceiver(onDownloadReceiver)
     }
 
-    override fun onRequestPermissionsResult(requestCode: Int,
-                                            permissions: Array<String>, grantResults: IntArray) {
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<String>, grantResults: IntArray
+    ) {
         when (requestCode) {
             WRITE_REQUEST_CODE -> {
                 if (grantResults.isEmpty() || grantResults[0] != PackageManager.PERMISSION_GRANTED) {
@@ -175,7 +185,11 @@ class MainActivity : AppCompatActivity() {
 
             runOnUiThread {
                 findViewById<Button>(R.id.download).isEnabled = false
-                Toast.makeText(this@MainActivity, "Download Completed. Uncompressing...", Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    this@MainActivity,
+                    "Download Completed. Uncompressing...",
+                    Toast.LENGTH_SHORT
+                ).show()
             }
             val tarFile = File(dir(), TAR_FILENAME)
             doAsync { uncompress(tarFile, rootDir()) }
@@ -186,7 +200,8 @@ class MainActivity : AppCompatActivity() {
         val tarFile = File(dir(), TAR_FILENAME)
         if (tarFile.exists()) {
             // Uncompress package
-            Toast.makeText(this, "Package already downloaded. Uncompressing...", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, "Package already downloaded. Uncompressing...", Toast.LENGTH_LONG)
+                .show()
             doAsync { uncompress(tarFile, rootDir()) }
             return
         }
@@ -250,7 +265,8 @@ class MainActivity : AppCompatActivity() {
         val rpcuser = sharedPref.getString("bitcoin-rpcuser", "").toString()
         val rpcpassword = sharedPref.getString("bitcoin-rpcpassword", "").toString()
         if (rpcuser === "" || rpcpassword === "") {
-            AlertDialog.Builder(this).setTitle("warning").setMessage("Go to Settings to set lightningd options before start").show()
+            AlertDialog.Builder(this).setTitle("warning")
+                .setMessage("Go to Settings to set lightningd options before start").show()
             return
         }
 
@@ -272,7 +288,7 @@ class MainActivity : AppCompatActivity() {
             val res = LightningCli().exec(this, arrayOf("stop"))
             log.info("---" + res.toString() + "---")
             reload()
-        }catch (e: Exception) {
+        } catch (e: Exception) {
             Toast.makeText(this, e.localizedMessage, Toast.LENGTH_LONG).show()
             log.info(e.localizedMessage)
             e.printStackTrace()
@@ -304,7 +320,7 @@ class MainActivity : AppCompatActivity() {
                 true
             }
             R.id.action_invoice -> {
-                buildInvoice()
+                showInvoiceBuilder()
                 true
             }
             R.id.action_paste -> {
@@ -320,10 +336,10 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        var result: IntentResult? = IntentIntegrator.parseActivityResult(requestCode, resultCode, data)
-        if(result != null){
-            if(result.contents != null) {
-                Toast.makeText(this@MainActivity, result.contents, Toast.LENGTH_LONG).show()
+        var result: IntentResult? =
+            IntentIntegrator.parseActivityResult(requestCode, resultCode, data)
+        if (result != null) {
+            if (result.contents != null) {
                 doAsync { scanned(result.contents) }
             } else {
                 Toast.makeText(this@MainActivity, "Scan failed", Toast.LENGTH_LONG).show()
@@ -336,63 +352,68 @@ class MainActivity : AppCompatActivity() {
     fun scanned(text: String) {
         try {
             val res = cli.exec(this@MainActivity, arrayOf("decodepay", text), true).toJSONObject()
-            runOnUiThread(Runnable {
-                AlertDialog.Builder(this@MainActivity)
-                    .setTitle("decodepay")
-                    .setMessage(res.toString())
-                    .setCancelable(true)
-                    .setPositiveButton("pay") { dialog, which -> pay(text) }
-                    .setNegativeButton("cancel") { dialog, which -> }
-                    .show()
-            })
+            runOnUiThread { showDecodePay(res) }
         } catch (e: Exception) {
             try {
                 val res = cli.exec(this@MainActivity, arrayOf("connect", text), true).toJSONObject()
-                runOnUiThread(Runnable {
-                    AlertDialog.Builder(this@MainActivity)
-                        .setTitle("connect")
-                        .setMessage(res.toString())
-                        .setPositiveButton("fund channel") { dialog, which -> showFundChannel(text) }
-                        .setNegativeButton("cancel") { dialog, which -> }
-                        .show()
-                })
+                runOnUiThread { showConnected(res["id"] as String) }
             } catch (e: Exception) {
-                runOnUiThread(Runnable { Toast.makeText(this@MainActivity, e.localizedMessage, Toast.LENGTH_LONG).show() })
+                runOnUiThread {
+                    Toast.makeText(
+                        this@MainActivity,
+                        e.localizedMessage,
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
             }
         }
     }
 
-    fun pay(bolt11: String) {
-        try {
-            val res = cli.exec(this@MainActivity, arrayOf("pay", bolt11), true).toJSONObject()
-            runOnUiThread(Runnable {
-                AlertDialog.Builder(this@MainActivity)
-                    .setTitle("paied")
-                    .setMessage(res.toString())
-                    .show()
-            })
-        } catch (e: Exception) {
-            runOnUiThread(Runnable { Toast.makeText(this@MainActivity, e.localizedMessage, Toast.LENGTH_LONG).show() })
-        }
+    fun showDecodePay(decoded: JSONObject) {
+        AlertDialog.Builder(this@MainActivity)
+            .setTitle("decodepay")
+            .setMessage(decoded.toString())
+            .setCancelable(true)
+            .setPositiveButton("pay") { dialog, which ->
+                try {
+                    cli.exec(this@MainActivity, arrayOf("pay", decoded["bolt11"] as String), true)
+                        .toJSONObject()
+                    runOnUiThread {
+                        Toast.makeText(
+                            this@MainActivity,
+                            "Invoice paid",
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
+                } catch (e: Exception) {
+                    runOnUiThread {
+                        Toast.makeText(
+                            this@MainActivity,
+                            e.localizedMessage,
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
+                }
+            }
+            .setNegativeButton("cancel") { dialog, which -> }
+            .show()
     }
 
-    fun fundChannel(id: String, satoshi: String) {
-        try {
-            val res = cli.exec(this@MainActivity, arrayOf("fundchannel", id, satoshi), true).toJSONObject()
-            runOnUiThread(Runnable {
-                AlertDialog.Builder(this@MainActivity)
-                    .setTitle("Funded")
-                    .setMessage(res.toString())
-                    .show()
-            })
-        } catch (e: Exception) {
-            runOnUiThread(Runnable { Toast.makeText(this@MainActivity, e.localizedMessage, Toast.LENGTH_LONG).show() })
-        }
+    fun showConnected(id: String) {
+        AlertDialog.Builder(this@MainActivity)
+            .setTitle("connect")
+            .setMessage(id)
+            .setPositiveButton("fund channel") { dialog, which -> showFundChannel(id) }
+            .setNegativeButton("cancel") { dialog, which -> }
+            .show()
     }
 
     fun showFundChannel(id: String) {
         val input = EditText(this)
-        val lp = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT)
+        val lp = LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.MATCH_PARENT,
+            LinearLayout.LayoutParams.MATCH_PARENT
+        )
         input.setLayoutParams(lp)
         input.inputType = InputType.TYPE_CLASS_NUMBER
         input.hint = "satoshi"
@@ -401,12 +422,35 @@ class MainActivity : AppCompatActivity() {
             .setTitle("fund a channel")
             .setMessage("with ${id}")
             .setView(input)
-            .setPositiveButton("confirm") { dialog, which -> fundChannel(id, input.text.toString()) }
+            .setPositiveButton("confirm") { dialog, which ->
+                try {
+                    cli.exec(
+                        this@MainActivity,
+                        arrayOf("fundchannel", id, input.text.toString()),
+                        true
+                    ).toJSONObject()
+                    runOnUiThread {
+                        Toast.makeText(
+                            this@MainActivity,
+                            "Channel funded",
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
+                } catch (e: Exception) {
+                    runOnUiThread {
+                        Toast.makeText(
+                            this@MainActivity,
+                            e.localizedMessage,
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
+                }
+            }
             .setNegativeButton("cancel") { dialog, which -> }
             .show()
     }
 
-    fun buildInvoice() {
+    fun showInvoiceBuilder() {
         val msatoshi = EditText(this)
         val label = EditText(this)
         val description = EditText(this)
@@ -417,7 +461,10 @@ class MainActivity : AppCompatActivity() {
 
         val container = LinearLayout(this)
         container.orientation = LinearLayout.VERTICAL
-        container.layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT)
+        container.layoutParams = LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.MATCH_PARENT,
+            LinearLayout.LayoutParams.MATCH_PARENT
+        )
         container.addView(msatoshi)
         container.addView(label)
         container.addView(description)
@@ -427,12 +474,24 @@ class MainActivity : AppCompatActivity() {
             .setView(container)
             .setPositiveButton("confirm") { dialog, which ->
                 try {
-                    val res = cli.exec(this@MainActivity, arrayOf("invoice",
-                        msatoshi.text.toString(), label.text.toString(), description.text.toString()), true).toJSONObject()
+                    val res = cli.exec(
+                        this@MainActivity, arrayOf(
+                            "invoice",
+                            msatoshi.text.toString(),
+                            label.text.toString(),
+                            description.text.toString()
+                        ), true
+                    ).toJSONObject()
                     val bolt11 = res["bolt11"].toString()
-                    showInvoice(bolt11, label.text.toString())
+                    runOnUiThread { showInvoice(bolt11, label.text.toString()) }
                 } catch (e: Exception) {
-                    runOnUiThread(Runnable { Toast.makeText(this@MainActivity, e.localizedMessage, Toast.LENGTH_LONG).show() })
+                    runOnUiThread {
+                        Toast.makeText(
+                            this@MainActivity,
+                            e.localizedMessage,
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
                 }
             }
             .setNegativeButton("cancel") { dialog, which -> }
@@ -449,7 +508,10 @@ class MainActivity : AppCompatActivity() {
 
         val container = LinearLayout(this)
         container.orientation = LinearLayout.VERTICAL
-        container.layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT)
+        container.layoutParams = LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.MATCH_PARENT,
+            LinearLayout.LayoutParams.MATCH_PARENT
+        )
         container.addView(editText)
         container.addView(qr)
 
@@ -462,10 +524,22 @@ class MainActivity : AppCompatActivity() {
             }
             .setPositiveButton("wait") { dialog, which ->
                 try {
-                    val res = cli.exec(this@MainActivity, arrayOf("waitinvoice", label), true).toJSONObject()
-                    runOnUiThread(Runnable { Toast.makeText(this@MainActivity, "Invoice paid", Toast.LENGTH_LONG).show() })
+                    cli.exec(this@MainActivity, arrayOf("waitinvoice", label), true).toJSONObject()
+                    runOnUiThread {
+                        Toast.makeText(
+                            this@MainActivity,
+                            "Invoice paid",
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
                 } catch (e: Exception) {
-                    runOnUiThread(Runnable { Toast.makeText(this@MainActivity, e.localizedMessage, Toast.LENGTH_LONG).show() })
+                    runOnUiThread {
+                        Toast.makeText(
+                            this@MainActivity,
+                            e.localizedMessage,
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
                 }
             }
             .setNegativeButton("cancel") { dialog, which -> }
@@ -473,14 +547,15 @@ class MainActivity : AppCompatActivity() {
             .show()
     }
 
-    fun copyToClipboard(key:String, text: String) {
+    fun copyToClipboard(key: String, text: String) {
         val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
         val clip: ClipData = ClipData.newPlainText(key, text)
         clipboard.setPrimaryClip(clip)
         Toast.makeText(this, "Copied to clipboard", Toast.LENGTH_LONG).show()
     }
+
     fun getWifiIPAddress(): String? {
-        val wifiMgr= getApplicationContext().getSystemService(WIFI_SERVICE) as WifiManager
+        val wifiMgr = getApplicationContext().getSystemService(WIFI_SERVICE) as WifiManager
         val wifiInfo = wifiMgr.getConnectionInfo()
         val ip = wifiInfo.getIpAddress()
         return Formatter.formatIpAddress(ip)
