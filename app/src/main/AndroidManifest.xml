@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.lvaccaro.alcore">
+    package="com.lvaccaro.lamp">
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
@@ -19,31 +19,31 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".LogActivity"
+            android:name="com.lvaccaro.lamp.LogActivity"
             android:label="@string/title_activity_log"
-            android:parentActivityName=".MainActivity"
+            android:parentActivityName="com.lvaccaro.lamp.MainActivity"
             android:theme="@style/AppTheme.NoActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.lvaccaro.alcore.MainActivity" />
+                android:value="com.lvaccaro.lamp.MainActivity" />
         </activity>
         <activity
-            android:name=".SettingsActivity"
+            android:name="com.lvaccaro.lamp.SettingsActivity"
             android:label="@string/title_activity_settings"
-            android:parentActivityName=".MainActivity">
+            android:parentActivityName="com.lvaccaro.lamp.MainActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.lvaccaro.alcore.MainActivity" />
+                android:value="com.lvaccaro.lamp.MainActivity" />
         </activity>
         <activity
-            android:name=".ConsoleActivity"
+            android:name="com.lvaccaro.lamp.ConsoleActivity"
             android:label="@string/title_activity_console"
-            android:parentActivityName=".MainActivity">
+            android:parentActivityName="com.lvaccaro.lamp.MainActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.lvaccaro.alcore.MainActivity" />
+                android:value="com.lvaccaro.lamp.MainActivity" />
         </activity>
-        <activity android:name=".MainActivity">
+        <activity android:name="com.lvaccaro.lamp.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -52,7 +52,7 @@
         </activity>
 
         <service
-            android:name=".LightningService"
+            android:name="com.lvaccaro.lamp.LightningService"
             android:exported="false" />
     </application>
 

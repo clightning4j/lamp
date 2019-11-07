@@ -1,4 +1,4 @@
-package com.lvaccaro.alcore
+package com.lvaccaro.lamp
 
 import android.Manifest
 import androidx.appcompat.app.AppCompatActivity
@@ -19,7 +19,6 @@ import android.net.wifi.WifiManager
 import android.os.*
 import android.text.InputType
 import android.text.format.Formatter
-import android.text.method.ScrollingMovementMethod
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.*
@@ -33,7 +32,6 @@ import com.google.zxing.integration.android.IntentResult
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel
 import com.google.zxing.qrcode.encoder.Encoder
 import org.jetbrains.anko.doAsync
-import org.json.JSONObject
 import java.lang.Exception
 import java.net.NetworkInterface
 import java.util.*

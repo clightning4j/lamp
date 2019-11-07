@@ -1,27 +1,13 @@
-package com.lvaccaro.alcore
+package com.lvaccaro.lamp
 
 import android.os.AsyncTask
-import android.os.Build
 import android.os.Bundle
-import android.text.method.KeyListener
-import android.text.method.ScrollingMovementMethod
-import android.view.KeyEvent
-import android.view.View
-import android.view.WindowManager
-import android.view.inputmethod.EditorInfo
 import android.widget.EditText
 import android.widget.ImageButton
-import android.widget.Toast
-import androidx.appcompat.app.AlertDialog
-import com.google.android.material.snackbar.Snackbar
 import androidx.appcompat.app.AppCompatActivity
 
 import kotlinx.android.synthetic.main.activity_log.*
-import org.jetbrains.anko.doAsync
-import java.io.File
 import java.lang.Exception
-import java.util.*
-import kotlin.math.log
 
 class ConsoleActivity : AppCompatActivity() {
 

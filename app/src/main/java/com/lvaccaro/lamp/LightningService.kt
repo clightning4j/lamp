@@ -1,10 +1,9 @@
-package com.lvaccaro.alcore
+package com.lvaccaro.lamp
 
 import android.app.*
 import android.content.Context
 import android.content.Intent
 import android.os.Build
-import android.util.Log
 import androidx.preference.PreferenceManager
 import java.io.File
 import java.util.logging.Logger
@@ -84,7 +83,7 @@ class LightningService : IntentService("LightningService") {
         val pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_ONE_SHOT)
 
         val notification = Notification.Builder(this)
-            .setContentTitle("ALCore is running")
+            .setContentTitle(getString(R.string.app_name) + " is running")
             .setContentIntent(pendingIntent)
             .setSmallIcon(R.mipmap.ic_launcher)
             .setOngoing(true)
@@ -93,7 +92,7 @@ class LightningService : IntentService("LightningService") {
             val importance = NotificationManager.IMPORTANCE_LOW
             val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
             val channelName = "channel_00"
-            val channel = NotificationChannel(channelName, "ALCore", importance)
+            val channel = NotificationChannel(channelName, getString(R.string.app_name), importance)
             channel.enableLights(true)
             channel.enableVibration(true)
             notificationManager.createNotificationChannel(channel)

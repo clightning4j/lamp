@@ -1,6 +1,5 @@
-package com.lvaccaro.alcore
+package com.lvaccaro.lamp
 
-import android.os.Build
 import android.os.Bundle
 import android.os.Environment
 import android.widget.Toast

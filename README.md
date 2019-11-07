@@ -1,4 +1,4 @@
-# ALCore
+# Lamp
 
 
 Android [c-lightning](https://github.com/ElementsProject/lightning) wallet based on [clightning_ndk](https://github.com/lvaccaro/clightning_ndk).

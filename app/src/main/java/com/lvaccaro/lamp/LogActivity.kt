@@ -1,17 +1,14 @@
-package com.lvaccaro.alcore
+package com.lvaccaro.lamp
 
-import android.os.Build
 import android.os.Bundle
 import android.text.method.ScrollingMovementMethod
 import android.widget.EditText
 import android.widget.Toast
-import com.google.android.material.snackbar.Snackbar
 import androidx.appcompat.app.AppCompatActivity
 
 import kotlinx.android.synthetic.main.activity_log.*
 import java.io.File
 import java.util.*
-import kotlin.math.log
 
 class LogActivity : AppCompatActivity() {
 

@@ -1,4 +1,4 @@
-package com.lvaccaro.alcore
+package com.lvaccaro.lamp
 
 import org.junit.Test
 

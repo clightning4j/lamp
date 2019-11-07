@@ -1,12 +1,10 @@
-package com.lvaccaro.alcore
+package com.lvaccaro.lamp
 
 import android.content.Context
 import android.os.Build
 import org.json.JSONObject
-import java.io.BufferedReader
 import java.io.File
 import java.io.InputStream
-import java.io.OutputStream
 import java.util.logging.Logger
 
 
