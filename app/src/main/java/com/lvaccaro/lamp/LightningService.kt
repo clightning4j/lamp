@@ -43,6 +43,7 @@ class LightningService : IntentService("LightningService") {
         val proxy = sharedPref.getString("proxy", "").toString()
         val announceaddr = sharedPref.getString("announce-addr", "").toString()
         val bindaddr = sharedPref.getString("bind-addr", "").toString()
+        val alias = sharedPref.getString("alias", "").toString()
 
         val options = arrayListOf<String>( String.format("%s/%s", binaryDir.canonicalPath, daemon),
             String.format("--network=%s", network),
@@ -64,6 +65,9 @@ class LightningService : IntentService("LightningService") {
         }
         if (!bindaddr.isEmpty()) {
             options.add(String.format("--bind-addr=%s", bindaddr))
+        }
+        if (!alias.isEmpty()) {
+            options.add(String.format("--alias=%s", alias))
         }
 
         val pb = ProcessBuilder(options)

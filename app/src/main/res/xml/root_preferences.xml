@@ -2,6 +2,12 @@
 
     <PreferenceCategory app:title="@string/id_lightning_daemon_options">
 
+        <EditTextPreference
+            app:key="alias"
+            app:title="@string/id_alias"
+            app:summary="@string/id_up_to_32_byte_alias_for_node"
+            app:useSimpleSummaryProvider="true" />
+
         <ListPreference
             app:defaultValue="testnet"
             app:entries="@array/networks"
