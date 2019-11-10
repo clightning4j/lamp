@@ -31,4 +31,6 @@
     <string name="id_proxy">Proxy</string>
     <string name="id_network_options">Network options</string>
     <string name="id_invoice">Invoice</string>
+    <string name="id_bind_address">Bind address</string>
+    <string name="id_set_an_ip_address_to_listen_on">Set an IP address (v4 or v6) to listen on, but not announce</string>
 </resources>

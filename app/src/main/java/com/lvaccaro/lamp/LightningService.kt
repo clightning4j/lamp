@@ -40,8 +40,9 @@ class LightningService : IntentService("LightningService") {
         val rpcpassword = sharedPref.getString("bitcoin-rpcpassword", "").toString()
         val rpcconnect = sharedPref.getString("bitcoin-rpcconnect", "127.0.0.1").toString()
         val rpcport = sharedPref.getString("bitcoin-rpcport", "9753").toString()
-        val proxy = sharedPref.getString("proxy", null)
-        val announceaddr = sharedPref.getString("announce-addr", null)
+        val proxy = sharedPref.getString("proxy", "").toString()
+        val announceaddr = sharedPref.getString("announce-addr", "").toString()
+        val bindaddr = sharedPref.getString("bind-addr", "").toString()
 
         val options = arrayListOf<String>( String.format("%s/%s", binaryDir.canonicalPath, daemon),
             String.format("--network=%s", network),
@@ -55,11 +56,14 @@ class LightningService : IntentService("LightningService") {
             String.format("--bitcoin-rpcport=%s", rpcport),
             String.format("--bitcoin-rpcpassword=%s", rpcpassword))
 
-        if (proxy != null && !proxy.isEmpty()) {
+        if (!proxy.isEmpty()) {
             options.add(String.format("--proxy=%s", proxy))
         }
-        if (announceaddr != null && !announceaddr.isEmpty()) {
+        if (!announceaddr.isEmpty()) {
             options.add(String.format("--announce-addr=%s", announceaddr))
+        }
+        if (!bindaddr.isEmpty()) {
+            options.add(String.format("--bind-addr=%s", bindaddr))
         }
 
         val pb = ProcessBuilder(options)

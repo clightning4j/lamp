@@ -28,6 +28,12 @@
             app:summary="@string/id_set_an_ip_address"
             app:useSimpleSummaryProvider="true" />
 
+        <EditTextPreference
+            app:key="bind-addr"
+            app:title="@string/id_bind_address"
+            app:summary="@string/id_set_an_ip_address_to_listen_on"
+            app:useSimpleSummaryProvider="true" />
+
         <SwitchPreference
             app:key="proxy-enabled"
             app:defaultValue="false"
