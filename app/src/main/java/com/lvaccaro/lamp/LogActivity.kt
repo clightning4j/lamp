@@ -7,12 +7,12 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 
 import kotlinx.android.synthetic.main.activity_log.*
+import org.jetbrains.anko.doAsync
+import java.io.BufferedReader
 import java.io.File
 import java.util.*
 
 class LogActivity : AppCompatActivity() {
-
-    lateinit var logTimer: Unit
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -34,19 +34,28 @@ class LogActivity : AppCompatActivity() {
     fun readLog() {
         val logFile = File(rootDir(),"log")
         val et = findViewById<EditText>(R.id.editText)
-        val logReader = logFile.bufferedReader()
-        et.setMovementMethod(ScrollingMovementMethod())
+        et.movementMethod = ScrollingMovementMethod()
+        et.isVerticalScrollBarEnabled = true
         et.setText("")
-        logTimer = Timer().scheduleAtFixedRate(object : TimerTask() {
-            override fun run() {
-                runOnUiThread { et.append(logReader.readLine() ?: "") }
-                //logReader.useLines { lines -> lines.forEach { runOnUiThread { text.append(it); log.info(it) } } }
-            }
-        }, 500, 100)
+        val logReader = logFile.bufferedReader()
+        doAsync { read(logReader, et) }
     }
 
-    override fun onPause() {
-        super.onPause()
+    fun read(logReader: BufferedReader, et: EditText) {
+        val text = read100(logReader)
+        runOnUiThread { et.append(text) }
+        Thread.sleep(1000)
+        read(logReader, et)
+    }
 
+    fun read100(logReader: BufferedReader): String {
+        var sb = StringBuilder()
+        var line = logReader.readLine()
+        var counter = 0
+        while (line != null && counter++ < 100) {
+            line = logReader.readLine()
+            sb.append(line)
+        }
+        return sb.toString()
     }
 }
