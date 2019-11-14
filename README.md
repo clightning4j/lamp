@@ -1,6 +1,8 @@
 # Lamp 
 <strong> [c-Lightning](https://github.com/ElementsProject/lightning) Android Mobile Porting </strong>
 
+[![Build Status](https://travis-ci.org/lvaccaro/Lamp.svg?branch=master)]
+
 > This is a experimenting lightning wallet for testnet. It is only for development purpose, don't use on mainnet.
 
 The c-lightning cross-compilated binaries for Android are available at [clightning_ndk project](https://github.com/lvaccaro/clightning_ndk).
