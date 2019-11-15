@@ -1,7 +1,7 @@
 # Lamp 
 <strong> [c-Lightning](https://github.com/ElementsProject/lightning) Android Mobile Porting </strong>
 
-[![Build Status](https://travis-ci.org/lvaccaro/Lamp.svg?branch=master)]
+[![Build Status](https://travis-ci.com/lvaccaro/lamp.svg?branch=master)](https://travis-ci.com/lvaccaro/lamp)
 
 > This is a experimenting lightning wallet for testnet. It is only for development purpose, don't use on mainnet.
 
