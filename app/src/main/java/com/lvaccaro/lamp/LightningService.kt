@@ -110,10 +110,16 @@ class LightningService : IntentService("LightningService") {
         startForeground(NOTIFICATION_ID, notification.build())
     }
 
+    private fun cancelNotification() {
+        val nm = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        nm.cancel(NOTIFICATION_ID)
+    }
+
     override fun onDestroy() {
         super.onDestroy()
         log.info("destroying core service")
         process?.destroy()
         process = null
+        cancelNotification()
     }
 }

@@ -316,6 +316,7 @@ class MainActivity : AppCompatActivity() {
             log.info(e.localizedMessage)
             e.printStackTrace()
         }
+        stopService(Intent(this, LightningService::class.java))
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
