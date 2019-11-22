@@ -41,21 +41,44 @@ import java.util.logging.Logger
 
 class MainActivity : AppCompatActivity() {
 
-    companion object {
-        var ARCH = "aarch64-linux-android"
-        var PACKAGE = "lightning"
-        var RELEASE = "release_0.2"
-        var TAR_FILENAME = "${ARCH}-${PACKAGE}.tar.xz"
-        var URL =
-            "https://github.com/lvaccaro/clightning_ndk/releases/download/${RELEASE}/${TAR_FILENAME}"
-        val WRITE_REQUEST_CODE = 101
-    }
-
+    val WRITE_REQUEST_CODE = 101
     val log = Logger.getLogger(MainActivity::class.java.name)
     val TAG = "MainActivity"
     var downloadID = 0L
     val cli = LightningCli()
     lateinit var downloadmanager: DownloadManager
+
+    companion object {
+
+        fun arch(): String {
+            var abi: String?
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                abi = Build.SUPPORTED_ABIS[0]
+            } else {
+                abi = Build.CPU_ABI
+            }
+            when (abi) {
+                "armeabi-v7a" -> return "arm-linux-androideabi"
+                "arm64-v8a" -> return "aarch64-linux-android"
+                "x86" -> return "i686-linux-android"
+                "x86_64" -> return "x86_64-linux-android"
+            }
+            throw Error("No arch found")
+        }
+
+        fun tarFilename(): String {
+            val ARCH = arch()
+            val PACKAGE = "lightning"
+            return "${ARCH}-${PACKAGE}.tar.xz"
+        }
+
+        fun url(): String {
+            val TAR_FILENAME = tarFilename()
+            val RELEASE = "release_0.2"
+            return "https://github.com/lvaccaro/clightning_ndk/releases/download/${RELEASE}/${TAR_FILENAME}"
+        }
+    }
+
     fun dir(): File {
         return getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS)!!
     }
@@ -191,13 +214,13 @@ class MainActivity : AppCompatActivity() {
                     Toast.LENGTH_SHORT
                 ).show()
             }
-            val tarFile = File(dir(), TAR_FILENAME)
+            val tarFile = File(dir(), tarFilename())
             doAsync { uncompress(tarFile, rootDir()) }
         }
     }
 
     fun onDownload(view: View?) {
-        val tarFile = File(dir(), TAR_FILENAME)
+        val tarFile = File(dir(), tarFilename())
         if (tarFile.exists()) {
             // Uncompress package
             Toast.makeText(this, "Package already downloaded. Uncompressing...", Toast.LENGTH_LONG)
@@ -207,8 +230,8 @@ class MainActivity : AppCompatActivity() {
         }
 
         // Download package
-        val request = DownloadManager.Request(Uri.parse(URL))
-        request.setTitle(PACKAGE)
+        val request = DownloadManager.Request(Uri.parse(url()))
+        request.setTitle("lightning")
         request.setDescription(getString(R.string.id_downloading))
         request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE)
         request.setDestinationUri(tarFile.toUri())

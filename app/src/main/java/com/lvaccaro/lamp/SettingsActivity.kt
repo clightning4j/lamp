@@ -42,7 +42,7 @@ class SettingsActivity : AppCompatActivity() {
                     true
                 }
                 "clearbinary" -> {
-                    File(activity?.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS)!!, MainActivity.TAR_FILENAME).delete()
+                    File(activity?.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS)!!, MainActivity.tarFilename()).delete()
                     File(activity?.rootDir(), "plugins").delete()
                     File(activity?.rootDir(), "lightningd").delete()
                     File(activity?.rootDir(), "lightning-cli").delete()
