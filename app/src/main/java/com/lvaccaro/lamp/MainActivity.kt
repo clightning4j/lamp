@@ -347,6 +347,10 @@ class MainActivity : AppCompatActivity() {
                 showInvoiceBuilder()
                 true
             }
+            R.id.action_invoice -> {
+                doAsync { generateNewAddress() }
+                true
+            }
             R.id.action_paste -> {
                 val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
                 val clip = clipboard.primaryClip
@@ -520,6 +524,38 @@ class MainActivity : AppCompatActivity() {
             }
             .setNegativeButton("cancel") { dialog, which -> }
             .show()
+    }
+
+    fun generateNewAddress() {
+        val res = cli.exec(
+            this@MainActivity,
+            arrayOf("newaddr"),
+            true
+        ).toJSONObject()
+        runOnUiThread {
+            val textView = TextView(this)
+            val qr = ImageView(this)
+            val address = res["address"].toString()
+            textView.setText(address)
+            qr.setImageBitmap(getQrCode(address))
+            qr.layoutParams = LinearLayout.LayoutParams(300, 300)
+            val container = LinearLayout(this)
+            container.orientation = LinearLayout.VERTICAL
+            container.layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.MATCH_PARENT
+            )
+            container.addView(textView)
+            container.addView(qr)
+            AlertDialog.Builder(this@MainActivity)
+                .setTitle("New address")
+                .setView(container)
+                .setPositiveButton("clipboard") { dialog, which ->
+                    copyToClipboard("address", address)
+                }.setNegativeButton("cancel") { dialog, which -> }
+                .setCancelable(false)
+                .show()
+        }
     }
 
     fun showInvoice(bolt11: String, label: String) {
