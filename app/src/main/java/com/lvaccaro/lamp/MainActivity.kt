@@ -176,7 +176,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun getQrCode(text: String): Bitmap {
-        val SCALE = 4
+        val SCALE = 16
         try {
             val matrix = Encoder.encode(text, ErrorCorrectionLevel.M).getMatrix()
             val height = matrix.getHeight() * SCALE
