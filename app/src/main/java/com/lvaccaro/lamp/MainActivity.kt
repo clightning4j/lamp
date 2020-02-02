@@ -68,14 +68,14 @@ class MainActivity : AppCompatActivity() {
 
         fun tarFilename(): String {
             val ARCH = arch()
-            val PACKAGE = "lightning"
-            return "${ARCH}-${PACKAGE}.tar.xz"
+            val PACKAGE = "bitcoin"
+            return "${ARCH}_${PACKAGE}.tar.xz"
         }
 
         fun url(): String {
             val TAR_FILENAME = tarFilename()
-            val RELEASE = "release_0.2"
-            return "https://github.com/lvaccaro/clightning_ndk/releases/download/${RELEASE}/${TAR_FILENAME}"
+            val RELEASE = "v0.18.1.2"
+            return "https://github.com/lvaccaro/bitcoin_ndk/releases/download/${RELEASE}/${TAR_FILENAME}"
         }
     }
 
@@ -151,9 +151,6 @@ class MainActivity : AppCompatActivity() {
                 findViewById<ProgressBar>(R.id.progressBar).visibility = View.GONE
                 findViewById<Button>(R.id.start).isEnabled = false
                 findViewById<Button>(R.id.stop).isEnabled = true
-
-
-                listOf(recyclerView.adapter)
             })
         } catch (e: Exception) {
             // if lightning is down
