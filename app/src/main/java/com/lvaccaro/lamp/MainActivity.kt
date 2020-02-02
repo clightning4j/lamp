@@ -123,13 +123,14 @@ class MainActivity : AppCompatActivity() {
         if (!isLightningReady)
             return
 
+        findViewById<ProgressBar>(R.id.progressBar).visibility = View.VISIBLE
         doAsync {
-            Thread.sleep(3000)
-            getInfo()
+            Thread.sleep(2000)
+            getInfo(true)
         }
     }
 
-    fun getInfo() {
+    fun getInfo(start: Boolean = false) {
         // if lightning is up and running update link
         try {
             val res = LightningCli().exec(this, arrayOf("getinfo"), true).toJSONObject()
@@ -147,15 +148,27 @@ class MainActivity : AppCompatActivity() {
                 }
                 findViewById<TextView>(R.id.textViewQr).visibility = View.VISIBLE
                 findViewById<ImageView>(R.id.qrcodeImageView).visibility = View.VISIBLE
+                findViewById<ProgressBar>(R.id.progressBar).visibility = View.GONE
                 findViewById<Button>(R.id.start).isEnabled = false
                 findViewById<Button>(R.id.stop).isEnabled = true
+
+
+                listOf(recyclerView.adapter)
             })
         } catch (e: Exception) {
             // if lightning is down
             log.info("---" + e.localizedMessage + "---")
+            if (start) {
+                // trying to start
+                runOnUiThread { onStart(null) }
+                Thread.sleep(3000)
+                getInfo(false)
+                return
+            }
             runOnUiThread(Runnable {
                 findViewById<TextView>(R.id.textViewQr).visibility = View.GONE
                 findViewById<ImageView>(R.id.qrcodeImageView).visibility = View.GONE
+                findViewById<ProgressBar>(R.id.progressBar).visibility = View.GONE
                 findViewById<Button>(R.id.start).isEnabled = true
                 findViewById<Button>(R.id.stop).isEnabled = false
             })
@@ -297,11 +310,6 @@ class MainActivity : AppCompatActivity() {
             startForegroundService(Intent(this, LightningService::class.java))
         } else {
             startService(Intent(this, LightningService::class.java))
-        }
-
-        doAsync {
-            Thread.sleep(3000)
-            getInfo()
         }
     }
 
