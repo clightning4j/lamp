@@ -30,15 +30,17 @@ class SettingsActivity : AppCompatActivity() {
         override fun onPreferenceTreeClick(preference: Preference?): Boolean {
             return when (preference?.key) {
                 "clearlogs" -> {
-                    val log = File(activity?.rootDir(), "log")
-                    log.delete()
-                    Toast.makeText(context, "Erased log: ${log.path}", Toast.LENGTH_LONG).show()
+                    File(activity?.rootDir(), "lightningd.log").delete()
+                    File(activity?.rootDir(), "tor.log").delete()
+                    Toast.makeText(context, "Erased logs", Toast.LENGTH_LONG).show()
                     true
                 }
                 "cleardata" -> {
-                    val datadir = File(activity?.rootDir(), ".lightning")
-                    datadir.delete()
-                    Toast.makeText(context, "Erased datadir: ${datadir.path}", Toast.LENGTH_LONG).show()
+                    File(activity?.rootDir(), ".lightning").delete()
+                    File(activity?.rootDir(), ".bitcoin").delete()
+                    File(activity?.rootDir(), ".tor").delete()
+                    File(activity?.rootDir(), ".torHiddenService").delete()
+                    Toast.makeText(context, "Erased datadir", Toast.LENGTH_LONG).show()
                     true
                 }
                 "clearbinary" -> {

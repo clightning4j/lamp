@@ -35,4 +35,5 @@
     <string name="id_set_an_ip_address_to_listen_on">Set an IP address (v4 or v6) to listen on, but not announce</string>
     <string name="id_alias">Alias</string>
     <string name="id_up_to_32_byte_alias_for_node">Up to 32-byte alias for node</string>
+    <string name="id_enable_tor">Enable Tor deamon</string>
 </resources>

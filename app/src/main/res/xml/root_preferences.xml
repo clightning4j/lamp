@@ -28,11 +28,17 @@
 
     <PreferenceCategory app:title="@string/id_network_options">
 
+        <SwitchPreference
+            app:key="enabled-tor"
+            app:title="@string/id_enable_tor"
+            app:defaultValue="true"
+            app:useSimpleSummaryProvider="true" />
+
         <EditTextPreference
             app:key="announce-addr"
             app:title="@string/id_accounce_address"
             app:summary="@string/id_set_an_ip_address"
-            app:useSimpleSummaryProvider="true" />
+            app:useSimpleSummaryProvider="true"/>
 
         <EditTextPreference
             app:key="bind-addr"

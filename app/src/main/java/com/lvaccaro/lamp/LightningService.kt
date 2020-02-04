@@ -13,6 +13,7 @@ class LightningService : IntentService("LightningService") {
     val log = Logger.getLogger(LightningService::class.java.name)
     var process: Process? = null
     val NOTIFICATION_ID = 573948
+    val daemon = "lightningd"
 
     override fun onHandleIntent(workIntent: Intent?) {
         val dataString = workIntent!!.dataString
@@ -21,7 +22,7 @@ class LightningService : IntentService("LightningService") {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND)
 
-        log.info("start lightningd service")
+        log.info("start $daemon service")
         val lightningDir = File(rootDir(), ".lightning")
         val bitcoinDir = File(rootDir(), ".bitcoin")
         val binaryDir = rootDir()
@@ -32,7 +33,6 @@ class LightningService : IntentService("LightningService") {
             bitcoinDir.mkdir()
         }
 
-        val daemon = "lightningd"
         val sharedPref = PreferenceManager.getDefaultSharedPreferences(applicationContext)
         val network = sharedPref.getString("network", "testnet").toString()
         val logLevel = sharedPref.getString("log-level", "io").toString()
@@ -40,12 +40,14 @@ class LightningService : IntentService("LightningService") {
         val rpcpassword = sharedPref.getString("bitcoin-rpcpassword", "").toString()
         val rpcconnect = sharedPref.getString("bitcoin-rpcconnect", "127.0.0.1").toString()
         val rpcport = sharedPref.getString("bitcoin-rpcport", "9753").toString()
-        val proxy = sharedPref.getString("proxy", "").toString()
-        val announceaddr = sharedPref.getString("announce-addr", "").toString()
-        val bindaddr = sharedPref.getString("bind-addr", "").toString()
+        var proxy = sharedPref.getString("proxy", "").toString()
+        var announceaddr = sharedPref.getString("announce-addr", "").toString()
+        var bindaddr = sharedPref.getString("bind-addr", "").toString()
+        var addr = sharedPref.getString("addr", "").toString()
         val alias = sharedPref.getString("alias", "").toString()
 
-        val options = arrayListOf<String>( String.format("%s/%s", binaryDir.canonicalPath, daemon),
+        val options = arrayListOf<String>(
+            String.format("%s/%s", binaryDir.canonicalPath, daemon),
             String.format("--network=%s", network),
             String.format("--log-level=%s", logLevel),
             String.format("--lightning-dir=%s", lightningDir.path),
@@ -57,6 +59,18 @@ class LightningService : IntentService("LightningService") {
             String.format("--bitcoin-rpcport=%s", rpcport),
             String.format("--bitcoin-rpcpassword=%s", rpcpassword))
 
+        if (!alias.isEmpty()) {
+            options.add(String.format("--alias=%s", alias))
+        }
+
+        if (sharedPref.getBoolean("enabled-tor", true)) {
+            proxy = "127.0.0.1:9050"
+            bindaddr = "127.0.0.1:9735"
+            //addr = "statictor:127.0.0.1:9051"
+            announceaddr = TorService.getHostname() ?: ""
+            options.add("--always-use-proxy=true")
+        }
+
         if (!proxy.isEmpty()) {
             options.add(String.format("--proxy=%s", proxy))
         }
@@ -66,20 +80,21 @@ class LightningService : IntentService("LightningService") {
         if (!bindaddr.isEmpty()) {
             options.add(String.format("--bind-addr=%s", bindaddr))
         }
-        if (!alias.isEmpty()) {
-            options.add(String.format("--alias=%s", alias))
+        if (!addr.isEmpty()) {
+            options.add(String.format("--addr=%s", addr))
         }
 
         val pb = ProcessBuilder(options)
         pb.directory(binaryDir)
         pb.redirectErrorStream(true)
-        val logFile = File(rootDir(),"log")
+        val logFile = File(rootDir(),"$daemon.log")
+        logFile.delete()
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             pb.redirectOutput(ProcessBuilder.Redirect.appendTo(logFile))
         }
         process = pb.start()
         //return super.onStartCommand(intent, flags, startId)
-        log.info("exit lightningd service")
+        log.info("exit $daemon service")
 
         startForeground()
         return Service.START_STICKY

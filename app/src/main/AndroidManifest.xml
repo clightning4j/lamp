@@ -54,6 +54,9 @@
         <service
             android:name="com.lvaccaro.lamp.LightningService"
             android:exported="false" />
+        <service
+            android:name="com.lvaccaro.lamp.TorService"
+            android:exported="false" />
     </application>
 
 </manifest>

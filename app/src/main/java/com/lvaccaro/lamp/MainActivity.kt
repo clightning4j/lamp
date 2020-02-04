@@ -126,7 +126,7 @@ class MainActivity : AppCompatActivity() {
         findViewById<ProgressBar>(R.id.progressBar).visibility = View.VISIBLE
         doAsync {
             Thread.sleep(2000)
-            getInfo(true)
+            getInfo(false)
         }
     }
 
@@ -140,9 +140,10 @@ class MainActivity : AppCompatActivity() {
             val announceaddr = sharedPref.getString("announce-addr", "").toString()
 
             val text = "${id}@" + if (!announceaddr.isEmpty()) announceaddr else "${address}"
+            val qrcode = getQrCode(text)
             runOnUiThread(Runnable {
                 findViewById<TextView>(R.id.textViewQr).text = text
-                findViewById<ImageView>(R.id.qrcodeImageView).setImageBitmap(getQrCode(text))
+                findViewById<ImageView>(R.id.qrcodeImageView).setImageBitmap(qrcode)
                 findViewById<ImageView>(R.id.qrcodeImageView).setOnClickListener {
                     copyToClipboard("peernode", text)
                 }
@@ -303,6 +304,28 @@ class MainActivity : AppCompatActivity() {
             return
         }
 
+        val torEnabled = sharedPref.getBoolean("enabled-tor", true)
+        if (torEnabled) {
+            startTor()
+        }
+        doAsync {
+            if (torEnabled) {
+                // wait tor deamon
+                Thread.sleep(5000)
+            }
+            runOnUiThread {  startLightning() }
+        }
+    }
+
+    fun startTor() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            startForegroundService(Intent(this, TorService::class.java))
+        } else {
+            startService(Intent(this, TorService::class.java))
+        }
+    }
+
+    fun startLightning() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             startForegroundService(Intent(this, LightningService::class.java))
         } else {
@@ -322,6 +345,7 @@ class MainActivity : AppCompatActivity() {
             e.printStackTrace()
         }
         stopService(Intent(this, LightningService::class.java))
+        stopService(Intent(this, TorService::class.java))
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {

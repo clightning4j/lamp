@@ -1,10 +1,16 @@
 package com.lvaccaro.lamp
 
+import android.content.ClipboardManager
+import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.text.method.ScrollingMovementMethod
+import android.view.Menu
+import android.view.MenuItem
 import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.google.zxing.integration.android.IntentIntegrator
 
 import kotlinx.android.synthetic.main.activity_log.*
 import org.jetbrains.anko.doAsync
@@ -13,6 +19,8 @@ import java.io.File
 import java.util.*
 
 class LogActivity : AppCompatActivity() {
+
+    var daemon = "lightningd"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -23,22 +31,46 @@ class LogActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        val logFile = File(rootDir(),"log")
+        readLog()
+    }
+
+
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        menuInflater.inflate(R.menu.log_menu, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            R.id.action_lightning -> {
+                daemon = "lightningd"
+                readLog()
+                true
+            }
+            R.id.action_tor -> {
+                daemon = "tor"
+                readLog()
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
+    }
+
+    fun readLog() {
+        val logFile = File(rootDir(),"$daemon.log")
         if (!logFile.exists()) {
             Toast.makeText(this, "No log file found", Toast.LENGTH_LONG).show()
             return
         }
-        readLog()
-    }
-
-    fun readLog() {
-        val logFile = File(rootDir(),"log")
         val et = findViewById<EditText>(R.id.editText)
         et.movementMethod = ScrollingMovementMethod()
         et.isVerticalScrollBarEnabled = true
         et.setText("")
         val logReader = logFile.bufferedReader()
-        doAsync { read(logReader, et) }
+        doAsync {
+            val text = read100(logReader)
+            runOnUiThread { et.append(text) }
+        }
     }
 
     fun read(logReader: BufferedReader, et: EditText) {
