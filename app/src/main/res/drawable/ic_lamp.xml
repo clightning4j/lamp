@@ -1,0 +1,9 @@
+<animation-list xmlns:android="http://schemas.android.com/apk/res/android"
+    android:oneshot="false">
+    <item android:drawable="@drawable/ic_lamp_off" android:duration="500" />
+    <item android:drawable="@drawable/ic_lamp1" android:duration="500" />
+    <item android:drawable="@drawable/ic_lamp2" android:duration="500" />
+    <item android:drawable="@drawable/ic_lamp3" android:duration="500" />
+    <item android:drawable="@drawable/ic_lamp4" android:duration="500" />
+    <item android:drawable="@drawable/ic_lamp_on" android:duration="500" />
+</animation-list>

@@ -1,6 +1,7 @@
 package com.lvaccaro.lamp
 
 import android.Manifest
+import android.app.ActivityManager
 import androidx.appcompat.app.AppCompatActivity
 import android.app.DownloadManager
 import android.content.*
@@ -15,23 +16,28 @@ import android.view.View
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.Color
+import android.graphics.drawable.AnimationDrawable
 import android.net.wifi.WifiManager
 import android.os.*
 import android.text.InputType
 import android.text.format.Formatter
 import android.view.Menu
 import android.view.MenuItem
+import android.view.animation.AnimationUtils
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.core.app.ActivityCompat
 import androidx.core.net.toUri
 import androidx.preference.PreferenceManager
+import com.google.android.material.snackbar.Snackbar
 import com.google.zxing.WriterException
 import com.google.zxing.integration.android.IntentIntegrator
 import com.google.zxing.integration.android.IntentResult
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel
 import com.google.zxing.qrcode.encoder.Encoder
+import kotlinx.android.synthetic.main.activity_console.*
 import org.jetbrains.anko.doAsync
+import org.json.JSONArray
 import org.json.JSONObject
 import java.lang.Exception
 import java.net.NetworkInterface
@@ -47,6 +53,7 @@ class MainActivity : AppCompatActivity() {
     var downloadID = 0L
     val cli = LightningCli()
     lateinit var downloadmanager: DownloadManager
+    lateinit var powerImageView: PowerImageView
 
     companion object {
 
@@ -85,7 +92,19 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        if (isServiceRunning()) {
+            setTheme(R.style.AppTheme)
+        } else {
+            setTheme(R.style.AppTheme_Night)
+        }
         setContentView(R.layout.activity_main)
+
+        powerImageView = findViewById<PowerImageView>(R.id.powerImageView)
+        powerImageView.setOnClickListener { this.onPowerClick() }
+
+        val addressTextView = findViewById<TextView>(R.id.textViewQr)
+        addressTextView.setOnClickListener { copyToClipboard("address", addressTextView.text.toString()) }
+
         downloadmanager = getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
         registerReceiver(onDownloadReceiver, IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE))
 
@@ -107,87 +126,8 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        reload()
-    }
-
-    fun reload() {
-        // Hide download button if package exist and is uncompressed
-        val isLightningReady = File(rootDir(), "lightning-cli").exists()
-        findViewById<Button>(R.id.start).visibility =
-            if (isLightningReady) View.VISIBLE else View.GONE
-        findViewById<Button>(R.id.stop).visibility =
-            if (isLightningReady) View.VISIBLE else View.GONE
-        findViewById<Button>(R.id.download).visibility =
-            if (isLightningReady) View.GONE else View.VISIBLE
-
-        if (!isLightningReady)
-            return
-
-        findViewById<ProgressBar>(R.id.progressBar).visibility = View.VISIBLE
-        doAsync {
-            Thread.sleep(2000)
-            getInfo(false)
-        }
-    }
-
-    fun getInfo(start: Boolean = false) {
-        // if lightning is up and running update link
-        try {
-            val res = LightningCli().exec(this, arrayOf("getinfo"), true).toJSONObject()
-            val id = res["id"].toString()
-            val address = getWifiIPAddress() ?: getMobileIPAddress() ?: ""
-            val sharedPref = PreferenceManager.getDefaultSharedPreferences(applicationContext)
-            val announceaddr = sharedPref.getString("announce-addr", "").toString()
-
-            val text = "${id}@" + if (!announceaddr.isEmpty()) announceaddr else "${address}"
-            val qrcode = getQrCode(text)
-            runOnUiThread(Runnable {
-                findViewById<TextView>(R.id.textViewQr).text = text
-                findViewById<ImageView>(R.id.qrcodeImageView).setImageBitmap(qrcode)
-                findViewById<ImageView>(R.id.qrcodeImageView).setOnClickListener {
-                    copyToClipboard("peernode", text)
-                }
-                findViewById<TextView>(R.id.textViewQr).visibility = View.VISIBLE
-                findViewById<ImageView>(R.id.qrcodeImageView).visibility = View.VISIBLE
-                findViewById<ProgressBar>(R.id.progressBar).visibility = View.GONE
-                findViewById<Button>(R.id.start).isEnabled = false
-                findViewById<Button>(R.id.stop).isEnabled = true
-            })
-        } catch (e: Exception) {
-            // if lightning is down
-            log.info("---" + e.localizedMessage + "---")
-            if (start) {
-                // trying to start
-                runOnUiThread { onStart(null) }
-                Thread.sleep(3000)
-                getInfo(false)
-                return
-            }
-            runOnUiThread(Runnable {
-                findViewById<TextView>(R.id.textViewQr).visibility = View.GONE
-                findViewById<ImageView>(R.id.qrcodeImageView).visibility = View.GONE
-                findViewById<ProgressBar>(R.id.progressBar).visibility = View.GONE
-                findViewById<Button>(R.id.start).isEnabled = true
-                findViewById<Button>(R.id.stop).isEnabled = false
-            })
-        }
-    }
-
-    fun getQrCode(text: String): Bitmap {
-        val SCALE = 16
-        try {
-            val matrix = Encoder.encode(text, ErrorCorrectionLevel.M).getMatrix()
-            val height = matrix.getHeight() * SCALE
-            val width = matrix.getWidth() * SCALE
-            val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
-            for (x in 0 until width)
-                for (y in 0 until height) {
-                    val point = matrix.get(x / SCALE, y / SCALE).toInt()
-                    bitmap.setPixel(x, y, if (point == 0x01) Color.BLACK else 0)
-                }
-            return bitmap
-        } catch (e: WriterException) {
-            throw RuntimeException(e)
+        if (isServiceRunning()) {
+            doAsync { getInfo() }
         }
     }
 
@@ -211,6 +151,172 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        menuInflater.inflate(R.menu.menu, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            R.id.action_settings -> {
+                startActivityForResult(Intent(this, SettingsActivity::class.java), 100)
+                true
+            }
+            R.id.action_log -> {
+                startActivityForResult(Intent(this, LogActivity::class.java), 100)
+                true
+            }
+            R.id.action_console -> {
+                startActivityForResult(Intent(this, ConsoleActivity::class.java), 100)
+                true
+            }
+            R.id.action_scan -> {
+                IntentIntegrator(this@MainActivity).initiateScan()
+                true
+            }
+            R.id.action_invoice -> {
+                showInvoiceBuilder()
+                true
+            }
+            R.id.action_invoice -> {
+                doAsync { generateNewAddress() }
+                true
+            }
+            R.id.action_paste -> {
+                val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                val clip = clipboard.primaryClip
+                val item = clip?.getItemAt(0)
+                val text = item?.text.toString()
+                doAsync { scanned(text) }
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        Toast.makeText(this, "****", Toast.LENGTH_SHORT).show()
+        var result: IntentResult? =
+            IntentIntegrator.parseActivityResult(requestCode, resultCode, data)
+        if (result != null) {
+            if (result.contents != null) {
+                doAsync { scanned(result.contents) }
+            } else {
+                Snackbar.make(findViewById(android.R.id.content), "Scan failed", Snackbar.LENGTH_LONG).show()
+            }
+        } else {
+            super.onActivityResult(requestCode, resultCode, data)
+        }
+    }
+
+    fun isServiceRunning(): Boolean {
+        val manager = getSystemService(ACTIVITY_SERVICE) as ActivityManager
+        for (service in manager.getRunningServices(Int.MAX_VALUE)) {
+            if("com.lvaccaro.lamp.LightningService".equals(service.service.getClassName())) {
+                return true
+            }
+        }
+        return false
+    }
+
+    fun onPowerClick() {
+        if (powerImageView.isAnimating()) {
+            return
+        }
+        if (powerImageView.isOn()) {
+            // turn off
+            doAsync {
+                stop()
+                runOnUiThread { powerOff() }
+            }
+            return
+        }
+
+        val isLightningReady = File(rootDir(), "lightning-cli").exists()
+        if (isLightningReady) {
+            // turn on
+            start()
+            return
+        }
+        val tarFile = File(dir(), tarFilename())
+        if (tarFile.exists()) {
+            // Uncompress package
+            Snackbar.make(findViewById(android.R.id.content), "Package already downloaded. Uncompressing...", Snackbar.LENGTH_LONG).show()
+            powerImageView.animating()
+            doAsync {
+                uncompress(tarFile, rootDir())
+                runOnUiThread {
+                    powerOff()
+                }
+            }
+            return
+        } else {
+            Snackbar.make(findViewById(android.R.id.content), "Downloading...", Snackbar.LENGTH_LONG)
+                .show()
+            powerImageView.animating()
+            download()
+        }
+    }
+
+    fun powerOff() {
+        powerImageView.off()
+        recreate()
+    }
+
+    fun powerOn() {
+        powerImageView.on()
+        recreate()
+    }
+
+    fun getInfo() {
+        try {
+            val res = LightningCli().exec(this@MainActivity, arrayOf("getinfo"), true).toJSONObject()
+            val id = res["id"] as String
+            val addresses = res["address"] as JSONArray
+            if (addresses.length() == 0)
+                throw Exception("no address found")
+            var address = addresses[0] as JSONObject
+            if (!address.has("address"))
+                throw Exception("no address found")
+            val txt = id + address.getString("address")
+            val alias = res["alias"] as String
+            runOnUiThread {
+                powerImageView.on()
+                findViewById<TextView>(R.id.textViewQr).apply {
+                    text = txt
+                    visibility = View.VISIBLE
+                }
+                title = alias
+            }
+        } catch (e: Exception) {
+            log.info("---" + e.localizedMessage + "---")
+            runOnUiThread {
+                Snackbar.make(findViewById(android.R.id.content), e.localizedMessage, Snackbar.LENGTH_LONG)
+                    .show()
+                powerImageView.off()
+            }
+        }
+    }
+
+    fun getQrCode(text: String): Bitmap {
+        val SCALE = 16
+        try {
+            val matrix = Encoder.encode(text, ErrorCorrectionLevel.M).getMatrix()
+            val height = matrix.getHeight() * SCALE
+            val width = matrix.getWidth() * SCALE
+            val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+            for (x in 0 until width)
+                for (y in 0 until height) {
+                    val point = matrix.get(x / SCALE, y / SCALE).toInt()
+                    bitmap.setPixel(x, y, if (point == 0x01) Color.BLACK else 0)
+                }
+            return bitmap
+        } catch (e: WriterException) {
+            throw RuntimeException(e)
+        }
+    }
+
     private val onDownloadReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             val id = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1)
@@ -218,38 +324,25 @@ class MainActivity : AppCompatActivity() {
                 return
 
             runOnUiThread {
-                findViewById<Button>(R.id.download).isEnabled = false
-                Toast.makeText(
-                    this@MainActivity,
-                    "Download Completed. Uncompressing...",
-                    Toast.LENGTH_SHORT
-                ).show()
+                Snackbar.make(findViewById(android.R.id.content), "Download Completed. Uncompressing...", Snackbar.LENGTH_LONG).show()
             }
             val tarFile = File(dir(), tarFilename())
-            doAsync { uncompress(tarFile, rootDir()) }
+            doAsync {
+                uncompress(tarFile, rootDir())
+                runOnUiThread { powerOff() }
+            }
         }
     }
 
-    fun onDownload(view: View?) {
-        val tarFile = File(dir(), tarFilename())
-        if (tarFile.exists()) {
-            // Uncompress package
-            Toast.makeText(this, "Package already downloaded. Uncompressing...", Toast.LENGTH_LONG)
-                .show()
-            doAsync { uncompress(tarFile, rootDir()) }
-            return
-        }
-
+    fun download() {
         // Download package
+        val tarFile = File(dir(), tarFilename())
         val request = DownloadManager.Request(Uri.parse(url()))
         request.setTitle("lightning")
         request.setDescription(getString(R.string.id_downloading))
         request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE)
         request.setDestinationUri(tarFile.toUri())
         downloadID = downloadmanager.enqueue(request)
-
-        findViewById<Button>(R.id.download).isEnabled = false
-        Toast.makeText(this, "Start downloading", Toast.LENGTH_SHORT).show()
     }
 
     fun uncompress(inputFile: File, outputDir: File) {
@@ -290,11 +383,9 @@ class MainActivity : AppCompatActivity() {
         }
         IOUtils.closeQuietly(input)
         inputFile.delete()
-        runOnUiThread(Runnable { reload() })
     }
 
-    fun onStart(view: View?) {
-
+    fun start() {
         val sharedPref = PreferenceManager.getDefaultSharedPreferences(applicationContext)
         val rpcuser = sharedPref.getString("bitcoin-rpcuser", "").toString()
         val rpcpassword = sharedPref.getString("bitcoin-rpcpassword", "").toString()
@@ -305,15 +396,25 @@ class MainActivity : AppCompatActivity() {
         }
 
         val torEnabled = sharedPref.getBoolean("enabled-tor", true)
-        if (torEnabled) {
-            startTor()
-        }
+        powerImageView.animating()
         doAsync {
             if (torEnabled) {
-                // wait tor deamon
+                runOnUiThread { startTor() }
                 Thread.sleep(5000)
             }
-            runOnUiThread {  startLightning() }
+            runOnUiThread { startLightning() }
+            Thread.sleep(2000)
+            try {
+                LightningCli().exec(this@MainActivity, arrayOf("getinfo"), true).toJSONObject()
+                runOnUiThread { powerOn() }
+            } catch (e: Exception) {
+                log.info("---" + e.localizedMessage + "---")
+                runOnUiThread {
+                    Snackbar.make(findViewById(android.R.id.content), e.localizedMessage, Snackbar.LENGTH_LONG)
+                        .show()
+                    powerImageView.off()
+                }
+            }
         }
     }
 
@@ -333,77 +434,18 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    fun onStop(view: View?) {
+    fun stop() {
         log.info("---onStop---")
         try {
             val res = LightningCli().exec(this, arrayOf("stop"))
             log.info("---" + res.toString() + "---")
-            reload()
         } catch (e: Exception) {
-            Toast.makeText(this, e.localizedMessage, Toast.LENGTH_LONG).show()
+            //Toast.makeText(this, e.localizedMessage, Toast.LENGTH_LONG).show()
             log.info(e.localizedMessage)
             e.printStackTrace()
         }
         stopService(Intent(this, LightningService::class.java))
         stopService(Intent(this, TorService::class.java))
-    }
-
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        menuInflater.inflate(R.menu.menu, menu)
-        return true
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        return when (item.itemId) {
-            R.id.action_settings -> {
-                startActivity(Intent(this, SettingsActivity::class.java))
-                true
-            }
-            R.id.action_log -> {
-                startActivity(Intent(this, LogActivity::class.java))
-                true
-            }
-            R.id.action_console -> {
-                startActivity(Intent(this, ConsoleActivity::class.java))
-                true
-            }
-            R.id.action_scan -> {
-                IntentIntegrator(this@MainActivity).initiateScan()
-                true
-            }
-            R.id.action_invoice -> {
-                showInvoiceBuilder()
-                true
-            }
-            R.id.action_invoice -> {
-                doAsync { generateNewAddress() }
-                true
-            }
-            R.id.action_paste -> {
-                val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                val clip = clipboard.primaryClip
-                val item = clip?.getItemAt(0)
-                val text = item?.text.toString()
-                doAsync { scanned(text) }
-                true
-            }
-            else -> super.onOptionsItemSelected(item)
-        }
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        var result: IntentResult? =
-            IntentIntegrator.parseActivityResult(requestCode, resultCode, data)
-        if (result != null) {
-            if (result.contents != null) {
-                doAsync { scanned(result.contents) }
-            } else {
-                Toast.makeText(this@MainActivity, "Scan failed", Toast.LENGTH_LONG).show()
-            }
-        } else {
-            super.onActivityResult(requestCode, resultCode, data)
-        }
     }
 
     fun scanned(text: String) {
@@ -641,27 +683,5 @@ class MainActivity : AppCompatActivity() {
         val clip: ClipData = ClipData.newPlainText(key, text)
         clipboard.setPrimaryClip(clip)
         Toast.makeText(this, "Copied to clipboard", Toast.LENGTH_LONG).show()
-    }
-
-    fun getWifiIPAddress(): String? {
-        val wifiMgr = getApplicationContext().getSystemService(WIFI_SERVICE) as WifiManager
-        val wifiInfo = wifiMgr.getConnectionInfo()
-        val ip = wifiInfo.getIpAddress()
-        return Formatter.formatIpAddress(ip)
-    }
-
-    fun getMobileIPAddress(): String? {
-        try {
-            val interfaces = Collections.list(NetworkInterface.getNetworkInterfaces());
-            for (intf in interfaces) {
-                val addrs = Collections.list(intf.getInetAddresses());
-                for (addr in addrs) {
-                    if (!addr.isLoopbackAddress()) {
-                        return  addr.getHostAddress()
-                    }
-                }
-            }
-        } catch (ex: Exception) { }
-        return null
     }
 }
