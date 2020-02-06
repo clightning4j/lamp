@@ -32,6 +32,7 @@
             app:key="enabled-tor"
             app:title="@string/id_enable_tor"
             app:defaultValue="true"
+            app:summary="@string/id_if_tor_is_enabled"
             app:useSimpleSummaryProvider="true" />
 
         <EditTextPreference
