@@ -122,6 +122,11 @@ class MainActivity : AppCompatActivity() {
                 )
             }
         }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            AlertDialog.Builder(this).setTitle("Sorry")
+                .setMessage("Android >= 10 API is not supported").show()
+        }
     }
 
     override fun onResume() {
