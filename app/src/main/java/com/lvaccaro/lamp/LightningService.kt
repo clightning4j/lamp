@@ -108,7 +108,7 @@ class LightningService : IntentService("LightningService") {
         val notification = Notification.Builder(this)
             .setContentTitle(getString(R.string.app_name) + " is running")
             .setContentIntent(pendingIntent)
-            .setSmallIcon(R.mipmap.ic_launcher)
+            .setSmallIcon(R.drawable.ic_notification)
             .setOngoing(true)
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
