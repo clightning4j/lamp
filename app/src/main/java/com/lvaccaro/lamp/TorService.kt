@@ -77,7 +77,7 @@ class TorService : IntentService("TorService") {
         val notification = Notification.Builder(this)
             .setContentTitle("$daemon is running")
             .setContentIntent(pendingIntent)
-            .setSmallIcon(R.mipmap.ic_launcher)
+            .setSmallIcon(R.drawable.ic_tor)
             .setOngoing(true)
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
