@@ -395,8 +395,14 @@ class MainActivity : AppCompatActivity() {
         val rpcuser = sharedPref.getString("bitcoin-rpcuser", "").toString()
         val rpcpassword = sharedPref.getString("bitcoin-rpcpassword", "").toString()
         if (rpcuser === "" || rpcpassword === "") {
-            AlertDialog.Builder(this).setTitle("warning")
-                .setMessage("Go to Settings to set lightningd options before start").show()
+            AlertDialog.Builder(this)
+                .setTitle("warning")
+                .setMessage("Go to Settings to set lightningd options before start")
+                .setNegativeButton("cancel") { dialog, which -> }
+                .setPositiveButton("settings") { dialog, which ->
+                    startActivityForResult(Intent(this, SettingsActivity::class.java), 100)
+                }
+                .show()
             return
         }
 
