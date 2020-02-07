@@ -5,9 +5,15 @@
 
 > This is a experimenting lightning wallet for testnet. It is only for development purpose, don't use on mainnet.
 
-The c-lightning cross-compilated binaries for Android are available at [clightning_ndk project](https://github.com/lvaccaro/clightning_ndk).
+Touch the lamp to download and run c-lightning from cross-compilated binaries for Android are available [here]( https://github.com/lvaccaro/bitcoin_ndk/releases/tag/v0.18.1.2) or in alternative from source of
+[bitcoin_ndk project](https://github.com/lvaccaro/bitcoin_ndk/tree/cln_test).
 
-#### Setup tor
+Warning: Lamp doesn't support Android >= 10.
+
+#### Automatic Tor setup
+Lamp is using tor hidden service as default. A new hidden service will be created at the first running time.
+
+#### Manually Tor setup
 Open [Orbot](https://github.com/guardianproject/Orbot) and setup a fixed tor address by menu: Onion Services -> Hosted Services -> set a service name and port 9735. Restarting tor to discover and copy the local address.
 
 On Lamp settings, enable proxy using orbot localhost gateway:
