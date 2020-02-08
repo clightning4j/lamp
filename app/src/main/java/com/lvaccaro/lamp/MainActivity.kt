@@ -294,6 +294,10 @@ class MainActivity : AppCompatActivity() {
                 }
                 title = alias
             }
+            val qrcode = getQrCode(txt)
+            runOnUiThread {
+                findViewById<ImageView>(R.id.qrcodeImageView).setImageBitmap(qrcode)
+            }
         } catch (e: Exception) {
             log.info("---" + e.localizedMessage + "---")
             runOnUiThread {
