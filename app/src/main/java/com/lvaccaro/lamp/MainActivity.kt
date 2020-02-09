@@ -93,7 +93,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        if (isServiceRunning()) {
+        if (isLightningRunning()) {
             setTheme(R.style.AppTheme)
         } else {
             setTheme(R.style.AppTheme_Night)
@@ -132,7 +132,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        if (isServiceRunning()) {
+        if (isLightningRunning()) {
             doAsync { getInfo() }
         }
     }
@@ -216,14 +216,22 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    fun isServiceRunning(): Boolean {
+    fun isServiceRunning(name: String): Boolean {
         val manager = getSystemService(ACTIVITY_SERVICE) as ActivityManager
         for (service in manager.getRunningServices(Int.MAX_VALUE)) {
-            if("com.lvaccaro.lamp.LightningService".equals(service.service.getClassName())) {
+            if(name.equals(service.service.getClassName())) {
                 return true
             }
         }
         return false
+    }
+
+    fun isLightningRunning(): Boolean {
+        return isServiceRunning("com.lvaccaro.lamp.LightningService")
+    }
+
+    fun isTorRunning(): Boolean {
+        return isServiceRunning("com.lvaccaro.lamp.TorService")
     }
 
     fun onPowerClick() {
