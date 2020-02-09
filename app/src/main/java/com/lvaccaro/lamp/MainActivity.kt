@@ -310,9 +310,11 @@ class MainActivity : AppCompatActivity() {
         } catch (e: Exception) {
             log.info("---" + e.localizedMessage + "---")
             runOnUiThread {
+                stopService(Intent(this, LightningService::class.java))
+                stopService(Intent(this, TorService::class.java))
                 Snackbar.make(findViewById(android.R.id.content), e.localizedMessage, Snackbar.LENGTH_LONG)
                     .show()
-                powerImageView.off()
+                powerOff()
             }
         }
     }
