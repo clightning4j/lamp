@@ -17,13 +17,6 @@ class TorService : IntentService("TorService") {
 
     var process: Process? = null
 
-    companion object {
-        fun getHostname(): String? {
-            return File("/data/user/0/com.lvaccaro.lamp/no_backup/.torHiddenService/hostname").readLines()
-                .first()
-        }
-    }
-
     override fun onHandleIntent(workIntent: Intent?) {
         val dataString = workIntent!!.dataString
     }

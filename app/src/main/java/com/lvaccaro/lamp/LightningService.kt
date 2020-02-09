@@ -66,8 +66,10 @@ class LightningService : IntentService("LightningService") {
         if (sharedPref.getBoolean("enabled-tor", true)) {
             proxy = "127.0.0.1:9050"
             bindaddr = "127.0.0.1:9735"
-            //addr = "statictor:127.0.0.1:9051"
-            announceaddr = TorService.getHostname() ?: ""
+            val torHiddenServiceDir = File(rootDir(), ".torHiddenService/hostname")
+            val address = torHiddenServiceDir.readLines().first()
+            announceaddr = address
+            //addr = "$address:127.0.0.1:9051"
             options.add("--always-use-proxy=true")
         }
 
