@@ -21,6 +21,7 @@ import android.net.wifi.WifiManager
 import android.os.*
 import android.text.InputType
 import android.text.format.Formatter
+import android.view.Gravity
 import android.view.Menu
 import android.view.MenuItem
 import android.view.animation.AnimationUtils
@@ -184,7 +185,7 @@ class MainActivity : AppCompatActivity() {
                 showInvoiceBuilder()
                 true
             }
-            R.id.action_invoice -> {
+            R.id.action_new_address -> {
                 doAsync { generateNewAddress() }
                 true
             }
@@ -624,13 +625,16 @@ class MainActivity : AppCompatActivity() {
             val address = res["address"].toString()
             textView.setText(address)
             qr.setImageBitmap(getQrCode(address))
-            qr.layoutParams = LinearLayout.LayoutParams(300, 300)
+            val layoutParams = LinearLayout.LayoutParams(300, 300)
+            layoutParams.gravity = Gravity.CENTER_HORIZONTAL
+            qr.layoutParams = layoutParams
             val container = LinearLayout(this)
             container.orientation = LinearLayout.VERTICAL
             container.layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.MATCH_PARENT
             )
+            container.setPadding(16, 16, 16, 16)
             container.addView(textView)
             container.addView(qr)
             AlertDialog.Builder(this@MainActivity)

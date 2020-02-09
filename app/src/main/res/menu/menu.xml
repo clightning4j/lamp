@@ -16,6 +16,10 @@ tools:context="example.javatpoint.com.kotlinoptionsmenu.MainActivity">
         android:orderInCategory="100"
         android:title="@string/id_invoice"/>
     <item
+        android:id="@+id/action_new_address"
+        android:orderInCategory="100"
+        android:title="@string/id_new_address"/>
+    <item
         android:id="@+id/action_settings"
         android:orderInCategory="100"
         android:title="@string/id_settings"/>
