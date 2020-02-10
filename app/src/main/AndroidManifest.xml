@@ -20,7 +20,15 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name="com.lvaccaro.lamp.LogActivity"
+            android:name=".InvoiceActivity"
+            android:label="@string/id_invoice"
+            android:parentActivityName=".MainActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.lvaccaro.lamp.MainActivity" />
+        </activity>
+        <activity
+            android:name=".LogActivity"
             android:label="@string/id_log"
             android:parentActivityName="com.lvaccaro.lamp.MainActivity"
             android:theme="@style/AppTheme.NoActionBar">

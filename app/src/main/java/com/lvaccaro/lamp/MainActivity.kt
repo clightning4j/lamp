@@ -13,7 +13,6 @@ import org.apache.commons.compress.archivers.tar.TarArchiveInputStream
 import org.apache.commons.compress.compressors.xz.XZCompressorInputStream
 import org.apache.commons.compress.utils.IOUtils
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry
-import android.view.View
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.Color
@@ -22,15 +21,14 @@ import android.net.wifi.WifiManager
 import android.os.*
 import android.text.InputType
 import android.text.format.Formatter
-import android.view.Gravity
-import android.view.Menu
-import android.view.MenuItem
+import android.view.*
 import android.view.animation.AnimationUtils
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.core.app.ActivityCompat
 import androidx.core.net.toUri
 import androidx.preference.PreferenceManager
+import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.google.android.material.snackbar.Snackbar
 import com.google.zxing.WriterException
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel
@@ -183,7 +181,8 @@ class MainActivity : AppCompatActivity() {
                 true
             }
             R.id.action_invoice -> {
-                showInvoiceBuilder()
+                val bottomSheetDialog = InvoiceBuildFragment()
+                bottomSheetDialog.show(getSupportFragmentManager(), "Custom Bottom Sheet")
                 true
             }
             R.id.action_new_address -> {
@@ -578,54 +577,6 @@ class MainActivity : AppCompatActivity() {
             .show()
     }
 
-    fun showInvoiceBuilder() {
-        val msatoshi = EditText(this)
-        val label = EditText(this)
-        val description = EditText(this)
-        msatoshi.inputType = InputType.TYPE_CLASS_NUMBER
-        msatoshi.hint = "msatoshi"
-        label.hint = "label"
-        description.hint = "description"
-
-        val container = LinearLayout(this)
-        container.orientation = LinearLayout.VERTICAL
-        container.layoutParams = LinearLayout.LayoutParams(
-            LinearLayout.LayoutParams.MATCH_PARENT,
-            LinearLayout.LayoutParams.MATCH_PARENT
-        )
-        container.addView(msatoshi)
-        container.addView(label)
-        container.addView(description)
-
-        AlertDialog.Builder(this@MainActivity)
-            .setTitle("Build invoice")
-            .setView(container)
-            .setPositiveButton("confirm") { dialog, which ->
-                try {
-                    val res = cli.exec(
-                        this@MainActivity, arrayOf(
-                            "invoice",
-                            msatoshi.text.toString(),
-                            label.text.toString(),
-                            description.text.toString()
-                        ), true
-                    ).toJSONObject()
-                    val bolt11 = res["bolt11"].toString()
-                    runOnUiThread { showInvoice(bolt11, label.text.toString()) }
-                } catch (e: Exception) {
-                    runOnUiThread {
-                        Toast.makeText(
-                            this@MainActivity,
-                            e.localizedMessage,
-                            Toast.LENGTH_LONG
-                        ).show()
-                    }
-                }
-            }
-            .setNegativeButton("cancel") { dialog, which -> }
-            .show()
-    }
-
     fun generateNewAddress() {
         val res = cli.exec(
             this@MainActivity,
@@ -659,55 +610,6 @@ class MainActivity : AppCompatActivity() {
                 .setCancelable(false)
                 .show()
         }
-    }
-
-    fun showInvoice(bolt11: String, label: String) {
-        val editText = EditText(this)
-        val qr = ImageView(this)
-
-        editText.setText(bolt11)
-        qr.setImageBitmap(getQrCode(bolt11))
-        qr.layoutParams = LinearLayout.LayoutParams(300, 300)
-
-        val container = LinearLayout(this)
-        container.orientation = LinearLayout.VERTICAL
-        container.layoutParams = LinearLayout.LayoutParams(
-            LinearLayout.LayoutParams.MATCH_PARENT,
-            LinearLayout.LayoutParams.MATCH_PARENT
-        )
-        container.addView(editText)
-        container.addView(qr)
-
-        AlertDialog.Builder(this@MainActivity)
-            .setTitle("Invoice")
-            .setMessage("Label: ${label}")
-            .setView(container)
-            .setNeutralButton("clipboard") { dialog, which ->
-                copyToClipboard("invoice", bolt11)
-            }
-            .setPositiveButton("wait") { dialog, which ->
-                try {
-                    cli.exec(this@MainActivity, arrayOf("waitinvoice", label), true).toJSONObject()
-                    runOnUiThread {
-                        Toast.makeText(
-                            this@MainActivity,
-                            "Invoice paid",
-                            Toast.LENGTH_LONG
-                        ).show()
-                    }
-                } catch (e: Exception) {
-                    runOnUiThread {
-                        Toast.makeText(
-                            this@MainActivity,
-                            e.localizedMessage,
-                            Toast.LENGTH_LONG
-                        ).show()
-                    }
-                }
-            }
-            .setNegativeButton("cancel") { dialog, which -> }
-            .setCancelable(false)
-            .show()
     }
 
     fun copyToClipboard(key: String, text: String) {
