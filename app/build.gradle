@@ -31,9 +31,10 @@ dependencies {
     implementation 'org.tukaani:xz:1.8'
     implementation 'org.apache.commons:commons-compress:1.19'
     implementation 'com.google.zxing:core:3.4.0'
-    implementation 'com.journeyapps:zxing-android-embedded:3.6.0'
+    implementation 'me.dm7.barcodescanner:zxing:1.9.13'
     implementation 'com.google.android.material:material:1.0.0'
     implementation "org.jetbrains.anko:anko-commons:0.10.4"
+
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test:runner:1.2.0'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'

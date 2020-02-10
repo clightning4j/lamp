@@ -1,6 +1,7 @@
 package com.lvaccaro.lamp
 
 import android.Manifest
+import android.app.Activity
 import android.app.ActivityManager
 import androidx.appcompat.app.AppCompatActivity
 import android.app.DownloadManager
@@ -32,8 +33,6 @@ import androidx.core.net.toUri
 import androidx.preference.PreferenceManager
 import com.google.android.material.snackbar.Snackbar
 import com.google.zxing.WriterException
-import com.google.zxing.integration.android.IntentIntegrator
-import com.google.zxing.integration.android.IntentResult
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel
 import com.google.zxing.qrcode.encoder.Encoder
 import kotlinx.android.synthetic.main.activity_console.*
@@ -48,6 +47,7 @@ import java.util.logging.Logger
 
 class MainActivity : AppCompatActivity() {
 
+    val REQUEST_SCAN = 102
     val WRITE_REQUEST_CODE = 101
     val log = Logger.getLogger(MainActivity::class.java.name)
     val TAG = "MainActivity"
@@ -178,7 +178,8 @@ class MainActivity : AppCompatActivity() {
                 true
             }
             R.id.action_scan -> {
-                IntentIntegrator(this@MainActivity).initiateScan()
+                val intent = Intent(this, ScanActivity::class.java)
+                startActivityForResult(intent, REQUEST_SCAN)
                 true
             }
             R.id.action_invoice -> {
@@ -202,14 +203,16 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        Toast.makeText(this, "****", Toast.LENGTH_SHORT).show()
-        var result: IntentResult? =
-            IntentIntegrator.parseActivityResult(requestCode, resultCode, data)
-        if (result != null) {
-            if (result.contents != null) {
-                doAsync { scanned(result.contents) }
+        if (requestCode == REQUEST_SCAN && resultCode == Activity.RESULT_OK) {
+            val result = data?.getStringExtra("text")
+            if (result != null) {
+                doAsync { scanned(result) }
             } else {
-                Snackbar.make(findViewById(android.R.id.content), "Scan failed", Snackbar.LENGTH_LONG).show()
+                Snackbar.make(
+                    findViewById(android.R.id.content),
+                    "Scan failed",
+                    Snackbar.LENGTH_LONG
+                ).show()
             }
         } else {
             super.onActivityResult(requestCode, resultCode, data)
@@ -293,7 +296,7 @@ class MainActivity : AppCompatActivity() {
             var address = addresses[0] as JSONObject
             if (!address.has("address"))
                 throw Exception("no address found")
-            val txt = id + address.getString("address")
+            val txt = id + "@" + address.getString("address")
             val alias = res["alias"] as String
             runOnUiThread {
                 powerImageView.on()
@@ -470,8 +473,8 @@ class MainActivity : AppCompatActivity() {
             log.info(e.localizedMessage)
             e.printStackTrace()
         }
-        stopService(Intent(this, LightningService::class.java))
-        stopService(Intent(this, TorService::class.java))
+        //stopService(Intent(this, LightningService::class.java))
+        //stopService(Intent(this, TorService::class.java))
     }
 
     fun scanned(text: String) {

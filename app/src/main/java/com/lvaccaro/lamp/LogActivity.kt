@@ -10,7 +10,6 @@ import android.view.MenuItem
 import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.google.zxing.integration.android.IntentIntegrator
 
 import kotlinx.android.synthetic.main.activity_log.*
 import org.jetbrains.anko.doAsync
