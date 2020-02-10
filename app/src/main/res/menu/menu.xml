@@ -4,13 +4,15 @@ xmlns:app="http://schemas.android.com/apk/res-auto"
 xmlns:tools="http://schemas.android.com/tools"
 tools:context="example.javatpoint.com.kotlinoptionsmenu.MainActivity">
     <item
+        android:id="@+id/action_invoice"
+        android:orderInCategory="100"
+        android:title="@string/id_invoice"
+        android:icon="@drawable/ic_sats"
+        app:showAsAction="always" />
+    <item
         android:id="@+id/action_paste"
         android:orderInCategory="100"
         android:title="@string/id_paste_from_clipboard"/>
-    <item
-        android:id="@+id/action_invoice"
-        android:orderInCategory="100"
-        android:title="@string/id_invoice"/>
     <item
         android:id="@+id/action_new_address"
         android:orderInCategory="100"
