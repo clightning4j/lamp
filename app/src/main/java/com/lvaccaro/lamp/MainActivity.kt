@@ -436,6 +436,7 @@ class MainActivity : AppCompatActivity() {
                 LightningCli().exec(this@MainActivity, arrayOf("getinfo"), true).toJSONObject()
                 runOnUiThread { powerOn() }
             } catch (e: Exception) {
+                stop()
                 log.info("---" + e.localizedMessage + "---")
                 runOnUiThread {
                     Snackbar.make(findViewById(android.R.id.content), e.localizedMessage, Snackbar.LENGTH_LONG)
@@ -472,8 +473,8 @@ class MainActivity : AppCompatActivity() {
             log.info(e.localizedMessage)
             e.printStackTrace()
         }
-        //stopService(Intent(this, LightningService::class.java))
-        //stopService(Intent(this, TorService::class.java))
+        stopService(Intent(this, LightningService::class.java))
+        stopService(Intent(this, TorService::class.java))
     }
 
     fun scanned(text: String) {
