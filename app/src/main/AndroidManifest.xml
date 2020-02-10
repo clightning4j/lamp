@@ -30,37 +30,37 @@
         <activity
             android:name=".LogActivity"
             android:label="@string/id_log"
-            android:parentActivityName="com.lvaccaro.lamp.MainActivity"
+            android:parentActivityName=".MainActivity"
             android:theme="@style/AppTheme.NoActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.lvaccaro.lamp.MainActivity" />
         </activity>
         <activity
-            android:name="com.lvaccaro.lamp.SettingsActivity"
+            android:name=".SettingsActivity"
             android:label="@string/id_settings"
-            android:parentActivityName="com.lvaccaro.lamp.MainActivity">
+            android:parentActivityName=".MainActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.lvaccaro.lamp.MainActivity" />
         </activity>
         <activity
-            android:name="com.lvaccaro.lamp.ScanActivity"
+            android:name=".ScanActivity"
             android:label="@string/id_scan"
-            android:parentActivityName="com.lvaccaro.lamp.MainActivity">
+            android:parentActivityName=".MainActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.lvaccaro.lamp.MainActivity" />
         </activity>
         <activity
-            android:name="com.lvaccaro.lamp.ConsoleActivity"
+            android:name=".ConsoleActivity"
             android:label="@string/id_console"
-            android:parentActivityName="com.lvaccaro.lamp.MainActivity">
+            android:parentActivityName=".MainActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.lvaccaro.lamp.MainActivity" />
         </activity>
-        <activity android:name="com.lvaccaro.lamp.MainActivity">
+        <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -69,10 +69,10 @@
         </activity>
 
         <service
-            android:name="com.lvaccaro.lamp.LightningService"
+            android:name=".LightningService"
             android:exported="false" />
         <service
-            android:name="com.lvaccaro.lamp.TorService"
+            android:name=".TorService"
             android:exported="false" />
     </application>
 
