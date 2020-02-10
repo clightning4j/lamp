@@ -29,6 +29,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.net.toUri
 import androidx.preference.PreferenceManager
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
 import com.google.zxing.WriterException
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel
@@ -106,6 +107,12 @@ class MainActivity : AppCompatActivity() {
         val addressTextView = findViewById<TextView>(R.id.textViewQr)
         addressTextView.setOnClickListener { copyToClipboard("address", addressTextView.text.toString()) }
 
+        val floatingActionButton = findViewById<FloatingActionButton>(R.id.floating_action_button)
+        floatingActionButton.setOnClickListener {
+            val intent = Intent(this, ScanActivity::class.java)
+            startActivityForResult(intent, REQUEST_SCAN)
+        }
+
         downloadmanager = getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
         registerReceiver(onDownloadReceiver, IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE))
 
@@ -175,11 +182,6 @@ class MainActivity : AppCompatActivity() {
             }
             R.id.action_console -> {
                 startActivityForResult(Intent(this, ConsoleActivity::class.java), 100)
-                true
-            }
-            R.id.action_scan -> {
-                val intent = Intent(this, ScanActivity::class.java)
-                startActivityForResult(intent, REQUEST_SCAN)
                 true
             }
             R.id.action_invoice -> {
@@ -306,6 +308,7 @@ class MainActivity : AppCompatActivity() {
             runOnUiThread {
                 powerImageView.on()
                 findViewById<ImageView>(R.id.arrowImageView).visibility = View.VISIBLE
+                findViewById<FloatingActionButton>(R.id.floating_action_button).visibility = View.VISIBLE
                 findViewById<TextView>(R.id.textViewQr).apply {
                     text = txt
                     visibility = View.VISIBLE
