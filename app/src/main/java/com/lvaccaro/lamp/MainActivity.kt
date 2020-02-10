@@ -479,7 +479,7 @@ class MainActivity : AppCompatActivity() {
     fun scanned(text: String) {
         try {
             val res = cli.exec(this@MainActivity, arrayOf("decodepay", text), true).toJSONObject()
-            runOnUiThread { showDecodePay(res) }
+            runOnUiThread { showDecodePay(text, res) }
         } catch (e: Exception) {
             try {
                 val res = cli.exec(this@MainActivity, arrayOf("connect", text), true).toJSONObject()
@@ -496,14 +496,14 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    fun showDecodePay(decoded: JSONObject) {
+    fun showDecodePay(bolt11: String, decoded: JSONObject) {
         AlertDialog.Builder(this@MainActivity)
             .setTitle("decodepay")
             .setMessage(decoded.toString())
             .setCancelable(true)
             .setPositiveButton("pay") { dialog, which ->
                 try {
-                    cli.exec(this@MainActivity, arrayOf("pay", decoded["bolt11"] as String), true)
+                    cli.exec(this@MainActivity, arrayOf("pay", bolt11), true)
                         .toJSONObject()
                     runOnUiThread {
                         Toast.makeText(
