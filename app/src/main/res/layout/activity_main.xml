@@ -50,4 +50,12 @@
             android:layout_height="100dp" />
     </LinearLayout>
 
+    <ImageView
+        android:id="@+id/arrowImageView"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:tint="@color/colorPrimary"
+        app:srcCompat="@drawable/ic_arrow"
+        android:visibility="gone"/>
+
 </LinearLayout>

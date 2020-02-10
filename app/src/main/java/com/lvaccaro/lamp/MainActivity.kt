@@ -100,6 +100,8 @@ class MainActivity : AppCompatActivity() {
 
         powerImageView = findViewById<PowerImageView>(R.id.powerImageView)
         powerImageView.setOnClickListener { this.onPowerClick() }
+        val arrowImageView = findViewById<ImageView>(R.id.arrowImageView)
+        arrowImageView.setOnClickListener { this.onHistoryClick() }
 
         val addressTextView = findViewById<TextView>(R.id.textViewQr)
         addressTextView.setOnClickListener { copyToClipboard("address", addressTextView.text.toString()) }
@@ -236,6 +238,10 @@ class MainActivity : AppCompatActivity() {
         return isServiceRunning("com.lvaccaro.lamp.TorService")
     }
 
+    fun onHistoryClick() {
+        HistoryFragment().show(getSupportFragmentManager(), "History dialog")
+    }
+
     fun onPowerClick() {
         if (powerImageView.isAnimating()) {
             return
@@ -299,6 +305,7 @@ class MainActivity : AppCompatActivity() {
             val alias = res["alias"] as String
             runOnUiThread {
                 powerImageView.on()
+                findViewById<ImageView>(R.id.arrowImageView).visibility = View.VISIBLE
                 findViewById<TextView>(R.id.textViewQr).apply {
                     text = txt
                     visibility = View.VISIBLE

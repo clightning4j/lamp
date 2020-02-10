@@ -43,4 +43,5 @@
     <string name="id_label">Label</string>
     <string name="id_description">Description</string>
     <string name="id_confirm">confirm</string>
+    <string name="id_transactions">Transactions</string>
 </resources>
