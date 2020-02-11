@@ -302,7 +302,7 @@ class MainActivity : AppCompatActivity() {
             runOnUiThread {
                 powerImageView.on()
                 findViewById<ImageView>(R.id.arrowImageView).visibility = View.VISIBLE
-                findViewById<FloatingActionButton>(R.id.floating_action_button).visibility = View.VISIBLE
+                findViewById<FloatingActionButton>(R.id.floating_action_button).show()
                 findViewById<TextView>(R.id.textViewQr).apply {
                     text = txt
                     visibility = View.VISIBLE
