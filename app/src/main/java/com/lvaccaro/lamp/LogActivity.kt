@@ -1,8 +1,5 @@
 package com.lvaccaro.lamp
 
-import android.content.ClipboardManager
-import android.content.Context
-import android.content.Intent
 import android.os.Bundle
 import android.text.method.ScrollingMovementMethod
 import android.view.Menu
@@ -15,7 +12,6 @@ import kotlinx.android.synthetic.main.activity_log.*
 import org.jetbrains.anko.doAsync
 import java.io.BufferedReader
 import java.io.File
-import java.util.*
 
 class LogActivity : AppCompatActivity() {
 
@@ -35,7 +31,7 @@ class LogActivity : AppCompatActivity() {
 
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        menuInflater.inflate(R.menu.log_menu, menu)
+        menuInflater.inflate(R.menu.menu_log, menu)
         return true
     }
 

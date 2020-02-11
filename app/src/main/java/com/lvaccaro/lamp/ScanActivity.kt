@@ -2,10 +2,13 @@ package com.lvaccaro.lamp
 
 import android.Manifest
 import android.app.Activity
+import android.content.ClipboardManager
+import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
+import android.view.Menu
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import com.google.zxing.Result
@@ -56,6 +59,11 @@ class ScanActivity : AppCompatActivity(), ZXingScannerView.ResultHandler {
         }
     }
 
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        menuInflater.inflate(R.menu.menu_scan, menu)
+        return true
+    }
+
     override fun handleResult(rawResult: Result?) {
         Log.d(TAG, rawResult?.text)
         val result = rawResult?.text ?: ""
@@ -77,6 +85,17 @@ class ScanActivity : AppCompatActivity(), ZXingScannerView.ResultHandler {
             android.R.id.home -> {
                 onBackPressed()
                 return true
+            }
+            R.id.action_paste -> {
+                val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                val clip = clipboard.primaryClip
+                val item = clip?.getItemAt(0)
+                val text = item?.text.toString()
+                val intent = intent
+                intent.putExtra("text", text)
+                setResult(Activity.RESULT_OK, intent)
+                finish()
+                true
             }
             else -> super.onOptionsItemSelected(item)
         }
