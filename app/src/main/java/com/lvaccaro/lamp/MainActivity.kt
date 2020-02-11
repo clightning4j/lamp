@@ -483,7 +483,7 @@ class MainActivity : AppCompatActivity() {
 
     fun scanned(text: String) {
         try {
-            val res = cli.exec(this@MainActivity, arrayOf("decodepay", text), true).toJSONObject()
+            val res = cli.exec(this@MainActivity, arrayOf("decodepay", text), true).toText()
             runOnUiThread { showDecodePay(text, res) }
         } catch (e: Exception) {
             try {
@@ -501,7 +501,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    fun showDecodePay(bolt11: String, decoded: JSONObject) {
+    fun showDecodePay(bolt11: String, decoded: String) {
         AlertDialog.Builder(this@MainActivity)
             .setTitle("decodepay")
             .setMessage(decoded.toString())
