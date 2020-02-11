@@ -10,6 +10,10 @@ Touch the lamp to download and run c-lightning from cross-compilated binaries fo
 
 Warning: Lamp doesn't support Android >= 10.
 
+![Spark screenshot](doc/img/Screen2.png)
+![Spark screenshot](doc/img/Screen1.png)
+![Spark screenshot](doc/img/Screen3.png)
+
 #### Automatic Tor setup
 Lamp is using tor hidden service as default. A new hidden service will be created at the first running time.
 
