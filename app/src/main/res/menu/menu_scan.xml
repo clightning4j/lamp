@@ -5,6 +5,7 @@ xmlns:tools="http://schemas.android.com/tools">
     <item
         android:id="@+id/action_paste"
         android:orderInCategory="100"
+        android:title="@string/id_paste_from_clipboard"
         android:icon="@drawable/ic_paste"
         app:showAsAction="always" />
 </menu>
