@@ -81,7 +81,7 @@ class LogActivity : AppCompatActivity() {
         var counter = 0
         while (line != null && counter++ < 100) {
             line = logReader.readLine()
-            sb.append(line)
+            sb.append(line + "\r\n")
         }
         return sb.toString()
     }
