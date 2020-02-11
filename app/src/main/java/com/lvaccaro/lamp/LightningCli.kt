@@ -2,6 +2,7 @@ package com.lvaccaro.lamp
 
 import android.content.Context
 import android.os.Build
+import com.lvaccaro.lamp.Services.LightningService
 import org.json.JSONObject
 import java.io.File
 import java.io.InputStream

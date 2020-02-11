@@ -16,31 +16,25 @@ import org.apache.commons.compress.archivers.tar.TarArchiveEntry
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.Color
-import android.graphics.drawable.AnimationDrawable
-import android.net.wifi.WifiManager
 import android.os.*
 import android.text.InputType
-import android.text.format.Formatter
 import android.view.*
-import android.view.animation.AnimationUtils
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.core.app.ActivityCompat
 import androidx.core.net.toUri
 import androidx.preference.PreferenceManager
-import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
 import com.google.zxing.WriterException
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel
 import com.google.zxing.qrcode.encoder.Encoder
-import kotlinx.android.synthetic.main.activity_console.*
+import com.lvaccaro.lamp.Services.LightningService
+import com.lvaccaro.lamp.Services.TorService
 import org.jetbrains.anko.doAsync
 import org.json.JSONArray
 import org.json.JSONObject
 import java.lang.Exception
-import java.net.NetworkInterface
-import java.util.*
 import java.util.logging.Logger
 
 
@@ -233,11 +227,11 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun isLightningRunning(): Boolean {
-        return isServiceRunning("com.lvaccaro.lamp.LightningService")
+        return isServiceRunning("com.lvaccaro.lamp.Services.LightningService")
     }
 
     fun isTorRunning(): Boolean {
-        return isServiceRunning("com.lvaccaro.lamp.TorService")
+        return isServiceRunning("com.lvaccaro.lamp.Services.TorService")
     }
 
     fun onHistoryClick() {

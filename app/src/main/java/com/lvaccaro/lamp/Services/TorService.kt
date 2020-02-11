@@ -1,9 +1,12 @@
-package com.lvaccaro.lamp
+package com.lvaccaro.lamp.Services
 
 import android.app.*
 import android.content.Context
 import android.content.Intent
 import android.os.Build
+import com.lvaccaro.lamp.MainActivity
+import com.lvaccaro.lamp.R
+import com.lvaccaro.lamp.rootDir
 import java.io.File
 import java.lang.reflect.Field
 import java.util.logging.Logger

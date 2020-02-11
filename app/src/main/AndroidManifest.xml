@@ -69,10 +69,10 @@
         </activity>
 
         <service
-            android:name=".LightningService"
+            android:name=".Services.LightningService"
             android:exported="false" />
         <service
-            android:name=".TorService"
+            android:name=".Services.TorService"
             android:exported="false" />
     </application>
 
