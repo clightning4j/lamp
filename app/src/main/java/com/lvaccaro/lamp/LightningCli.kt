@@ -48,7 +48,7 @@ fun InputStream.toText(): String {
     var line = reader.readLine()
     while (line != null) {
         if (!line.startsWith("**")) {
-            builder.append(line)
+            builder.append(line + "\r\n")
         }
         line = reader.readLine()
     }
