@@ -432,7 +432,8 @@ class MainActivity : AppCompatActivity() {
         doAsync {
             if (torEnabled) {
                 runOnUiThread { startTor() }
-                Thread.sleep(5000)
+                while (!isTorBootstrapped())
+                    Thread.sleep(1000)
             }
             runOnUiThread { startLightning() }
             Thread.sleep(2000)
@@ -449,6 +450,11 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
+    }
+
+    fun isTorBootstrapped(): Boolean {
+        val logFile = File(rootDir(), "tor.log")
+        return logFile.readText().contains("100%")
     }
 
     fun startTor() {
