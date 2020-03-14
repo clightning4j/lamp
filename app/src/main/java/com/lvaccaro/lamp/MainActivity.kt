@@ -75,7 +75,7 @@ class MainActivity : AppCompatActivity() {
 
         fun url(): String {
             val TAR_FILENAME = tarFilename()
-            val RELEASE = "release_clightning_0.8.1"
+            val RELEASE = "release_clightning_0.8.1_esplora"
             return "https://github.com/lvaccaro/bitcoin_ndk/releases/download/${RELEASE}/${TAR_FILENAME}"
         }
     }
