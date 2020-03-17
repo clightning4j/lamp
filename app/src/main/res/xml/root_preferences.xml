@@ -64,6 +64,13 @@
 
     <PreferenceCategory app:title="@string/id_bitcoind_rpc_options">
 
+        <SwitchPreference
+            app:key="enabled-esplora"
+            app:title="@string/id_enable_esplora"
+            app:defaultValue="true"
+            app:summary="@string/id_using_esplora_plugin"
+            app:useSimpleSummaryProvider="true" />
+
         <EditTextPreference
             app:key="bitcoin-rpcuser"
             app:title="@string/id_bitcoind_rpc_username"

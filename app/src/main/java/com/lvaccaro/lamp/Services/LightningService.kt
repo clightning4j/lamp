@@ -49,24 +49,39 @@ class LightningService : IntentService("LightningService") {
         var addr = sharedPref.getString("addr", "").toString()
         val alias = sharedPref.getString("alias", "").toString()
 
-        val options = arrayListOf<String>(
+        var options = arrayListOf<String>(
             String.format("%s/%s", binaryDir.canonicalPath, daemon),
             String.format("--network=%s", network),
             String.format("--log-level=%s", logLevel),
             String.format("--lightning-dir=%s", lightningDir.path),
-            String.format("--bitcoin-cli=%s/bitcoin-cli", binaryDir.canonicalPath),
             String.format("--bitcoin-datadir=%s", bitcoinDir.path),
             String.format("--plugin-dir=%s", File(binaryDir.path , "plugins").path),
-            String.format("--bitcoin-rpcconnect=%s", rpcconnect),
-            String.format("--bitcoin-rpcuser=%s", rpcuser),
-            String.format("--bitcoin-rpcport=%s", rpcport),
-            String.format("--bitcoin-rpcpassword=%s", rpcpassword))
+            String.format("--bitcoin-cli=%s/bitcoin-cli", binaryDir.canonicalPath))
 
         if (!alias.isEmpty()) {
             options.add(String.format("--alias=%s", alias))
         }
 
+        if (sharedPref.getBoolean("enabled-esplora", true)) {
+            // set esplora plugin
+            options.addAll(arrayListOf<String>(
+                String.format("--disable-plugin %s", "bcli"),
+                String.format("--blockchain-api-endpoint https://api.blockchair.com/%s",
+                    if ("testnet".equals(network)) "bitcoin/testnet" else "bitcoin"),
+                String.format("--esplora-api-endpoint https://blockstream.info/%s",
+                    if ("testnet".equals(network)) "testnet/api" else "api")))
+        } else {
+            options.addAll(arrayListOf<String>(
+                // set bitcoind rpc config
+                String.format("--disable-plugin %s", "esplora"),
+                String.format("--bitcoin-rpcconnect=%s", rpcconnect),
+                String.format("--bitcoin-rpcuser=%s", rpcuser),
+                String.format("--bitcoin-rpcport=%s", rpcport),
+                String.format("--bitcoin-rpcpassword=%s", rpcpassword)))
+        }
+
         if (sharedPref.getBoolean("enabled-tor", true)) {
+            // setup Tor
             proxy = "127.0.0.1:9050"
             bindaddr = "127.0.0.1:9735"
             val torHiddenServiceDir = File(rootDir(), ".torHiddenService/hostname")

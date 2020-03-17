@@ -44,4 +44,6 @@
     <string name="id_description">Description</string>
     <string name="id_confirm">confirm</string>
     <string name="id_transactions">Transactions</string>
+    <string name="id_enable_esplora">Enable Esplora plugin</string>
+    <string name="id_using_esplora_plugin">Using Esplora plugin as bitcoind backend</string>
 </resources>
