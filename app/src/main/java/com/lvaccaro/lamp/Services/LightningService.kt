@@ -54,9 +54,7 @@ class LightningService : IntentService("LightningService") {
             String.format("--network=%s", network),
             String.format("--log-level=%s", logLevel),
             String.format("--lightning-dir=%s", lightningDir.path),
-            String.format("--bitcoin-datadir=%s", bitcoinDir.path),
-            String.format("--plugin-dir=%s", File(binaryDir.path , "plugins").path),
-            String.format("--bitcoin-cli=%s/bitcoin-cli", binaryDir.canonicalPath))
+            String.format("--plugin-dir=%s", File(binaryDir.path , "plugins").path))
 
         if (!alias.isEmpty()) {
             options.add(String.format("--alias=%s", alias))
@@ -65,15 +63,17 @@ class LightningService : IntentService("LightningService") {
         if (sharedPref.getBoolean("enabled-esplora", true)) {
             // set esplora plugin
             options.addAll(arrayListOf<String>(
-                String.format("--disable-plugin %s", "bcli"),
-                String.format("--blockchain-api-endpoint https://api.blockchair.com/%s",
+                String.format("--disable-plugin=%s", "bcli"),
+                String.format("--blockchair-api-endpoint=https://api.blockchair.com/%s",
                     if ("testnet".equals(network)) "bitcoin/testnet" else "bitcoin"),
-                String.format("--esplora-api-endpoint https://blockstream.info/%s",
+                String.format("--esplora-api-endpoint=https://blockstream.info/%s",
                     if ("testnet".equals(network)) "testnet/api" else "api")))
         } else {
             options.addAll(arrayListOf<String>(
                 // set bitcoind rpc config
-                String.format("--disable-plugin %s", "esplora"),
+                String.format("--disable-plugin=%s", "esplora"),
+                String.format("--bitcoin-datadir=%s", bitcoinDir.path),
+                String.format("--bitcoin-cli=%s/bitcoin-cli", binaryDir.canonicalPath),
                 String.format("--bitcoin-rpcconnect=%s", rpcconnect),
                 String.format("--bitcoin-rpcuser=%s", rpcuser),
                 String.format("--bitcoin-rpcport=%s", rpcport),
@@ -108,7 +108,7 @@ class LightningService : IntentService("LightningService") {
         pb.directory(binaryDir)
         pb.redirectErrorStream(true)
         val logFile = File(rootDir(),"$daemon.log")
-        logFile.delete()
+        //logFile.delete()
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             pb.redirectOutput(ProcessBuilder.Redirect.appendTo(logFile))
         }
