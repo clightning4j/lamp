@@ -454,6 +454,8 @@ class MainActivity : AppCompatActivity() {
 
     fun isTorBootstrapped(): Boolean {
         val logFile = File(rootDir(), "tor.log")
+        if (!logFile.exists())
+            return false
         return logFile.readText().contains("100%")
     }
 
