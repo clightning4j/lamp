@@ -427,7 +427,8 @@ class MainActivity : AppCompatActivity() {
         val sharedPref = PreferenceManager.getDefaultSharedPreferences(applicationContext)
         val rpcuser = sharedPref.getString("bitcoin-rpcuser", "").toString()
         val rpcpassword = sharedPref.getString("bitcoin-rpcpassword", "").toString()
-        if (rpcuser === "" || rpcpassword === "") {
+        val esplora = sharedPref.getBoolean("enabled-esplora", true)
+        if (!esplora && (rpcuser === "" || rpcpassword === "")) {
             AlertDialog.Builder(this)
                 .setTitle("warning")
                 .setMessage("Go to Settings to set lightningd options before start")
