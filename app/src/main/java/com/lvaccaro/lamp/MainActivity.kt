@@ -449,7 +449,7 @@ class MainActivity : AppCompatActivity() {
                     Thread.sleep(1000)
             }
             runOnUiThread { startLightning() }
-            Thread.sleep(2000)
+            Thread.sleep(3000)
             try {
                 LightningCli().exec(this@MainActivity, arrayOf("getinfo"), true).toJSONObject()
                 runOnUiThread { powerOn() }
