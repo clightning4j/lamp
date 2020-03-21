@@ -2,12 +2,12 @@ package com.lvaccaro.lamp
 
 import android.content.Context
 import android.os.Build
+import androidx.preference.PreferenceManager
 import com.lvaccaro.lamp.Services.LightningService
 import org.json.JSONObject
 import java.io.File
 import java.io.InputStream
 import java.util.logging.Logger
-
 
 class LightningCli {
 
@@ -18,9 +18,12 @@ class LightningCli {
     fun exec(c: Context, options: Array<String>, json: Boolean = true): InputStream {
         val binaryDir = c.rootDir()
         val lightningDir = File(c.rootDir(), ".lightning")
+        val sharedPref = PreferenceManager.getDefaultSharedPreferences(c)
+        val network = sharedPref.getString("network", "testnet").toString()
 
-        val args =
-            arrayOf( String.format("%s/%s", binaryDir.canonicalPath, command),
+        val args = arrayOf(
+            String.format("%s/%s", binaryDir.canonicalPath, command),
+            String.format("--network=%s", network),
             String.format("--lightning-dir=%s", lightningDir.path),
             String.format("--%s", if (json == true) "json" else "raw" ))
 
