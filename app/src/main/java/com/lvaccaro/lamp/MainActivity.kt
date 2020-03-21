@@ -378,7 +378,7 @@ class MainActivity : AppCompatActivity() {
         val requestCert = DownloadManager.Request(Uri.parse(cacert))
         requestCert.setTitle("CA certificates")
         requestCert.setDescription(getString(R.string.id_downloading))
-        requestCert.setNotificationVisibility(DownloadManager.Request.VISIBILITY_HIDDEN)
+        requestCert.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE)
         requestCert.setDestinationUri(fileCert.toUri())
         downloadCertID = downloadmanager.enqueue(requestCert)
     }
