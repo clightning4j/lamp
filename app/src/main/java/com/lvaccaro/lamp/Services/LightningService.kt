@@ -4,6 +4,7 @@ import android.app.*
 import android.content.Context
 import android.content.Intent
 import android.os.Build
+import android.os.Environment
 import androidx.preference.PreferenceManager
 import com.lvaccaro.lamp.MainActivity
 import com.lvaccaro.lamp.R
@@ -61,9 +62,11 @@ class LightningService : IntentService("LightningService") {
         }
 
         if (sharedPref.getBoolean("enabled-esplora", true)) {
+            val fileCert = File(getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS)!!, "cacert.pem")
             // set esplora plugin
             options.addAll(arrayListOf<String>(
                 String.format("--disable-plugin=%s", "bcli"),
+                String.format("--esplora-cainfo=%s", fileCert.absolutePath),
                 String.format("--blockchair-api-endpoint=https://api.blockchair.com/%s",
                     if ("testnet".equals(network)) "bitcoin/testnet" else "bitcoin"),
                 String.format("--esplora-api-endpoint=https://blockstream.info/%s",
