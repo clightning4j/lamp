@@ -45,6 +45,7 @@ class MainActivity : AppCompatActivity() {
     val log = Logger.getLogger(MainActivity::class.java.name)
     val TAG = "MainActivity"
     var downloadID = 0L
+    var downloadCertID = 0L
     val cli = LightningCli()
     lateinit var downloadmanager: DownloadManager
     lateinit var powerImageView: PowerImageView
@@ -355,13 +356,14 @@ class MainActivity : AppCompatActivity() {
             val tarFile = File(dir(), tarFilename())
             doAsync {
                 uncompress(tarFile, rootDir())
+                tarFile.delete();
                 runOnUiThread { powerOff() }
             }
         }
     }
 
     fun download() {
-        // Download package
+        // Download bitcoin_ndk package
         val tarFile = File(dir(), tarFilename())
         val request = DownloadManager.Request(Uri.parse(url()))
         request.setTitle("lightning")
@@ -369,6 +371,16 @@ class MainActivity : AppCompatActivity() {
         request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE)
         request.setDestinationUri(tarFile.toUri())
         downloadID = downloadmanager.enqueue(request)
+
+        // Download CA certificates
+        val cacert = "https://curl.haxx.se/ca/cacert.pem"
+        val fileCert = File(dir(), "cacert.pem")
+        val requestCert = DownloadManager.Request(Uri.parse(cacert))
+        requestCert.setTitle("CA certificates")
+        requestCert.setDescription(getString(R.string.id_downloading))
+        requestCert.setNotificationVisibility(DownloadManager.Request.VISIBILITY_HIDDEN)
+        requestCert.setDestinationUri(fileCert.toUri())
+        downloadCertID = downloadmanager.enqueue(requestCert)
     }
 
     fun uncompress(inputFile: File, outputDir: File) {
