@@ -445,11 +445,14 @@ class MainActivity : AppCompatActivity() {
         doAsync {
             if (torEnabled) {
                 runOnUiThread { startTor() }
+                Thread.sleep(1000)
                 while (!isTorBootstrapped())
                     Thread.sleep(1000)
             }
             runOnUiThread { startLightning() }
-            Thread.sleep(3000)
+            Thread.sleep(1000)
+            while (!isLightningBootstrapped())
+                Thread.sleep(1000)
             try {
                 LightningCli().exec(this@MainActivity, arrayOf("getinfo"), true).toJSONObject()
                 runOnUiThread { powerOn() }
@@ -470,6 +473,13 @@ class MainActivity : AppCompatActivity() {
         if (!logFile.exists())
             return false
         return logFile.readText().contains("100%")
+    }
+
+    fun isLightningBootstrapped(): Boolean {
+        val logFile = File(rootDir(), "lightningd.log")
+        if (!logFile.exists())
+            return false
+        return logFile.readText().contains("lightningd: Server started with public key")
     }
 
     fun startTor() {
