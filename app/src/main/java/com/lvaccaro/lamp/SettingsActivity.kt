@@ -44,13 +44,25 @@ class SettingsActivity : AppCompatActivity() {
                     true
                 }
                 "clearbinary" -> {
-                    File(activity?.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS)!!, MainActivity.tarFilename()).delete()
-                    File(activity?.rootDir(), "plugins").delete()
-                    File(activity?.rootDir(), "lightningd").delete()
-                    File(activity?.rootDir(), "lightning-cli").delete()
-                    File(activity?.rootDir(), "bitcoin-cli").delete()
                     val dir = File(activity?.rootDir(), "")
-                    Toast.makeText(context, "Erased binary in: ${dir.path}", Toast.LENGTH_LONG).show()
+                    val downloadDir = activity?.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS)!!
+                    File(downloadDir, MainActivity.tarFilename()).delete()
+                    File(downloadDir, "cacert.pem").delete()
+                    File(dir, "plugins").delete()
+                    File(dir, "lightningd").delete()
+                    File(dir, "lightning-cli").delete()
+                    File(dir, "lightning_channeld").delete()
+                    File(dir, "lightning_closingd").delete()
+                    File(dir, "lightning_connectd").delete()
+                    File(dir, "lightning_onchaind").delete()
+                    File(dir, "lightning_openingd").delete()
+                    File(dir, "lightning_gossipd").delete()
+                    File(dir, "lightning_hsmd").delete()
+                    File(dir, "bitcoin-cli").delete()
+                    File(dir, "bitcoind").delete()
+                    File(dir, "plugins").delete()
+                    File(dir, "tor").delete()
+                    Toast.makeText(context, "Erased binary in: ${dir.path} and downloaded files", Toast.LENGTH_LONG).show()
                     true
                 } else -> {
                     super.onPreferenceTreeClick(preference)
