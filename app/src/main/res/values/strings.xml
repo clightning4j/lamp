@@ -46,4 +46,6 @@
     <string name="id_transactions">Transactions</string>
     <string name="id_enable_esplora">Enable Esplora plugin</string>
     <string name="id_using_esplora_plugin">Using Esplora plugin as bitcoind backend</string>
+    <string name="action_settings">Settings</string>
+    <string name="id_channels">Channels</string>
 </resources>

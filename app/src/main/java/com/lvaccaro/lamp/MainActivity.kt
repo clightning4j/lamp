@@ -184,6 +184,10 @@ class MainActivity : AppCompatActivity() {
                 bottomSheetDialog.show(getSupportFragmentManager(), "Custom Bottom Sheet")
                 true
             }
+            R.id.action_channels -> {
+                startActivityForResult(Intent(this, ChannelsActivity::class.java), 100)
+                true
+            }
             R.id.action_new_address -> {
                 doAsync { generateNewAddress() }
                 true

@@ -9,6 +9,12 @@ xmlns:tools="http://schemas.android.com/tools">
         android:icon="@drawable/ic_sats"
         app:showAsAction="always" />
     <item
+        android:id="@+id/action_channels"
+        android:icon="@android:drawable/ic_menu_sort_by_size"
+        android:orderInCategory="100"
+        android:title="@string/id_channels"
+        app:showAsAction="always" />
+    <item
         android:id="@+id/action_new_address"
         android:orderInCategory="100"
         android:title="@string/id_new_address"/>
