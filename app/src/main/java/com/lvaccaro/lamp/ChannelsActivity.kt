@@ -92,6 +92,8 @@ class ChannelsActivity : AppCompatActivity() {
             }
 
             runOnUiThread {
+                val total = channels.sumBy { it.getInt("msatoshi_to_us") / 1000 }
+                findViewById<TextView>(R.id.total_text).text = "${total} sat in channels"
                 val recyclerView = findViewById<RecyclerView>(R.id.recycler_view)
                 val adapter = recyclerView.adapter as ChannelAdapter
                 adapter.list.clear()
