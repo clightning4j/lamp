@@ -54,6 +54,7 @@ class TorService : IntentService("TorService") {
         pb.redirectErrorStream(true)
         val logFile = File(rootDir(), "$daemon.log")
         logFile.delete()
+        logFile.createNewFile()
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             pb.redirectOutput(ProcessBuilder.Redirect.appendTo(logFile))
         }

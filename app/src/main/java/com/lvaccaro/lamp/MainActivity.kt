@@ -427,6 +427,30 @@ class MainActivity : AppCompatActivity() {
         inputFile.delete()
     }
 
+    fun waitTorBootstrap(): Boolean {
+        val logFile = File(rootDir(), "tor.log")
+        for (i in 0..10) {
+            try {
+                if (logFile.readText().contains("100%"))
+                    return true
+            } catch (err: Exception) { }
+            Thread.sleep(1000)
+        }
+        return false;
+    }
+
+    fun waitLightningBootstrap(): Boolean {
+        val logFile = File(rootDir(), "lightningd.log")
+        for (i in 0..10) {
+            try {
+                if (logFile.readText().contains("lightningd: Server started with public key"))
+                    return true
+            } catch (err: Exception) { }
+            Thread.sleep(1000)
+        }
+        return false;
+    }
+
     fun start() {
         val sharedPref = PreferenceManager.getDefaultSharedPreferences(applicationContext)
         val rpcuser = sharedPref.getString("bitcoin-rpcuser", "").toString()
@@ -445,18 +469,39 @@ class MainActivity : AppCompatActivity() {
         }
 
         val torEnabled = sharedPref.getBoolean("enabled-tor", true)
+
+        // clear log files
+        val torLogFile = File(rootDir(), "tor.log")
+        val lightningLogFile = File(rootDir(), "lightningd.log")
+        torLogFile.delete()
+        lightningLogFile.delete()
+
         powerImageView.animating()
         doAsync {
             if (torEnabled) {
+                // start service on main thread
                 runOnUiThread { startTor() }
-                Thread.sleep(1000)
-                while (!isTorBootstrapped())
-                    Thread.sleep(1000)
+                // wait tor to be bootstrapped
+                if (!waitTorBootstrap()) {
+                    runOnUiThread {
+                        Snackbar.make(findViewById(android.R.id.content), "Tor start failed", Snackbar.LENGTH_LONG)
+                            .show()
+                        powerImageView.off()
+                    }
+                    return@doAsync
+                }
             }
+            // start service on main thread
             runOnUiThread { startLightning() }
-            Thread.sleep(1000)
-            while (!isLightningBootstrapped())
-                Thread.sleep(1000)
+            // wait lightning to be bootstrapped
+            if (!waitLightningBootstrap()) {
+                runOnUiThread {
+                    Snackbar.make(findViewById(android.R.id.content), "Lightning start failed", Snackbar.LENGTH_LONG)
+                        .show()
+                    powerImageView.off()
+                }
+                return@doAsync
+            }
             try {
                 LightningCli().exec(this@MainActivity, arrayOf("getinfo"), true).toJSONObject()
                 runOnUiThread { powerOn() }
@@ -470,20 +515,6 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
-    }
-
-    fun isTorBootstrapped(): Boolean {
-        val logFile = File(rootDir(), "tor.log")
-        if (!logFile.exists())
-            return false
-        return logFile.readText().contains("100%")
-    }
-
-    fun isLightningBootstrapped(): Boolean {
-        val logFile = File(rootDir(), "lightningd.log")
-        if (!logFile.exists())
-            return false
-        return logFile.readText().contains("lightningd: Server started with public key")
     }
 
     fun startTor() {
