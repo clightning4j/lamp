@@ -35,18 +35,21 @@ class ListAdapter(val list: ArrayList<Item>)
 }
 class ItemViewHolder(inflater: LayoutInflater, parent: ViewGroup) :
     RecyclerView.ViewHolder(inflater.inflate(R.layout.list_tx, parent, false)) {
-    private var mTitleView: TextView? = null
-    private var mDescriptionView: TextView? = null
+    private var mDateView: TextView? = null
+    private var mAmountView: TextView? = null
+    private var mLabelView: TextView? = null
 
     init {
-        mTitleView = itemView.findViewById(R.id.text1)
-        mDescriptionView = itemView.findViewById(R.id.text2)
+        mDateView = itemView.findViewById(R.id.date)
+        mAmountView = itemView.findViewById(R.id.amount)
+        mLabelView = itemView.findViewById(R.id.label)
     }
 
     fun bind(item: Item) {
         val date = Date(item.time * 1000L)
-        mDescriptionView?.text = String.format("%s %dmsat", if (item.incoming) "+" else "-", item.amount)
-        mTitleView?.text = SimpleDateFormat("dd MMM yyyy, HH:mm:ss").format(date)
+        mAmountView?.text = String.format("%s %dmsat", if (item.incoming) "+" else "-", item.amount)
+        mDateView?.text = SimpleDateFormat("dd MMM yyyy, HH:mm:ss").format(date)
+        mLabelView?.text = item.label
     }
 }
 
@@ -102,8 +105,8 @@ class HistoryFragment: BottomSheetDialogFragment() {
             if (status.equals("complete")) {
                 val createdAt = payment["created_at"] as Int
                 val msatoshi = payment["msatoshi"] as Int
-                val id = payment["id"] as String
-                payments.add(Item(msatoshi, createdAt, id, false))
+                val id = payment["id"] as Int
+                payments.add(Item(msatoshi, createdAt, "Payment ID ${id.toString()}", false))
             }
         }
         return payments
