@@ -16,6 +16,7 @@ class LightningService : IntentService("LightningService") {
 
     val log = Logger.getLogger(LightningService::class.java.name)
     var process: Process? = null
+    var globber: Globber? = null
     val NOTIFICATION_ID = 573948
     val daemon = "lightningd"
 
@@ -117,6 +118,11 @@ class LightningService : IntentService("LightningService") {
             pb.redirectOutput(ProcessBuilder.Redirect.appendTo(logFile))
         }
         process = pb.start()
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+            // Redirection output to file
+            globber = Globber(process!!.inputStream, logFile);
+            globber?.start()
+        }
         //return super.onStartCommand(intent, flags, startId)
         log.info("exit $daemon service")
 
@@ -158,7 +164,9 @@ class LightningService : IntentService("LightningService") {
         super.onDestroy()
         log.info("destroying core service")
         process?.destroy()
+        globber?.interrupt()
         process = null
+        globber = null
         cancelNotification()
     }
 }
