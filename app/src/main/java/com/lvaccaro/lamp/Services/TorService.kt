@@ -19,6 +19,7 @@ class TorService : IntentService("TorService") {
     val daemon = "tor"
 
     var process: Process? = null
+    var globber: Globber? = null
 
     override fun onHandleIntent(workIntent: Intent?) {
         val dataString = workIntent!!.dataString
@@ -59,6 +60,12 @@ class TorService : IntentService("TorService") {
             pb.redirectOutput(ProcessBuilder.Redirect.appendTo(logFile))
         }
         process = pb.start()
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+            // Redirection output to file
+            globber = Globber(process!!.inputStream, logFile);
+            globber?.start()
+        }
+
         //return super.onStartCommand(intent, flags, startId)
         log.info("exit $daemon service")
 
@@ -103,7 +110,9 @@ class TorService : IntentService("TorService") {
             android.os.Process.sendSignal(getPid(process!!), 15)
         }
         process?.destroy()
+        globber?.interrupt()
         process = null
+        globber = null
         cancelNotification()
     }
 
