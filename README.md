@@ -10,8 +10,6 @@
 Touch the lamp to download and run c-lightning from cross-compilated binaries for Android are available [here]( https://github.com/lvaccaro/bitcoin_ndk/releases/tag/release_clightning_0.8.1_esplora) or in alternative from source of
 [bitcoin_ndk project](https://github.com/lvaccaro/bitcoin_ndk/tree/add_clightningv0.8.1).
 
-> Warning: Lamp doesn't support Android >= 10.
-
 ![screenshot1](doc/img/Screen2.png)
 ![screenshot2](doc/img/Screen1.png)
 ![screenshot3](doc/img/Screen3.png)
