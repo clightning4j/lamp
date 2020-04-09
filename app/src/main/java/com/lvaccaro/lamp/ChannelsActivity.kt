@@ -2,25 +2,26 @@ package com.lvaccaro.lamp
 
 import android.os.Bundle
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
-import com.google.android.material.snackbar.Snackbar
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.activity_channels.*
-import kotlinx.android.synthetic.main.list_channel.view.*
 import org.jetbrains.anko.doAsync
 import org.json.JSONArray
 import org.json.JSONObject
 import java.lang.Exception
-import java.text.SimpleDateFormat
-import java.util.*
 import kotlin.collections.ArrayList
 
-class ChannelAdapter(val list: ArrayList<JSONObject>)
+typealias MyCategoryClickListener = (View, JSONObject) -> Unit
+
+class ChannelAdapter(val list: ArrayList<JSONObject>,
+                     private val onClickListener: MyCategoryClickListener)
     : RecyclerView.Adapter<ChannelViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ChannelViewHolder {
@@ -31,6 +32,9 @@ class ChannelAdapter(val list: ArrayList<JSONObject>)
     override fun onBindViewHolder(holder: ChannelViewHolder, position: Int) {
         val item: JSONObject = list[position]
         holder.bind(item)
+        holder.itemView.setOnClickListener { view ->
+            onClickListener(view, item)
+        }
     }
 
     override fun getItemCount(): Int = list.size
@@ -66,9 +70,39 @@ class ChannelsActivity : AppCompatActivity() {
 
         recyclerView = findViewById<RecyclerView>(R.id.recycler_view)
         recyclerView.layoutManager = LinearLayoutManager(this)
-        recyclerView.adapter = ChannelAdapter(ArrayList<JSONObject>())
+        recyclerView.adapter = ChannelAdapter(ArrayList<JSONObject>(), this::dialogChannel)
 
         doAsync { refresh() }
+    }
+
+    fun dialogChannel(view: View, channel: JSONObject) {
+        val cid = channel.getString("channel_id")
+        AlertDialog.Builder(this)
+            .setTitle("Close channel")
+            .setMessage("CID: ${cid}")
+            .setPositiveButton("close") { dialog, which -> doAsync { close(cid) }}
+            .setNegativeButton("cancel") { dialog, which -> }
+            .setCancelable(false)
+            .show()
+    }
+
+    fun close(cid: String) {
+        try {
+            val res = LightningCli().exec(
+                this@ChannelsActivity,
+                arrayOf("close", cid),
+                true
+            ).toJSONObject()
+            refresh()
+        } catch (e: Exception) {
+            runOnUiThread {
+                Toast.makeText(
+                    this@ChannelsActivity,
+                    "Channel closed",
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+        }
     }
 
     fun refresh() {
