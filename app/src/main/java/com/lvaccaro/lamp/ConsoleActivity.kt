@@ -42,7 +42,7 @@ class ConsoleActivity : AppCompatActivity() {
             this.params = params[0]
             val args = params[0].split(" ").toTypedArray()
             try {
-                return LightningCli().exec(this@ConsoleActivity, args, false).toText()
+                return LightningCli().exec(this@ConsoleActivity, args, true).toText()
             }catch (e: Exception) {
                 e.printStackTrace()
                 return e.localizedMessage ?: "Error, params: ${args}"
