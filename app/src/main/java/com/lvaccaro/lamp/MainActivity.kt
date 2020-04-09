@@ -183,6 +183,11 @@ class MainActivity : AppCompatActivity() {
                 startActivityForResult(Intent(this, ChannelsActivity::class.java), 100)
                 true
             }
+            R.id.action_withdraw -> {
+                val bottomSheetDialog = WithdrawFragment()
+                bottomSheetDialog.show(supportFragmentManager, "WithdrawFragment")
+                true
+            }
             R.id.action_new_address -> {
                 doAsync { generateNewAddress() }
                 true

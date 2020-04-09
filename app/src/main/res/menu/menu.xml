@@ -19,6 +19,10 @@ xmlns:tools="http://schemas.android.com/tools">
         android:orderInCategory="100"
         android:title="@string/id_new_address"/>
     <item
+        android:id="@+id/action_withdraw"
+        android:orderInCategory="100"
+        android:title="@string/id_withdraw"/>
+    <item
         android:id="@+id/action_settings"
         android:orderInCategory="100"
         android:title="@string/id_settings"/>

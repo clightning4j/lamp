@@ -49,4 +49,7 @@
     <string name="action_settings">Settings</string>
     <string name="id_channels">Channels</string>
     <string name="id_history">History</string>
+    <string name="id_withdraw">Withdraw</string>
+    <string name="id_destination_address">Destination address</string>
+    <string name="id_satoshi">Satoshi</string>
 </resources>
