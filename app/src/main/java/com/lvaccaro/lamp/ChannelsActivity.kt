@@ -18,10 +18,10 @@ import org.json.JSONObject
 import java.lang.Exception
 import kotlin.collections.ArrayList
 
-typealias MyCategoryClickListener = (View, JSONObject) -> Unit
+typealias ChannelClickListener = (View, JSONObject) -> Unit
 
 class ChannelAdapter(val list: ArrayList<JSONObject>,
-                     private val onClickListener: MyCategoryClickListener)
+                     private val onClickListener: ChannelClickListener)
     : RecyclerView.Adapter<ChannelViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ChannelViewHolder {
