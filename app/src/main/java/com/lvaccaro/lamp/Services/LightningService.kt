@@ -68,8 +68,6 @@ class LightningService : IntentService("LightningService") {
             options.addAll(arrayListOf<String>(
                 String.format("--disable-plugin=%s", "bcli"),
                 String.format("--esplora-cainfo=%s", fileCert.absolutePath),
-                String.format("--blockchair-api-endpoint=https://api.blockchair.com/%s",
-                    if ("testnet".equals(network)) "bitcoin/testnet" else "bitcoin"),
                 String.format("--esplora-api-endpoint=https://blockstream.info/%s",
                     if ("testnet".equals(network)) "testnet/api" else "api")))
         } else {
