@@ -7,8 +7,8 @@
 
 > This is a experimenting lightning wallet for testnet. It is only for development purpose, don't use on mainnet.
 
-Touch the lamp to download and run c-lightning from cross-compilated binaries for Android are available [here]( https://github.com/lvaccaro/bitcoin_ndk/releases/tag/release_clightning_0.8.1_esplora) or in alternative from source of
-[bitcoin_ndk project](https://github.com/lvaccaro/bitcoin_ndk/tree/add_clightningv0.8.1).
+Touch the lamp to download and run c-lightning from cross-compilated binaries for Android are available [here]( https://github.com/lvaccaro/lightning_ndk/releases/tag/release_clightning_0.8.1_1dc281c) or in alternative from source of
+[bitcoin_ndk project](https://github.com/lvaccaro/lightning_ndk/tree/lightning).
 
 ![screenshot1](doc/img/Screen2.png)
 ![screenshot2](doc/img/Screen1.png)
@@ -17,7 +17,7 @@ Touch the lamp to download and run c-lightning from cross-compilated binaries fo
 
 ## Bitcoin Setup
 
-#### Automatic
+#### Automatic with esplora plugin
 
 Lamp is using [esplora plugin](https://github.com/lvaccaro/esplora_clnd_plugin) to fetch chain/block/tx info and send tx from [blockstream.info](https://blockstream.info) explorer. Esplora plugin is enabled by default.
 
@@ -32,7 +32,7 @@ On Lamp settings, disable esplora plugin and set the current bitcoin rpc options
 
 ## Tor Setup
 
-#### Automatic
+#### Automatic with internal tor service
 
 Lamp is using tor hidden service as default. A new hidden service will be created at the first running time.
 
@@ -48,7 +48,7 @@ On Lamp settings, enable proxy using orbot localhost gateway:
 
 Read the follow instruction at [Tor on clightning](https://lightning.readthedocs.io/TOR.html) to setup address on different network scenario.
 
-#### References
+## References
 
 - [ABCore](https://github.com/greenaddress/abcore) Android Bitcoin Core wallet
 - [bitcoin_ndk](https://github.com/greenaddress/bitcoin_ndk) ndk build of bitcoin core and knots
