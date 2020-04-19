@@ -95,6 +95,18 @@
 
     </PreferenceCategory>
 
+    <PreferenceCategory app:title="@string/id_backup_and_restore">
+
+    <Preference
+        app:key="exportdata"
+        app:title="@string/id_export_data" />
+
+    <Preference
+        app:key="importdata"
+        app:title="@string/id_import_data" />
+
+    </PreferenceCategory>
+
     <PreferenceCategory app:title="@string/id_clear_memory">
 
         <Preference

@@ -6,7 +6,11 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
-import java.io.File
+import org.jetbrains.anko.doAsync
+import java.io.*
+import java.util.zip.ZipEntry
+import java.util.zip.ZipOutputStream
+
 
 class SettingsActivity : AppCompatActivity() {
 
@@ -45,7 +49,8 @@ class SettingsActivity : AppCompatActivity() {
                 }
                 "clearbinary" -> {
                     val dir = File(activity?.rootDir(), "")
-                    val downloadDir = activity?.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS)!!
+                    val downloadDir =
+                        activity?.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS)!!
                     File(downloadDir, MainActivity.tarFilename()).delete()
                     File(downloadDir, "cacert.pem").delete()
                     File(dir, "plugins").delete()
@@ -62,10 +67,66 @@ class SettingsActivity : AppCompatActivity() {
                     File(dir, "bitcoind").delete()
                     File(dir, "plugins").delete()
                     File(dir, "tor").delete()
-                    Toast.makeText(context, "Erased binary in: ${dir.path} and downloaded files", Toast.LENGTH_LONG).show()
+                    Toast.makeText(
+                        context,
+                        "Erased binary in: ${dir.path} and downloaded files",
+                        Toast.LENGTH_LONG
+                    ).show()
+                    true
+                }
+                "exportdata" -> {
+                    doAsync { exportData() }
+                    true
+                }
+                "importdata" -> {
                     true
                 } else -> {
                     super.onPreferenceTreeClick(preference)
+                }
+            }
+        }
+
+        fun exportData() {
+            val inputFolder = File(activity?.rootDir(), ".lightning")
+            val outputFolder = context!!.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS)!!
+            if (!outputFolder.exists())
+                outputFolder.mkdir()
+            val zipFile = File(outputFolder, "export.zip")
+            zipFile.delete()
+            zipFile.createNewFile()
+
+            ZipOutputStream(BufferedOutputStream(FileOutputStream(zipFile))).use {
+                it.use {
+                    compress(it, inputFolder, "")
+                    it.close()
+                }
+            }
+
+            activity?.let {
+                it.runOnUiThread {
+                    if (zipFile.exists()) {
+                        Toast.makeText(it, "Export in ${zipFile}", Toast.LENGTH_LONG).show()
+                    } else {
+                        Toast.makeText(it, "Export error", Toast.LENGTH_LONG).show()
+                    }
+                }
+            }
+        }
+
+        fun compress(zos: ZipOutputStream, inputFolder: File, basePath: String) {
+            for (file in inputFolder.listFiles()) {
+                if (file.isDirectory) {
+                    val entry = ZipEntry(basePath + File.separator + file.name + File.separator)
+                    entry.size = file.length()
+                    zos.putNextEntry(entry)
+                    compress(zos, file, file.name)
+                } else {
+                    val origin = BufferedInputStream(FileInputStream(file))
+                    origin.use {
+                        val entryName = basePath + File.separator + file.name
+                        zos.putNextEntry(ZipEntry(entryName))
+                        origin.copyTo(zos, 2048)
+                    }
                 }
             }
         }

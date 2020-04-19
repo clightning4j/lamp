@@ -52,4 +52,7 @@
     <string name="id_withdraw">Withdraw</string>
     <string name="id_destination_address">Destination address</string>
     <string name="id_satoshi">Satoshi</string>
+    <string name="id_backup_and_restore"><![CDATA[Backup & restore]]></string>
+    <string name="id_export_data">Export data</string>
+    <string name="id_import_data">Import data</string>
 </resources>
