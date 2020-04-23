@@ -2,12 +2,22 @@ package com.lvaccaro.lamp
 
 import android.os.Bundle
 import android.os.Environment
+import android.text.InputType
+import android.util.Log
+import android.widget.EditText
+import android.widget.LinearLayout
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
+import org.apache.commons.compress.archivers.tar.TarArchiveEntry
+import org.apache.commons.compress.archivers.tar.TarArchiveInputStream
+import org.apache.commons.compress.compressors.xz.XZCompressorInputStream
+import org.apache.commons.compress.utils.IOUtils
 import org.jetbrains.anko.doAsync
 import java.io.*
+import java.lang.Exception
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
 
@@ -79,11 +89,66 @@ class SettingsActivity : AppCompatActivity() {
                     true
                 }
                 "importdata" -> {
+                    showImportDialog()
                     true
                 } else -> {
                     super.onPreferenceTreeClick(preference)
                 }
             }
+        }
+
+        fun showImportDialog() {
+            val input = EditText(activity)
+            val lp = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.MATCH_PARENT
+            )
+            input.setLayoutParams(lp)
+            input.hint = "zip filepath"
+
+            AlertDialog.Builder(context!!)
+                .setTitle("Import file")
+                .setMessage("Importing will delete the current lightning wallet")
+                .setView(input)
+                .setPositiveButton("import") { dialog, which ->
+                    doAsync {
+                        val dataFolder = File(activity?.rootDir(), ".lightning")
+                        dataFolder.delete()
+                        uncompress(File(input.text.toString()), dataFolder)
+                        activity?.runOnUiThread {
+                            Toast.makeText(context!!, "Importing successful ", Toast.LENGTH_LONG).show()
+                        }
+                    }
+                }
+                .setNegativeButton("cancel") { dialog, which -> }
+                .show()
+        }
+
+        fun uncompress(inputFile: File, outputDir: File) {
+            if (!outputDir.exists()) {
+                outputDir.mkdir()
+            }
+            val input = TarArchiveInputStream(
+                BufferedInputStream(
+                    XZCompressorInputStream(
+                        BufferedInputStream(FileInputStream(inputFile))
+                    )
+                )
+            )
+            var counter = 0
+            var entry = input.nextEntry
+            while (entry != null) {
+                val f = File(outputDir, entry.name)
+                var out = FileOutputStream(f)
+                try {
+                    IOUtils.copy(input, out)
+                } finally {
+                    IOUtils.closeQuietly(out)
+                }
+                entry = input.nextEntry
+                counter++
+            }
+            IOUtils.closeQuietly(input)
         }
 
         fun exportData() {
