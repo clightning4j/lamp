@@ -76,7 +76,7 @@ class MainActivity : AppCompatActivity() {
 
         fun url(): String {
             val TAR_FILENAME = tarFilename()
-            val RELEASE = "release_clightning_0.8.1_1dc281c"
+            val RELEASE = "release_clightning_0.8.2"
             return "https://github.com/lvaccaro/lightning_ndk/releases/download/${RELEASE}/${TAR_FILENAME}"
         }
     }
