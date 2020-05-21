@@ -12,11 +12,11 @@ class Globber(val stream: InputStream, val file: File): Thread() {
             val isr = InputStreamReader(stream)
             val br = BufferedReader(isr)
             while(!Thread.currentThread().isInterrupted()) {
-                val line = br.readLine()
+                val line = br.readLine() + "\n"
                 file.appendText(line ?: "")
                 log.info(line)
             }
-        } catch (ioe: IOException) {
+        } catch (ioe: Exception) {
             ioe.printStackTrace()
         }
     }
