@@ -53,6 +53,7 @@ class LogActivity : AppCompatActivity() {
     }
 
     fun readLog() {
+        title = "Log $daemon"
         val logFile = File(rootDir(),"$daemon.log")
         if (!logFile.exists()) {
             Toast.makeText(this, "No log file found", Toast.LENGTH_LONG).show()
