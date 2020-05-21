@@ -12,6 +12,7 @@ import kotlinx.android.synthetic.main.activity_log.*
 import org.jetbrains.anko.doAsync
 import java.io.BufferedReader
 import java.io.File
+import java.lang.Exception
 
 class LogActivity : AppCompatActivity() {
 
@@ -61,27 +62,27 @@ class LogActivity : AppCompatActivity() {
         et.movementMethod = ScrollingMovementMethod()
         et.isVerticalScrollBarEnabled = true
         et.setText("")
-        val logReader = logFile.bufferedReader()
-        doAsync {
-            val text = read100(logReader)
-            runOnUiThread { et.append(text) }
-        }
+
+        read(logFile.bufferedReader(), et)
     }
 
     fun read(logReader: BufferedReader, et: EditText) {
-        val text = read100(logReader)
-        runOnUiThread { et.append(text) }
-        Thread.sleep(1000)
-        read(logReader, et)
+        var text = "."
+        while (!text.isEmpty()) {
+            text = read100(logReader)
+            et.append(text)
+        }
     }
 
     fun read100(logReader: BufferedReader): String {
-        var sb = StringBuilder()
-        var line = logReader.readLine()
-        var counter = 0
-        while (line != null && counter++ < 100) {
-            line = logReader.readLine()
-            sb.append(line + "\r\n")
+        val sb = StringBuilder()
+        for (i in 0..100) {
+            try {
+                val line = logReader.readLine() ?: break
+                sb.append(line)
+            } catch (e: Exception) {
+                break
+            }
         }
         return sb.toString()
     }

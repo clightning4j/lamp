@@ -434,7 +434,7 @@ class MainActivity : AppCompatActivity() {
                 if (logFile.readText().contains("100%"))
                     return true
             } catch (err: Exception) { }
-            Thread.sleep(1000)
+            Thread.sleep(2000)
         }
         return false;
     }
@@ -446,7 +446,7 @@ class MainActivity : AppCompatActivity() {
                 if (logFile.readText().contains("lightningd: Server started with public key"))
                     return true
             } catch (err: Exception) { }
-            Thread.sleep(1000)
+            Thread.sleep(2000)
         }
         return false;
     }
