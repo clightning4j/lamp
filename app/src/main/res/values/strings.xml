@@ -55,4 +55,5 @@
     <string name="id_backup_and_restore"><![CDATA[Backup & restore]]></string>
     <string name="id_export_data">Export data</string>
     <string name="id_import_data">Import data</string>
+    <string name="id_esplora_api_endpoint">Esplora api endoint uri</string>
 </resources>

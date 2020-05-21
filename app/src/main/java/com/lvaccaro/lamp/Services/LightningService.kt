@@ -65,10 +65,11 @@ class LightningService : IntentService("LightningService") {
         if (sharedPref.getBoolean("enabled-esplora", true)) {
             val fileCert = File(getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS)!!, "cacert.pem")
             // set esplora plugin
+            val endpoint = sharedPref.getString("esplora-api-endpoint", null) ?: "https://blockstream.info"
             options.addAll(arrayListOf<String>(
                 String.format("--disable-plugin=%s", "bcli"),
                 String.format("--esplora-cainfo=%s", fileCert.absolutePath),
-                String.format("--esplora-api-endpoint=https://blockstream.info/%s",
+                String.format("--esplora-api-endpoint=$endpoint/%s",
                     if ("testnet".equals(network)) "testnet/api" else "api")))
         } else {
             options.addAll(arrayListOf<String>(

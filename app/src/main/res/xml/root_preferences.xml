@@ -72,6 +72,13 @@
             app:useSimpleSummaryProvider="true" />
 
         <EditTextPreference
+            app:key="esplora-api-endpoint"
+            app:title="@string/id_esplora_api_endpoint"
+            app:dependency="enabled-esplora"
+            app:defaultValue="https://blockstream.info"
+            app:useSimpleSummaryProvider="true" />
+
+        <EditTextPreference
             app:key="bitcoin-rpcuser"
             app:title="@string/id_bitcoind_rpc_username"
             app:useSimpleSummaryProvider="true" />
