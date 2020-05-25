@@ -109,6 +109,10 @@ class SettingsActivity : AppCompatActivity() {
                     doAsync {
                         val dataFolder = File(activity?.rootDir(), ".lightning")
                         dataFolder.delete()
+                        activity?.runOnUiThread {
+                            Toast.makeText(context!!, "Copying the content of " + input.text
+                                    + " into " + dataFolder, Toast.LENGTH_LONG).show()
+                        }
                         uncompress(File(input.text.toString()), dataFolder)
                         activity?.runOnUiThread {
                             Toast.makeText(context!!, "Importing successful ", Toast.LENGTH_LONG).show()
