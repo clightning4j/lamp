@@ -108,7 +108,7 @@ class SettingsActivity : AppCompatActivity() {
                 .setPositiveButton("import") { dialog, which ->
                     doAsync {
                         val dataFolder = File(activity?.rootDir(), ".lightning")
-                        dataFolder.delete()
+                        dataFolder.deleteRecursively()
                         activity?.runOnUiThread {
                             Toast.makeText(context!!, "Copying the content of " + input.text
                                     + " into " + dataFolder, Toast.LENGTH_LONG).show()
