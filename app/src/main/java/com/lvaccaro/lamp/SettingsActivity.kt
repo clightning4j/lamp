@@ -138,11 +138,16 @@ class SettingsActivity : AppCompatActivity() {
                         parent.mkdirs()
                     }
 
-                    val out = FileOutputStream(currFile)
+                    val out : OutputStream
                     try {
+                        out = FileOutputStream(currFile)
                         IOUtils.copy(input, out)
-                    } finally {
                         IOUtils.closeQuietly(out)
+                    } catch (e: IOException) {
+                        activity?.runOnUiThread {
+                            Toast.makeText(context!!, "Error while copying '" + currFile.absolutePath
+                                    + "': " + e.message + "'", Toast.LENGTH_LONG).show()
+                        }
                     }
                 }
 
