@@ -56,7 +56,9 @@ class LightningService : IntentService("LightningService") {
             String.format("--network=%s", network),
             String.format("--log-level=%s", logLevel),
             String.format("--lightning-dir=%s", lightningDir.path),
-            String.format("--plugin-dir=%s", File(binaryDir.path , "plugins").path))
+            String.format("--plugin-dir=%s", File(binaryDir.path , "plugins").path),
+            // 10 days to catch a cheating attempt
+            String.format("--watchtime-blocks=%s", 10 * 24 * 6))
 
         if (!alias.isEmpty()) {
             options.add(String.format("--alias=%s", alias))
