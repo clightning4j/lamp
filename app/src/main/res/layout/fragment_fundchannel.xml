@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="@dimen/text_margin">
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="@string/id_node_uri">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/node_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:singleLine="true" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="@string/id_satoshi">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/satoshi_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="number" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.switchmaterial.SwitchMaterial
+        android:id="@+id/fundmax_switch"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Fund max" />
+
+    <com.google.android.material.switchmaterial.SwitchMaterial
+        android:id="@+id/private_switch"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Private channel" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="end">
+
+        <Button
+            android:id="@+id/button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/id_fund_channel" />
+
+    </LinearLayout>
+</LinearLayout>

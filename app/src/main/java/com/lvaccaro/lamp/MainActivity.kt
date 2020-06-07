@@ -17,7 +17,6 @@ import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.Color
 import android.os.*
-import android.text.InputType
 import android.view.*
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
@@ -29,6 +28,8 @@ import com.google.android.material.snackbar.Snackbar
 import com.google.zxing.WriterException
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel
 import com.google.zxing.qrcode.encoder.Encoder
+import com.lvaccaro.lamp.Channels.ChannelsActivity
+import com.lvaccaro.lamp.Channels.FundChannelFragment
 import com.lvaccaro.lamp.Services.LightningService
 import com.lvaccaro.lamp.Services.TorService
 import org.jetbrains.anko.doAsync
@@ -41,6 +42,7 @@ import java.util.logging.Logger
 class MainActivity : AppCompatActivity() {
 
     val REQUEST_SCAN = 102
+    val REQUEST_FUNDCHANNEL = 103
     val WRITE_REQUEST_CODE = 101
     val log = Logger.getLogger(MainActivity::class.java.name)
     val TAG = "MainActivity"
@@ -601,49 +603,13 @@ class MainActivity : AppCompatActivity() {
         AlertDialog.Builder(this@MainActivity)
             .setTitle("connect")
             .setMessage(id)
-            .setPositiveButton("fund channel") { dialog, which -> showFundChannel(id) }
-            .setNegativeButton("cancel") { dialog, which -> }
-            .show()
-    }
-
-    fun showFundChannel(id: String) {
-        val input = EditText(this)
-        val lp = LinearLayout.LayoutParams(
-            LinearLayout.LayoutParams.MATCH_PARENT,
-            LinearLayout.LayoutParams.MATCH_PARENT
-        )
-        input.setLayoutParams(lp)
-        input.inputType = InputType.TYPE_CLASS_NUMBER
-        input.hint = "satoshi"
-
-        AlertDialog.Builder(this@MainActivity)
-            .setTitle("fund a channel")
-            .setMessage("with ${id}")
-            .setView(input)
-            .setPositiveButton("confirm") { dialog, which ->
-                try {
-                    cli.exec(
-                        this@MainActivity,
-                        arrayOf("fundchannel", id, input.text.toString()),
-                        true
-                    ).toJSONObject()
-                    runOnUiThread {
-                        Toast.makeText(
-                            this@MainActivity,
-                            "Channel funded",
-                            Toast.LENGTH_LONG
-                        ).show()
-                    }
-                } catch (e: Exception) {
-                    runOnUiThread {
-                        Toast.makeText(
-                            this@MainActivity,
-                            e.localizedMessage,
-                            Toast.LENGTH_LONG
-                        ).show()
-                    }
-                }
-            }
+            .setPositiveButton("fund channel") { dialog, which ->
+                val bottomSheetDialog =
+                    FundChannelFragment()
+                val args = Bundle()
+                args.putString("uri", id)
+                bottomSheetDialog.arguments = args
+                bottomSheetDialog.show(supportFragmentManager, "Fund channel") }
             .setNegativeButton("cancel") { dialog, which -> }
             .show()
     }

@@ -56,4 +56,7 @@
     <string name="id_export_data">Export data</string>
     <string name="id_import_data">Import data</string>
     <string name="id_esplora_api_endpoint">Esplora api endoint uri</string>
+    <string name="id_fund_channel">Fund Channel</string>
+    <string name="id_node_uri">Node URI</string>
+    <string name="id_warning">Warning</string>
 </resources>
