@@ -19,7 +19,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".ChannelsActivity"
+            android:name=".Channels.ChannelsActivity"
             android:label="@string/id_channels"
             android:parentActivityName=".MainActivity"
             android:theme="@style/AppTheme.NoActionBar">

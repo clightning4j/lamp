@@ -1,4 +1,4 @@
-package com.lvaccaro.lamp
+package com.lvaccaro.lamp.Channels
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -11,6 +11,9 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.lvaccaro.lamp.LightningCli
+import com.lvaccaro.lamp.R
+import com.lvaccaro.lamp.toJSONObject
 import kotlinx.android.synthetic.main.activity_channels.*
 import org.jetbrains.anko.doAsync
 import org.json.JSONArray
@@ -21,7 +24,8 @@ import kotlin.collections.ArrayList
 typealias ChannelClickListener = (View, JSONObject) -> Unit
 
 class ChannelAdapter(val list: ArrayList<JSONObject>,
-                     private val onClickListener: ChannelClickListener)
+                     private val onClickListener: ChannelClickListener
+)
     : RecyclerView.Adapter<ChannelViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ChannelViewHolder {
@@ -70,7 +74,10 @@ class ChannelsActivity : AppCompatActivity() {
 
         recyclerView = findViewById<RecyclerView>(R.id.recycler_view)
         recyclerView.layoutManager = LinearLayoutManager(this)
-        recyclerView.adapter = ChannelAdapter(ArrayList<JSONObject>(), this::dialogChannel)
+        recyclerView.adapter = ChannelAdapter(
+            ArrayList<JSONObject>(),
+            this::dialogChannel
+        )
 
         doAsync { refresh() }
     }
