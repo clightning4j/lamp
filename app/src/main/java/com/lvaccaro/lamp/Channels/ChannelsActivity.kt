@@ -1,9 +1,8 @@
 package com.lvaccaro.lamp.Channels
 
+import android.content.Intent
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
@@ -13,6 +12,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.lvaccaro.lamp.LightningCli
 import com.lvaccaro.lamp.R
+import com.lvaccaro.lamp.ScanActivity
 import com.lvaccaro.lamp.toJSONObject
 import kotlinx.android.synthetic.main.activity_channels.*
 import org.jetbrains.anko.doAsync
@@ -149,6 +149,24 @@ class ChannelsActivity : AppCompatActivity() {
                     Toast.LENGTH_LONG
                 ).show()
             }
+        }
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        menuInflater.inflate(R.menu.menu_channels, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            R.id.action_add -> {
+                val bottomSheetDialog =
+                    FundChannelFragment()
+                bottomSheetDialog.show(supportFragmentManager, "Fund channel")
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
         }
     }
 
