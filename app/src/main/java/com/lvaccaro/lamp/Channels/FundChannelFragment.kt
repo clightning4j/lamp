@@ -27,14 +27,16 @@ class FundChannelFragment: BottomSheetDialogFragment() {
         val uri = arguments?.getString("uri")
         view.findViewById<TextInputEditText>(R.id.node_text).setText(uri ?: "")
         view.findViewById<Button>(R.id.button).setOnClickListener {
+            val uri = view.findViewById<TextInputEditText>(R.id.node_text).text.toString()
+            val isMax =  view.findViewById<SwitchMaterial>(R.id.fundmax_switch).isChecked
+            var isPrivate = view.findViewById<SwitchMaterial>(R.id.private_switch).isChecked
+            val satoshi = view.findViewById<TextInputEditText>(R.id.satoshi_text).text.toString()
             doAsync {
                 fund(
-                    view.findViewById<TextInputEditText>(R.id.node_text).text.toString(),
-                    if (view.findViewById<SwitchMaterial>(R.id.fundmax_switch).isChecked) "all" else view.findViewById<TextInputEditText>(
-                        R.id.satoshiText
-                    ).text.toString(),
+                    uri,
+                    if (isMax) "all" else satoshi,
                     "normal",
-                    if (view.findViewById<SwitchMaterial>(R.id.private_switch).isChecked) "false" else "true"
+                    if (isPrivate) "false" else "true"
                 )
             }
         }
