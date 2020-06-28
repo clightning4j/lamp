@@ -1,13 +1,10 @@
 package com.lvaccaro.lamp
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
-import android.os.Message
-import android.util.Log
-import android.widget.EditText
-import android.widget.LinearLayout
 import android.widget.Toast
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
@@ -17,7 +14,6 @@ import java.io.*
 import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
 import java.util.zip.ZipOutputStream
-
 
 class SettingsActivity : AppCompatActivity() {
 
@@ -34,6 +30,10 @@ class SettingsActivity : AppCompatActivity() {
     }
 
     class SettingsFragment : PreferenceFragmentCompat() {
+
+        val REQUEST_CREATE_FILE = 999
+        val REQUEST_OPEN_FILE = 998
+
         override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
             setPreferencesFromResource(R.xml.root_preferences, rootKey)
         }
@@ -100,11 +100,18 @@ class SettingsActivity : AppCompatActivity() {
                     return resultOperation
                 }
                 "exportdata" -> {
-                    doAsync { exportData() }
+                    val intent = Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
+                        addCategory(Intent.CATEGORY_OPENABLE)
+                        type = "application/zip"
+                        putExtra(Intent.EXTRA_TITLE, "clightning_data.zip")
+                    }
+                    startActivityForResult(intent, REQUEST_CREATE_FILE)
                     true
                 }
                 "importdata" -> {
-                    showImportDialog()
+                    val intent = Intent(Intent.ACTION_GET_CONTENT)
+                    intent.type = "application/zip"
+                    startActivityForResult(intent, REQUEST_OPEN_FILE)
                     true
                 }
                 "enabled-tor" -> {
@@ -125,46 +132,12 @@ class SettingsActivity : AppCompatActivity() {
             Toast.makeText(context, message, duration).show()
         }
 
-        fun showImportDialog() {
-            val input = EditText(activity)
-            val lp = LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.MATCH_PARENT
-            )
-            input.setLayoutParams(lp)
-            input.hint = "zip filepath"
-
-            AlertDialog.Builder(context!!)
-                .setTitle("Import file")
-                .setMessage("Importing will delete the current lightning wallet")
-                .setView(input)
-                .setPositiveButton("import") { dialog, which ->
-                    doAsync {
-                        val dataFolder = File(activity?.rootDir(), ".lightning")
-                        dataFolder.deleteRecursively()
-                        activity?.runOnUiThread {
-                            Toast.makeText(
-                                context!!, "Copying the content of " + input.text
-                                        + " into " + dataFolder, Toast.LENGTH_LONG
-                            ).show()
-                        }
-                        uncompress(File(input.text.toString()), dataFolder)
-                        activity?.runOnUiThread {
-                            Toast.makeText(context!!, "Importing successful ", Toast.LENGTH_LONG)
-                                .show()
-                        }
-                    }
-                }
-                .setNegativeButton("cancel") { dialog, which -> }
-                .show()
-        }
-
-
-        fun uncompress(inputFile: File, outputDir: File) {
-            if (!outputDir.exists()) {
-                outputDir.mkdir()
-            }
-            val input = ZipInputStream(BufferedInputStream(FileInputStream(inputFile)))
+        fun import(selected: Uri) {
+            val outputDir = File(activity?.rootDir(), ".lightning")
+            outputDir.deleteRecursively()
+            outputDir.mkdir()
+            val stream = activity!!.contentResolver.openInputStream(selected)
+            val input = ZipInputStream(BufferedInputStream(stream))
             var entry = input.nextEntry
             while (entry != null) {
                 val currFile = File(outputDir, entry.name)
@@ -190,36 +163,39 @@ class SettingsActivity : AppCompatActivity() {
                                         + "': " + e.message + "'", Toast.LENGTH_LONG
                             ).show()
                         }
+                        return
                     }
                 }
 
                 entry = input.nextEntry
             }
             IOUtils.closeQuietly(input)
+            stream?.close()
+            activity?.runOnUiThread {
+                Toast.makeText(
+                    activity!!, "Import success", Toast.LENGTH_LONG
+                ).show()
+            }
         }
 
-        fun exportData() {
+        fun export(selected: Uri) {
+            val stream = activity!!.contentResolver.openOutputStream(selected, "w")
             val inputFolder = File(activity?.rootDir(), ".lightning")
-            val outputFolder = context!!.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS)!!
-            if (!outputFolder.exists())
-                outputFolder.mkdir()
-            val zipFile = File(outputFolder, "export.zip")
-            zipFile.delete()
-            zipFile.createNewFile()
-
-            ZipOutputStream(BufferedOutputStream(FileOutputStream(zipFile))).use {
+            ZipOutputStream(BufferedOutputStream(stream)).use {
                 it.use {
                     compress(it, inputFolder, "")
                     it.close()
                 }
             }
+            stream?.close()
 
-            activity?.let {
-                it.runOnUiThread {
-                    if (zipFile.exists()) {
-                        Toast.makeText(it, "Export in ${zipFile}", Toast.LENGTH_LONG).show()
-                    } else {
-                        Toast.makeText(it, "Export error", Toast.LENGTH_LONG).show()
+            activity?.apply {
+                runOnUiThread {
+                    try {
+                        contentResolver.openInputStream(selected)
+                        Toast.makeText(this, "Export success", Toast.LENGTH_LONG).show()
+                    } catch (e: java.io.FileNotFoundException) {
+                        Toast.makeText(this, "Export failure", Toast.LENGTH_LONG).show()
                     }
                 }
             }
@@ -239,6 +215,19 @@ class SettingsActivity : AppCompatActivity() {
                         zos.putNextEntry(ZipEntry(entryName))
                         origin.copyTo(zos, 2048)
                     }
+                }
+            }
+        }
+
+        override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+            super.onActivityResult(requestCode, resultCode, data)
+            if (requestCode == REQUEST_CREATE_FILE && resultCode == RESULT_OK) {
+                data?.data?.let {
+                    doAsync { export(it) }
+                }
+            } else if (requestCode == REQUEST_OPEN_FILE && resultCode == RESULT_OK) {
+                data?.data?.let {
+                    doAsync { import(it) }
                 }
             }
         }
