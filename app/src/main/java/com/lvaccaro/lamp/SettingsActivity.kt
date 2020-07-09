@@ -2,6 +2,8 @@ package com.lvaccaro.lamp
 
 import android.os.Bundle
 import android.os.Environment
+import android.os.Message
+import android.util.Log
 import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.Toast
@@ -39,45 +41,63 @@ class SettingsActivity : AppCompatActivity() {
         override fun onPreferenceTreeClick(preference: Preference?): Boolean {
             return when (preference?.key) {
                 "clearlogs" -> {
-                    File(activity?.rootDir(), "lightningd.log").delete()
-                    File(activity?.rootDir(), "tor.log").delete()
-                    Toast.makeText(context, "Erased logs", Toast.LENGTH_LONG).show()
-                    true
+                    var resultOperation = File(activity?.rootDir(), "lightningd.log").delete() &&
+                            File(activity?.rootDir(), "tor.log").delete()
+
+                    if(resultOperation){
+                        showToast("Erased logs", Toast.LENGTH_LONG)
+                    }else{
+                        showToast("Error during Erasing logs", Toast.LENGTH_LONG)
+                    }
+                    return resultOperation
                 }
                 "cleardata" -> {
-                    File(activity?.rootDir(), ".lightning").delete()
-                    File(activity?.rootDir(), ".bitcoin").delete()
-                    File(activity?.rootDir(), ".tor").delete()
-                    File(activity?.rootDir(), ".torHiddenService").delete()
-                    Toast.makeText(context, "Erased datadir", Toast.LENGTH_LONG).show()
-                    true
+                    var resultOperation = File(activity?.rootDir(), ".lightning").delete() &&
+                            File(activity?.rootDir(), ".bitcoin").delete() &&
+                            File(activity?.rootDir(), ".tor").delete() &&
+                            File(activity?.rootDir(), ".torHiddenService").delete()
+
+                    if (resultOperation) {
+                        showToast("Erased datadir", Toast.LENGTH_LONG)
+                    } else {
+                        showToast("Error during erasing datadir", Toast.LENGTH_LONG)
+                    }
+                    return resultOperation
                 }
                 "clearbinary" -> {
                     val dir = File(activity?.rootDir(), "")
                     val downloadDir =
                         activity?.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS)!!
-                    File(downloadDir, MainActivity.tarFilename()).delete()
-                    File(downloadDir, "cacert.pem").delete()
-                    File(dir, "plugins").delete()
-                    File(dir, "lightningd").delete()
-                    File(dir, "lightning-cli").delete()
-                    File(dir, "lightning_channeld").delete()
-                    File(dir, "lightning_closingd").delete()
-                    File(dir, "lightning_connectd").delete()
-                    File(dir, "lightning_onchaind").delete()
-                    File(dir, "lightning_openingd").delete()
-                    File(dir, "lightning_gossipd").delete()
-                    File(dir, "lightning_hsmd").delete()
-                    File(dir, "bitcoin-cli").delete()
-                    File(dir, "bitcoind").delete()
-                    File(dir, "plugins").delete()
+                    var resultOperation = File(downloadDir, MainActivity.tarFilename()).delete() &&
+                    File(downloadDir, "cacert.pem").delete() &&
+                    File(dir, "plugins").delete() &&
+                    File(dir, "lightningd").delete() &&
+                    File(dir, "lightning-cli").delete() &&
+                    File(dir, "lightning_channeld").delete() &&
+                    File(dir, "lightning_closingd").delete() &&
+                    File(dir, "lightning_connectd").delete() &&
+                    File(dir, "lightning_onchaind").delete() &&
+                    File(dir, "lightning_openingd").delete() &&
+                    File(dir, "lightning_gossipd").delete() &&
+                    File(dir, "lightning_hsmd").delete() &&
+                    File(dir, "bitcoin-cli").delete() &&
+                    File(dir, "bitcoind").delete() &&
+                    File(dir, "plugins").delete() &&
                     File(dir, "tor").delete()
-                    Toast.makeText(
-                        context,
-                        "Erased binary in: ${dir.path} and downloaded files",
-                        Toast.LENGTH_LONG
-                    ).show()
-                    true
+
+                    if(resultOperation){
+                        showToast(
+                            "Erased binary in: ${dir.path} and downloaded files",
+                            Toast.LENGTH_LONG
+                        )
+                    }else{
+                        showToast(
+                            "Error during erasing binary in: ${dir.path} and downloaded files",
+                            Toast.LENGTH_LONG
+                        )
+                    }
+
+                    return resultOperation
                 }
                 "exportdata" -> {
                     doAsync { exportData() }
@@ -86,10 +106,23 @@ class SettingsActivity : AppCompatActivity() {
                 "importdata" -> {
                     showImportDialog()
                     true
-                } else -> {
+                }
+                "enabled-tor" -> {
+                    showToast("The change require the node restart", Toast.LENGTH_LONG)
+                    true
+                }
+                "enabled-esplora" ->{
+                    showToast("The change require the node restart", Toast.LENGTH_LONG)
+                    true
+                }
+                else -> {
                     super.onPreferenceTreeClick(preference)
                 }
             }
+        }
+
+        fun showToast(message: String, duration: Int) {
+            Toast.makeText(context, message, duration).show()
         }
 
         fun showImportDialog() {
@@ -110,12 +143,15 @@ class SettingsActivity : AppCompatActivity() {
                         val dataFolder = File(activity?.rootDir(), ".lightning")
                         dataFolder.deleteRecursively()
                         activity?.runOnUiThread {
-                            Toast.makeText(context!!, "Copying the content of " + input.text
-                                    + " into " + dataFolder, Toast.LENGTH_LONG).show()
+                            Toast.makeText(
+                                context!!, "Copying the content of " + input.text
+                                        + " into " + dataFolder, Toast.LENGTH_LONG
+                            ).show()
                         }
                         uncompress(File(input.text.toString()), dataFolder)
                         activity?.runOnUiThread {
-                            Toast.makeText(context!!, "Importing successful ", Toast.LENGTH_LONG).show()
+                            Toast.makeText(context!!, "Importing successful ", Toast.LENGTH_LONG)
+                                .show()
                         }
                     }
                 }
@@ -142,15 +178,17 @@ class SettingsActivity : AppCompatActivity() {
                         parent.mkdirs()
                     }
 
-                    val out : OutputStream
+                    val out: OutputStream
                     try {
                         out = FileOutputStream(currFile)
                         IOUtils.copy(input, out)
                         IOUtils.closeQuietly(out)
                     } catch (e: IOException) {
                         activity?.runOnUiThread {
-                            Toast.makeText(context!!, "Error while copying '" + currFile.absolutePath
-                                    + "': " + e.message + "'", Toast.LENGTH_LONG).show()
+                            Toast.makeText(
+                                context!!, "Error while copying '" + currFile.absolutePath
+                                        + "': " + e.message + "'", Toast.LENGTH_LONG
+                            ).show()
                         }
                     }
                 }

@@ -5,7 +5,6 @@ import android.app.Activity
 import android.app.ActivityManager
 import androidx.appcompat.app.AppCompatActivity
 import android.app.DownloadManager
-import android.app.NotificationManager
 import android.content.*
 import android.net.Uri
 import android.util.Log
@@ -240,11 +239,11 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun isLightningRunning(): Boolean {
-        return isServiceRunning("com.lvaccaro.lamp.Services.LightningService")
+        return isServiceRunning(LightningService::class.java.canonicalName)
     }
 
     fun isTorRunning(): Boolean {
-        return isServiceRunning("com.lvaccaro.lamp.Services.TorService")
+        return isServiceRunning(TorService::class.java.canonicalName)
     }
 
     fun onHistoryClick() {
@@ -285,7 +284,6 @@ class MainActivity : AppCompatActivity() {
                     powerOff()
                 }
             }
-            return
         } else {
             Snackbar.make(
                 findViewById(android.R.id.content),
@@ -338,14 +336,13 @@ class MainActivity : AppCompatActivity() {
         } catch (e: Exception) {
             log.info("---" + e.localizedMessage + "---")
             runOnUiThread {
-                stopService(Intent(this, LightningService::class.java))
-                stopService(Intent(this, TorService::class.java))
+                stopLightningService()
+                stopTorService()
                 Snackbar.make(
                     findViewById(android.R.id.content),
                     e.localizedMessage,
                     Snackbar.LENGTH_LONG
-                )
-                    .show()
+                ).show()
                 powerOff()
             }
         }
@@ -472,6 +469,7 @@ class MainActivity : AppCompatActivity() {
                 if (logFile.readText().contains("lightningd: Server started with public key"))
                     return true
             } catch (err: Exception) {
+                Log.d(TAG, err.localizedMessage)
             }
             Thread.sleep(2000)
         }
@@ -517,7 +515,7 @@ class MainActivity : AppCompatActivity() {
                             Snackbar.LENGTH_LONG
                         ).show()
                         powerImageView.off()
-                        Log.d(this.javaClass.canonicalName, "******** Tor run failed ********")
+                        Log.d(TAG, "******** Tor run failed ********")
                         stopTorService()
                     }
                     return@doAsync
@@ -534,9 +532,7 @@ class MainActivity : AppCompatActivity() {
                         Snackbar.LENGTH_LONG
                     ).show()
                     powerImageView.off()
-                    //TODO same problem with tor service notification?
-                    //TODO in this case I should be shout down also the tor service?
-                    // @author https://github.com/vincenzopalazzo
+                    stopLightningService()
                 }
                 return@doAsync
             }
@@ -558,10 +554,12 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    //TODO this resolve the problem with notification but I want to see this a little bit deeper
-    //@author https://github.com/vincenzopalazzo
     private fun stopTorService() {
         stopService(Intent(this, TorService::class.java))
+    }
+
+    private fun stopLightningService(){
+        stopService(Intent(this, LightningService::class.java))
     }
 
     fun startTor() {
@@ -586,9 +584,6 @@ class MainActivity : AppCompatActivity() {
             val res = LightningCli().exec(this, arrayOf("stop"))
             log.info("---" + res.toString() + "---")
         } catch (e: Exception) {
-            //Toast.makeText(this, e.localizedMessage, Toast.LENGTH_LONG).show()
-            //TODO I added this call, but I want see if this code can be remove
-            //author https://github.com/vincenzopalazzo
             Snackbar.make(
                 findViewById(android.R.id.content),
                 "Error: ${e.localizedMessage}",
@@ -598,8 +593,8 @@ class MainActivity : AppCompatActivity() {
             log.info(e.localizedMessage)
             e.printStackTrace()
         }
-        stopService(Intent(this, LightningService::class.java))
-        stopService(Intent(this, TorService::class.java))
+        stopLightningService()
+        stopTorService()
     }
 
     fun scanned(text: String) {

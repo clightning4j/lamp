@@ -20,12 +20,17 @@ class ConsoleActivity : AppCompatActivity() {
 
         val editText = findViewById<EditText>(R.id.editText)
         text = findViewById<EditText>(R.id.text)
-        editText.hint = "help"
 
         findViewById<ImageButton>(R.id.send).setOnClickListener {
             val text = editText.text.toString()
             if (text != "") {
-                CommandTask().execute(text)
+                if(text.equals("clean", true)){
+                    //Command to clean console
+                    this.text.setText("")
+                    this.editText.setText("")
+                }else{
+                    CommandTask().execute(text)
+                }
             }
         }
     }
