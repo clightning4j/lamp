@@ -52,10 +52,10 @@ class SettingsActivity : AppCompatActivity() {
                     return resultOperation
                 }
                 "cleardata" -> {
-                    var resultOperation = File(activity?.rootDir(), ".lightning").delete() &&
-                            File(activity?.rootDir(), ".bitcoin").delete() &&
-                            File(activity?.rootDir(), ".tor").delete() &&
-                            File(activity?.rootDir(), ".torHiddenService").delete()
+                    var resultOperation = File(activity?.rootDir(), ".lightning").deleteRecursively() &&
+                            File(activity?.rootDir(), ".bitcoin").deleteRecursively() &&
+                            File(activity?.rootDir(), ".tor").deleteRecursively() &&
+                            File(activity?.rootDir(), ".torHiddenService").deleteRecursively()
 
                     if (resultOperation) {
                         showToast("Erased datadir", Toast.LENGTH_LONG)
@@ -70,7 +70,6 @@ class SettingsActivity : AppCompatActivity() {
                         activity?.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS)!!
                     var resultOperation = File(downloadDir, MainActivity.tarFilename()).delete() &&
                     File(downloadDir, "cacert.pem").delete() &&
-                    File(dir, "plugins").delete() &&
                     File(dir, "lightningd").delete() &&
                     File(dir, "lightning-cli").delete() &&
                     File(dir, "lightning_channeld").delete() &&
@@ -82,7 +81,7 @@ class SettingsActivity : AppCompatActivity() {
                     File(dir, "lightning_hsmd").delete() &&
                     File(dir, "bitcoin-cli").delete() &&
                     File(dir, "bitcoind").delete() &&
-                    File(dir, "plugins").delete() &&
+                    File(dir, "plugins").deleteRecursively() &&
                     File(dir, "tor").delete()
 
                     if(resultOperation){
