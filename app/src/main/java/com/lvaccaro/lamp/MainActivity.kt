@@ -102,7 +102,12 @@ class MainActivity : AppCompatActivity() {
         arrowImageView.setOnClickListener { this.onHistoryClick() }
 
         val addressTextView = findViewById<TextView>(R.id.textViewQr)
-        addressTextView.setOnClickListener { copyToClipboard("address", addressTextView.text.toString()) }
+        addressTextView.setOnClickListener {
+            copyToClipboard(
+                "address",
+                addressTextView.text.toString()
+            )
+        }
 
         val floatingActionButton = findViewById<FloatingActionButton>(R.id.floating_action_button)
         floatingActionButton.setOnClickListener {
@@ -226,7 +231,7 @@ class MainActivity : AppCompatActivity() {
     fun isServiceRunning(name: String): Boolean {
         val manager = getSystemService(ACTIVITY_SERVICE) as ActivityManager
         for (service in manager.getRunningServices(Int.MAX_VALUE)) {
-            if(name.equals(service.service.getClassName())) {
+            if (name.equals(service.service.getClassName())) {
                 return true
             }
         }
@@ -234,11 +239,11 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun isLightningRunning(): Boolean {
-        return isServiceRunning("com.lvaccaro.lamp.Services.LightningService")
+        return isServiceRunning(LightningService::class.java.canonicalName)
     }
 
     fun isTorRunning(): Boolean {
-        return isServiceRunning("com.lvaccaro.lamp.Services.TorService")
+        return isServiceRunning(TorService::class.java.canonicalName)
     }
 
     fun onHistoryClick() {
@@ -267,7 +272,11 @@ class MainActivity : AppCompatActivity() {
         val tarFile = File(dir(), tarFilename())
         if (tarFile.exists()) {
             // Uncompress package
-            Snackbar.make(findViewById(android.R.id.content), "Package already downloaded. Uncompressing...", Snackbar.LENGTH_LONG).show()
+            Snackbar.make(
+                findViewById(android.R.id.content),
+                "Package already downloaded. Uncompressing...",
+                Snackbar.LENGTH_LONG
+            ).show()
             powerImageView.animating()
             doAsync {
                 uncompress(tarFile, rootDir())
@@ -275,9 +284,12 @@ class MainActivity : AppCompatActivity() {
                     powerOff()
                 }
             }
-            return
         } else {
-            Snackbar.make(findViewById(android.R.id.content), "Downloading...", Snackbar.LENGTH_LONG)
+            Snackbar.make(
+                findViewById(android.R.id.content),
+                "Downloading...",
+                Snackbar.LENGTH_LONG
+            )
                 .show()
             powerImageView.animating()
             download()
@@ -296,7 +308,8 @@ class MainActivity : AppCompatActivity() {
 
     fun getInfo() {
         try {
-            val res = LightningCli().exec(this@MainActivity, arrayOf("getinfo"), true).toJSONObject()
+            val res =
+                LightningCli().exec(this@MainActivity, arrayOf("getinfo"), true).toJSONObject()
             val id = res["id"] as String
             val addresses = res["address"] as JSONArray
             if (addresses.length() == 0)
@@ -323,10 +336,13 @@ class MainActivity : AppCompatActivity() {
         } catch (e: Exception) {
             log.info("---" + e.localizedMessage + "---")
             runOnUiThread {
-                stopService(Intent(this, LightningService::class.java))
-                stopService(Intent(this, TorService::class.java))
-                Snackbar.make(findViewById(android.R.id.content), e.localizedMessage, Snackbar.LENGTH_LONG)
-                    .show()
+                stopLightningService()
+                stopTorService()
+                Snackbar.make(
+                    findViewById(android.R.id.content),
+                    e.localizedMessage,
+                    Snackbar.LENGTH_LONG
+                ).show()
                 powerOff()
             }
         }
@@ -357,7 +373,11 @@ class MainActivity : AppCompatActivity() {
                 return
 
             runOnUiThread {
-                Snackbar.make(findViewById(android.R.id.content), "Download Completed. Uncompressing...", Snackbar.LENGTH_LONG).show()
+                Snackbar.make(
+                    findViewById(android.R.id.content),
+                    "Download Completed. Uncompressing...",
+                    Snackbar.LENGTH_LONG
+                ).show()
             }
             val tarFile = File(dir(), tarFilename())
             doAsync {
@@ -435,7 +455,8 @@ class MainActivity : AppCompatActivity() {
             try {
                 if (logFile.readText().contains("100%"))
                     return true
-            } catch (err: Exception) { }
+            } catch (err: Exception) {
+            }
             Thread.sleep(2000)
         }
         return false;
@@ -447,7 +468,9 @@ class MainActivity : AppCompatActivity() {
             try {
                 if (logFile.readText().contains("lightningd: Server started with public key"))
                     return true
-            } catch (err: Exception) { }
+            } catch (err: Exception) {
+                Log.d(TAG, err.localizedMessage)
+            }
             Thread.sleep(2000)
         }
         return false;
@@ -486,9 +509,14 @@ class MainActivity : AppCompatActivity() {
                 // wait tor to be bootstrapped
                 if (!waitTorBootstrap()) {
                     runOnUiThread {
-                        Snackbar.make(findViewById(android.R.id.content), "Tor start failed", Snackbar.LENGTH_LONG)
-                            .show()
+                        Snackbar.make(
+                            findViewById(android.R.id.content),
+                            "Tor start failed",
+                            Snackbar.LENGTH_LONG
+                        ).show()
                         powerImageView.off()
+                        Log.d(TAG, "******** Tor run failed ********")
+                        stopTorService()
                     }
                     return@doAsync
                 }
@@ -498,9 +526,13 @@ class MainActivity : AppCompatActivity() {
             // wait lightning to be bootstrapped
             if (!waitLightningBootstrap()) {
                 runOnUiThread {
-                    Snackbar.make(findViewById(android.R.id.content), "Lightning start failed", Snackbar.LENGTH_LONG)
-                        .show()
+                    Snackbar.make(
+                        findViewById(android.R.id.content),
+                        "Lightning start failed",
+                        Snackbar.LENGTH_LONG
+                    ).show()
                     powerImageView.off()
+                    stopLightningService()
                 }
                 return@doAsync
             }
@@ -511,12 +543,23 @@ class MainActivity : AppCompatActivity() {
                 stop()
                 log.info("---" + e.localizedMessage + "---")
                 runOnUiThread {
-                    Snackbar.make(findViewById(android.R.id.content), e.localizedMessage, Snackbar.LENGTH_LONG)
-                        .show()
+                    Snackbar.make(
+                        findViewById(android.R.id.content),
+                        e.localizedMessage,
+                        Snackbar.LENGTH_LONG
+                    ).show()
                     powerImageView.off()
                 }
             }
         }
+    }
+
+    private fun stopTorService() {
+        stopService(Intent(this, TorService::class.java))
+    }
+
+    private fun stopLightningService(){
+        stopService(Intent(this, LightningService::class.java))
     }
 
     fun startTor() {
@@ -541,12 +584,17 @@ class MainActivity : AppCompatActivity() {
             val res = LightningCli().exec(this, arrayOf("stop"))
             log.info("---" + res.toString() + "---")
         } catch (e: Exception) {
-            //Toast.makeText(this, e.localizedMessage, Toast.LENGTH_LONG).show()
+            Snackbar.make(
+                findViewById(android.R.id.content),
+                "Error: ${e.localizedMessage}",
+                Snackbar.LENGTH_LONG)
+                .setBackgroundTint(Color.RED)
+                .show()
             log.info(e.localizedMessage)
             e.printStackTrace()
         }
-        stopService(Intent(this, LightningService::class.java))
-        stopService(Intent(this, TorService::class.java))
+        stopLightningService()
+        stopTorService()
     }
 
     fun scanned(text: String) {
@@ -609,7 +657,8 @@ class MainActivity : AppCompatActivity() {
                 val args = Bundle()
                 args.putString("uri", id)
                 bottomSheetDialog.arguments = args
-                bottomSheetDialog.show(supportFragmentManager, "Fund channel") }
+                bottomSheetDialog.show(supportFragmentManager, "Fund channel")
+            }
             .setNegativeButton("cancel") { dialog, which -> }
             .show()
     }

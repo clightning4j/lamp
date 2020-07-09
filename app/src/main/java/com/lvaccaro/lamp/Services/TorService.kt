@@ -4,6 +4,7 @@ import android.app.*
 import android.content.Context
 import android.content.Intent
 import android.os.Build
+import android.util.Log
 import com.lvaccaro.lamp.MainActivity
 import com.lvaccaro.lamp.R
 import com.lvaccaro.lamp.rootDir
@@ -15,9 +16,10 @@ import java.util.logging.Logger
 class TorService : IntentService("TorService") {
 
     val log = Logger.getLogger(TorService::class.java.name)
-    val NOTIFICATION_ID = 432432
+    companion object{
+        val NOTIFICATION_ID = 432432
+    }
     val daemon = "tor"
-
     var process: Process? = null
     var globber: Globber? = null
 
@@ -27,11 +29,10 @@ class TorService : IntentService("TorService") {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND)
-
         log.info("start $daemon service")
         val torDir = File(rootDir(), ".tor")
         val torHiddenServiceDir = File(rootDir(), ".torHiddenService")
-        val binaryDir = rootDir()
+        val  binaryDir = rootDir()
         if (!torDir.exists()) {
             torDir.mkdir()
         }
@@ -76,7 +77,7 @@ class TorService : IntentService("TorService") {
     fun startForeground() {
         val intent = Intent(this, MainActivity::class.java)
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-        val pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_ONE_SHOT)
+        val pendingIntent = PendingIntent.getActivity(this, NOTIFICATION_ID, intent, PendingIntent.FLAG_ONE_SHOT)
 
         val notification = Notification.Builder(this)
             .setContentTitle("$daemon is running")
@@ -99,6 +100,7 @@ class TorService : IntentService("TorService") {
     }
 
     private fun cancelNotification() {
+        Log.d(this.javaClass.canonicalName, "******** Cancel notification called ********")
         val nm = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         nm.cancel(NOTIFICATION_ID)
     }

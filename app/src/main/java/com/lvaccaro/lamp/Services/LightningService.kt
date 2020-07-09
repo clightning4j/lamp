@@ -113,7 +113,9 @@ class LightningService : IntentService("LightningService") {
         pb.directory(binaryDir)
         pb.redirectErrorStream(true)
         val logFile = File(rootDir(),"$daemon.log")
-        logFile.delete()
+        if(logFile.exists()){
+            logFile.delete()
+        }
         logFile.createNewFile()
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             pb.redirectOutput(ProcessBuilder.Redirect.appendTo(logFile))
@@ -137,7 +139,7 @@ class LightningService : IntentService("LightningService") {
         val pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_ONE_SHOT)
 
         val notification = Notification.Builder(this)
-            .setContentTitle(getString(R.string.app_name) + " is running")
+            .setContentTitle("${getString(R.string.app_name)} is running")
             .setContentIntent(pendingIntent)
             .setSmallIcon(R.drawable.ic_notification)
             .setOngoing(true)
