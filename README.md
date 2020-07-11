@@ -5,10 +5,9 @@
 [![MIT license](https://img.shields.io/github/license/lvaccaro/lamp)](https://github.com/lvaccaro/lamp/blob/master/LICENSE)
 
 
-> This is a experimenting lightning wallet for testnet. It is only for development purpose, don't use on mainnet.
+> This is an experimenting lightning wallet. Use it on testnet or only with amounts you can afford to lose on mainnet.
 
-Touch the lamp to download and run c-lightning from cross-compilated binaries for Android are available [here]( https://github.com/lvaccaro/lightning_ndk/releases/tag/release_clightning_0.8.1_1dc281c) or in alternative from source of
-[bitcoin_ndk project](https://github.com/lvaccaro/lightning_ndk/tree/lightning).
+Touch the lamp to download and run c-lightning from cross-compilated binaries for Android are available [here](https://github.com/lvaccaro/lightning_ndk/releases) or in alternative from source of [bitcoin_ndk project](https://github.com/lvaccaro/lightning_ndk/tree/lightning).
 
 ![screenshot1](doc/img/Screen2.png)
 ![screenshot2](doc/img/Screen1.png)
@@ -19,16 +18,20 @@ Touch the lamp to download and run c-lightning from cross-compilated binaries fo
 
 #### Automatic with esplora plugin
 
-Lamp is using [esplora plugin](https://github.com/lvaccaro/esplora_clnd_plugin) to fetch chain/block/tx info and send tx from [blockstream.info](https://blockstream.info) explorer. Esplora plugin is enabled by default.
+This is the default behaviour.
+
+Lamp is using [the C Esplora plugin for C-lightning](https://github.com/lvaccaro/esplora_clnd_plugin) as the Bitcoin backend of the lightning node (to fetch chain/blocks/transactions informations and send transactions).
+
+You can point it to your own [Esplora](github.com/Blockstream/esplora) instance in the settings, and it uses [blockstream.info](https://blockstream.info) by default.
 
 
 #### Manually with bitcoind rpc node
-On Lamp settings, disable esplora plugin and set the current bitcoin rpc options:
+On Lamp settings, disable Esplora plugin and set the current Bitcoin RPC options:
 
 - Bitcoin RPC username
 - Bitcoin RPC password
 - Bitcoin RPC host (default 127.0.0.1)
-- Bitcoin RPC port (default 18332)
+- Bitcoin RPC port (default 18332 for testnet)
 
 ## Tor Setup
 
@@ -46,7 +49,7 @@ On Lamp settings, enable proxy using orbot localhost gateway:
 - announce address: tor_address
 - bind address: 127.0.0.1:9735
 
-Read the follow instruction at [Tor on clightning](https://lightning.readthedocs.io/TOR.html) to setup address on different network scenario.
+Read the following instructions at [Tor on clightning](https://lightning.readthedocs.io/TOR.html) to setup address on different network scenario.
 
 ## References
 
