@@ -13,13 +13,6 @@
         android:layout_height="match_parent"
         android:orientation="vertical">
 
-        <com.lvaccaro.lamp.PowerImageView
-            android:id="@+id/powerImageView"
-            android:layout_width="200dp"
-            android:layout_height="200dp"
-            android:layout_gravity="center_horizontal"
-            android:background="@drawable/ic_lamp_off" />
-
         <TextView
             android:id="@+id/statusText"
             android:layout_width="match_parent"
@@ -27,6 +20,13 @@
             android:layout_marginStart="16dp"
             android:layout_marginEnd="16dp"
             android:textAlignment="center" />
+
+        <com.lvaccaro.lamp.PowerImageView
+            android:id="@+id/powerImageView"
+            android:layout_width="200dp"
+            android:layout_height="200dp"
+            android:layout_gravity="center_horizontal"
+            android:background="@drawable/ic_lamp_off" />
 
         <View
             android:layout_width="match_parent"
