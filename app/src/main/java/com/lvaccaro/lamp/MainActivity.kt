@@ -36,7 +36,9 @@ import org.jetbrains.anko.doAsync
 import org.json.JSONArray
 import org.json.JSONObject
 import java.lang.Exception
+import java.util.*
 import java.util.logging.Logger
+import kotlin.concurrent.schedule
 
 
 class MainActivity : AppCompatActivity() {
@@ -51,6 +53,7 @@ class MainActivity : AppCompatActivity() {
     val cli = LightningCli()
     lateinit var downloadmanager: DownloadManager
     lateinit var powerImageView: PowerImageView
+    var timer: Timer? = null
 
     companion object {
         val RELEASE = "release_clightning_0.8.2"
@@ -147,6 +150,10 @@ class MainActivity : AppCompatActivity() {
                 "Offline. Rub the lamp to start."
             return
         }
+
+    override fun onPause() {
+        super.onPause()
+        timer?.cancel()
     }
 
     override fun onDestroy() {
@@ -307,15 +314,21 @@ class MainActivity : AppCompatActivity() {
     fun powerOff() {
         powerImageView.off()
         recreate()
+        timer?.cancel()
+        findViewById<TextView>(R.id.statusText).text = "Offline. Rub the lamp to turn on."
     }
 
     fun powerOn() {
         powerImageView.on()
         recreate()
+        findViewById<TextView>(R.id.statusText).text = ""
     }
 
     fun getInfo() {
         try {
+            val resChainInfo =
+                LightningCli().exec(this@MainActivity, arrayOf("getchaininfo"), true).toJSONObject()
+            val blockcount = resChainInfo["blockcount"] as Int
             val res =
                 LightningCli().exec(this@MainActivity, arrayOf("getinfo"), true).toJSONObject()
             val id = res["id"] as String
@@ -327,7 +340,19 @@ class MainActivity : AppCompatActivity() {
                 throw Exception("no address found")
             val txt = id + "@" + address.getString("address")
             val alias = res["alias"] as String
+            val blockheight = res["blockheight"] as Int
+
+            // instantiate timer to monitor block syncing progress
+            timer?.cancel()
+            if (blockcount > blockheight) {
+                timer = Timer()
+                timer!!.schedule(5 * 1000) {
+                    doAsync { getInfo() }
+                }
+            }
+
             runOnUiThread {
+                title = alias
                 powerImageView.on()
                 findViewById<ImageView>(R.id.arrowImageView).visibility = View.VISIBLE
                 findViewById<FloatingActionButton>(R.id.floating_action_button).show()
@@ -335,7 +360,8 @@ class MainActivity : AppCompatActivity() {
                     text = txt
                     visibility = View.VISIBLE
                 }
-                title = alias
+                val delta = blockcount - blockheight
+                findViewById<TextView>(R.id.statusText).text = if (delta > 0) "Syncing blocks -${delta}" else "Online"
             }
             val qrcode = getQrCode(txt)
             runOnUiThread {
