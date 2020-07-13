@@ -288,11 +288,8 @@ class MainActivity : AppCompatActivity() {
         val tarFile = File(dir(), tarFilename())
         if (tarFile.exists()) {
             // Uncompress package
-            Snackbar.make(
-                findViewById(android.R.id.content),
-                "Package already downloaded. Uncompressing...",
-                Snackbar.LENGTH_LONG
-            ).show()
+            findViewById<TextView>(R.id.statusText).text =
+                "Package already downloaded. Uncompressing..."
             powerImageView.animating()
             doAsync {
                 uncompress(tarFile, rootDir())
@@ -301,12 +298,8 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         } else {
-            Snackbar.make(
-                findViewById(android.R.id.content),
-                "Downloading...",
-                Snackbar.LENGTH_LONG
-            )
-                .show()
+            findViewById<TextView>(R.id.statusText).text =
+                "Downloading..."
             powerImageView.animating()
             download()
         }
@@ -410,11 +403,8 @@ class MainActivity : AppCompatActivity() {
                 return
 
             runOnUiThread {
-                Snackbar.make(
-                    findViewById(android.R.id.content),
-                    "Download Completed. Uncompressing...",
-                    Snackbar.LENGTH_LONG
-                ).show()
+                findViewById<TextView>(R.id.statusText).text =
+                    "Download Completed. Uncompressing..."
             }
             val tarFile = File(dir(), tarFilename())
             doAsync {
