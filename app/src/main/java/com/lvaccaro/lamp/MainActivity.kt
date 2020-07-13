@@ -150,6 +150,8 @@ class MainActivity : AppCompatActivity() {
                 "Offline. Rub the lamp to start."
             return
         }
+        doAsync { getInfo() }
+    }
 
     override fun onPause() {
         super.onPause()
@@ -273,7 +275,6 @@ class MainActivity : AppCompatActivity() {
             // turn off
             doAsync {
                 stop()
-                runOnUiThread { powerOff() }
             }
             return
         }
@@ -312,15 +313,17 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun powerOff() {
+        if (powerImageView.isOn())
+            recreate()
         powerImageView.off()
-        recreate()
         timer?.cancel()
         findViewById<TextView>(R.id.statusText).text = "Offline. Rub the lamp to turn on."
     }
 
     fun powerOn() {
+        if (!powerImageView.isOn())
+            recreate()
         powerImageView.on()
-        recreate()
         findViewById<TextView>(R.id.statusText).text = ""
     }
 
@@ -572,8 +575,9 @@ class MainActivity : AppCompatActivity() {
                         "Lightning start failed",
                         Snackbar.LENGTH_LONG
                     ).show()
-                    powerImageView.off()
+                    Log.d(TAG, "******** Lightning run failed ********")
                     stopLightningService()
+                    powerOff()
                 }
                 return@doAsync
             }
@@ -589,7 +593,6 @@ class MainActivity : AppCompatActivity() {
                         e.localizedMessage,
                         Snackbar.LENGTH_LONG
                     ).show()
-                    powerImageView.off()
                 }
             }
         }
@@ -634,8 +637,11 @@ class MainActivity : AppCompatActivity() {
             log.info(e.localizedMessage)
             e.printStackTrace()
         }
-        stopLightningService()
-        stopTorService()
+        runOnUiThread {
+            stopLightningService()
+            stopTorService()
+            powerOff()
+        }
     }
 
     fun scanned(text: String) {
