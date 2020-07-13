@@ -53,6 +53,7 @@ class MainActivity : AppCompatActivity() {
     lateinit var powerImageView: PowerImageView
 
     companion object {
+        val RELEASE = "release_clightning_0.8.2"
 
         fun arch(): String {
             var abi: String?
@@ -78,7 +79,6 @@ class MainActivity : AppCompatActivity() {
 
         fun url(): String {
             val TAR_FILENAME = tarFilename()
-            val RELEASE = "release_clightning_0.8.2"
             return "https://github.com/lvaccaro/lightning_ndk/releases/download/${RELEASE}/${TAR_FILENAME}"
         }
     }
@@ -136,8 +136,16 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        if (isLightningRunning()) {
-            doAsync { getInfo() }
+
+        if (!File(rootDir(), "lightning-cli").exists()) {
+            findViewById<TextView>(R.id.statusText).text =
+                "Rub the lamp to download ${RELEASE} binaries."
+            return
+        }
+        if (!isLightningRunning()) {
+            findViewById<TextView>(R.id.statusText).text =
+                "Offline. Rub the lamp to start."
+            return
         }
     }
 
@@ -505,7 +513,11 @@ class MainActivity : AppCompatActivity() {
         doAsync {
             if (torEnabled) {
                 // start service on main thread
-                runOnUiThread { startTor() }
+                runOnUiThread {
+                    findViewById<TextView>(R.id.statusText).text =
+                        "Starting tor..."
+                    startTor()
+                }
                 // wait tor to be bootstrapped
                 if (!waitTorBootstrap()) {
                     runOnUiThread {
@@ -514,15 +526,18 @@ class MainActivity : AppCompatActivity() {
                             "Tor start failed",
                             Snackbar.LENGTH_LONG
                         ).show()
-                        powerImageView.off()
                         Log.d(TAG, "******** Tor run failed ********")
                         stopTorService()
+                        powerOff()
                     }
                     return@doAsync
                 }
             }
             // start service on main thread
-            runOnUiThread { startLightning() }
+            runOnUiThread {
+                findViewById<TextView>(R.id.statusText).text =
+                    "Starting lightning..."
+                startLightning() }
             // wait lightning to be bootstrapped
             if (!waitLightningBootstrap()) {
                 runOnUiThread {
