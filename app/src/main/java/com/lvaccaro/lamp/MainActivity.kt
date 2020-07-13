@@ -32,11 +32,13 @@ import com.lvaccaro.lamp.Channels.ChannelsActivity
 import com.lvaccaro.lamp.Channels.FundChannelFragment
 import com.lvaccaro.lamp.Services.LightningService
 import com.lvaccaro.lamp.Services.TorService
+import com.lvaccaro.lamp.util.Validator
 import org.jetbrains.anko.doAsync
 import org.json.JSONArray
 import org.json.JSONObject
 import java.lang.Exception
 import java.util.logging.Logger
+import kotlin.collections.ArrayList
 
 
 class MainActivity : AppCompatActivity() {
@@ -599,6 +601,12 @@ class MainActivity : AppCompatActivity() {
 
     fun scanned(text: String) {
         try {
+            Log.d(TAG, "******** Text from scan View *********\n${text}")
+            val result = isBitcoinPayment(text)
+            if(!result.isEmpty()){
+                doWithDrawCommand(result)
+                return
+            }
             val res = cli.exec(this@MainActivity, arrayOf("decodepay", text), true).toText()
             runOnUiThread { showDecodePay(text, res) }
         } catch (e: Exception) {
@@ -615,6 +623,43 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
+    }
+
+    private fun doWithDrawCommand(result: List<String>) {
+        val address = result[0]
+        var amount: String
+        if(result.size == 1) {
+            // The scan activity returned with only an address
+            //In this cases the app should be require the user interaction
+            //Maybe with a dialog
+            //FIXME (vincenzopalazzo) this is only to run without error en for a fist test
+            amount = "all"
+        }else{
+            //Also in this cases I will start the activity to require more information?
+            //For instance, feerate and minconf? Maybe with an advanced setting
+            amount = result[1]
+        }
+
+        var resultRPC = cli.exec(this.applicationContext, arrayOf("withdraw", address, amount), true).toJSONObject()
+        Log.d(TAG, resultRPC.toString())
+        showSnackBar(resultRPC.toString(), Snackbar.LENGTH_LONG)
+    }
+
+    private fun isBitcoinPayment(text: String): List<String> {
+        var result = ArrayList<String>();
+        //We know that we have two type of url that can arrive from QR
+        //This type are URL like bitcoin:ADDRESS?amount=10
+        //OR
+        //The other type, so the QR contains only the url
+        if(Validator.isBitcoinURL(text)){
+            Log.d(TAG, "***** Bitcoin URL *****")
+            val parserResult = Validator.doParseBitcoinURL(text)
+            result.addAll(parserResult)
+        }else if(Validator.isBitcoinAddress(text)){
+            Log.d(TAG, "***** Bitcoin Address *****")
+            result.add(text)
+        }
+        return result
     }
 
     fun showDecodePay(bolt11: String, decoded: String) {
@@ -696,6 +741,14 @@ class MainActivity : AppCompatActivity() {
                 .setCancelable(false)
                 .show()
         }
+    }
+
+    private fun showSnackBar(message: String, duration: Int){
+        Snackbar.make(findViewById(android.R.id.content), message, duration).show()
+    }
+
+    private fun showToast(message: String, duration: Int){
+        Toast.makeText(applicationContext, message, duration).show()
     }
 
     fun copyToClipboard(key: String, text: String) {
