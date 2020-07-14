@@ -1,6 +1,5 @@
 package com.lvaccaro.lamp.Channels
 
-import android.content.Intent
 import android.os.Bundle
 import android.view.*
 import android.widget.ProgressBar
@@ -12,7 +11,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.lvaccaro.lamp.LightningCli
 import com.lvaccaro.lamp.R
-import com.lvaccaro.lamp.ScanActivity
 import com.lvaccaro.lamp.toJSONObject
 import kotlinx.android.synthetic.main.activity_channels.*
 import org.jetbrains.anko.doAsync

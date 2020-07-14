@@ -14,10 +14,11 @@ import androidx.appcompat.app.AppCompatActivity
 import com.google.zxing.Result
 import me.dm7.barcodescanner.zxing.ZXingScannerView
 
+//TODO(vincenzopalazzo) look here if I can leave this without check on null value
 
 class ScanActivity : AppCompatActivity(), ZXingScannerView.ResultHandler {
     private val TAG = "ScanActivity"
-    var mScannerView: ZXingScannerView? = null
+    lateinit var mScannerView: ZXingScannerView
 
     public override fun onCreate(state: Bundle?) {
         super.onCreate(state)
@@ -26,8 +27,8 @@ class ScanActivity : AppCompatActivity(), ZXingScannerView.ResultHandler {
 
         mScannerView = ZXingScannerView(this)
         setContentView(mScannerView)
-        mScannerView?.setAutoFocus(true)
-        mScannerView?.setAspectTolerance(0.5f)
+        mScannerView.setAutoFocus(true)
+        mScannerView.setAspectTolerance(0.5f)
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
             checkSelfPermission(Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED
@@ -39,13 +40,18 @@ class ScanActivity : AppCompatActivity(), ZXingScannerView.ResultHandler {
 
     public override fun onResume() {
         super.onResume()
-        mScannerView?.setResultHandler(this) // Register ourselves as a handler for scan results.
-        mScannerView?.startCamera()
+        mScannerView.setResultHandler(this) // Register ourselves as a handler for scan results.
+        mScannerView.startCamera()
     }
 
     public override fun onPause() {
         super.onPause()
-        mScannerView?.stopCamera()
+        mScannerView.stopCamera()
+    }
+
+    override fun onStop() {
+        super.onStop()
+        mScannerView.stopCamera()
     }
 
     override fun onRequestPermissionsResult(
@@ -68,7 +74,7 @@ class ScanActivity : AppCompatActivity(), ZXingScannerView.ResultHandler {
         Log.d(TAG, rawResult?.text)
         val result = rawResult?.text ?: ""
         if (result.isEmpty()) {
-            mScannerView?.resumeCameraPreview(this);
+            mScannerView.resumeCameraPreview(this);
             return
         }
 

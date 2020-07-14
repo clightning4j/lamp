@@ -59,4 +59,6 @@
     <string name="id_fund_channel">Fund Channel</string>
     <string name="id_node_uri">Node URI</string>
     <string name="id_warning">Warning</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>
