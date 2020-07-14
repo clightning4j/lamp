@@ -369,7 +369,7 @@ class MainActivity : AppCompatActivity() {
                     visibility = View.VISIBLE
                 }
                 val delta = blockcount - blockheight
-                findViewById<TextView>(R.id.statusText).text = if (delta > 0) "Syncing blocks -${delta}" else "Online"
+                findViewById<TextView>(R.id.statusText).text = if (delta > 0) "Syncing blocks -${delta}" else ""
             }
             val qrcode = getQrCode(txt)
             runOnUiThread {
