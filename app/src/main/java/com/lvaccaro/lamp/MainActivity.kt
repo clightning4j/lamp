@@ -179,8 +179,26 @@ class MainActivity : AppCompatActivity() {
         return true
     }
 
+    override fun onPrepareOptionsMenu(menu: Menu?): Boolean {
+        if (!isLightningRunning()) {
+            menu?.apply {
+                removeItem(R.id.action_console)
+                removeItem(R.id.action_invoice)
+                removeItem(R.id.action_channels)
+                removeItem(R.id.action_withdraw)
+                removeItem(R.id.action_new_address)
+                removeItem(R.id.action_stop)
+            }
+        }
+        return super.onPrepareOptionsMenu(menu)
+    }
+
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
+            R.id.action_stop -> {
+                doAsync { stop() }
+                true
+            }
             R.id.action_settings -> {
                 startActivityForResult(Intent(this, SettingsActivity::class.java), 100)
                 true
@@ -305,11 +323,13 @@ class MainActivity : AppCompatActivity() {
         timer?.cancel()
         findViewById<TextView>(R.id.statusText).text = "Offline. Rub the lamp to turn on."
         findViewById<ImageView>(R.id.qrcodeImageView).visibility = View.GONE
+        invalidateOptionsMenu()
     }
 
     fun powerOn() {
         powerImageView.on()
         findViewById<TextView>(R.id.statusText).text = ""
+        invalidateOptionsMenu()
     }
 
     fun getInfo() {
