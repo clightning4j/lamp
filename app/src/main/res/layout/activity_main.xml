@@ -8,54 +8,50 @@
     tools:context=".MainActivity"
     android:id="@+id/content">
 
-    <LinearLayout
+    <RelativeLayout
+        android:id="@+id/relativeLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical">
-
-        <TextView
-            android:id="@+id/statusText"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_marginEnd="16dp"
-            android:textAlignment="center" />
+        android:layout_marginBottom="56dp">
 
         <com.lvaccaro.lamp.PowerImageView
             android:id="@+id/powerImageView"
             android:layout_width="200dp"
             android:layout_height="200dp"
-            android:layout_gravity="center_horizontal"
+            android:layout_centerInParent="true"
+            android:layout_gravity="center"
             android:background="@drawable/ic_lamp_off" />
 
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1" />
+        <ImageView
+            android:id="@+id/qrcodeImageView"
+            android:layout_width="200dp"
+            android:layout_height="200dp"
+            android:layout_centerInParent="true"
+            android:layout_gravity="center"
+            android:clickable="true"
+            android:visibility="gone"/>
 
-        <LinearLayout
+        <TextView
+            android:id="@+id/statusText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:padding="16dp"
-            android:layout_marginBottom="24dp">
+            android:layout_marginStart="32dp"
+            android:layout_marginEnd="32dp"
+            android:layout_below="@id/powerImageView"
+            android:textAlignment="center" />
 
-            <ImageView
-                android:id="@+id/qrcodeImageView"
-                android:layout_width="100dp"
-                android:layout_height="100dp"
-                android:layout_marginEnd="8dp"/>
+    </RelativeLayout>
 
-            <TextView
-                android:id="@+id/textViewQr"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:textSize="12sp" />
-        </LinearLayout>
-
-    </LinearLayout>
-
+    <TextView
+        android:id="@+id/textViewQr"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_marginStart="32dp"
+        android:layout_marginEnd="32dp"
+        android:textSize="12sp"
+        app:layout_anchor="@+id/relativeLayout"
+        app:layout_anchorGravity="bottom|center" />
 
     <ImageView
         android:id="@+id/arrowImageView"
@@ -64,7 +60,7 @@
         android:layout_gravity="bottom|center"
         android:tint="@color/colorPrimary"
         app:srcCompat="@drawable/ic_arrow"
-        android:visibility="gone"/>
+        android:visibility="gone" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/floating_action_button"

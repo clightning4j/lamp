@@ -304,6 +304,7 @@ class MainActivity : AppCompatActivity() {
         powerImageView.off()
         timer?.cancel()
         findViewById<TextView>(R.id.statusText).text = "Offline. Rub the lamp to turn on."
+        findViewById<ImageView>(R.id.qrcodeImageView).visibility = View.GONE
     }
 
     fun powerOn() {
@@ -352,7 +353,10 @@ class MainActivity : AppCompatActivity() {
             }
             val qrcode = getQrCode(txt)
             runOnUiThread {
-                findViewById<ImageView>(R.id.qrcodeImageView).setImageBitmap(qrcode)
+                findViewById<ImageView>(R.id.qrcodeImageView).apply {
+                    visibility = View.VISIBLE
+                    setImageBitmap(qrcode)
+                }
             }
         } catch (e: Exception) {
             log.info("---" + e.localizedMessage + "---")
@@ -563,7 +567,7 @@ class MainActivity : AppCompatActivity() {
                 return@doAsync
             }
             try {
-                LightningCli().exec(this@MainActivity, arrayOf("getinfo"), true).toJSONObject()
+                getInfo()
                 runOnUiThread { powerOn() }
             } catch (e: Exception) {
                 stop()
