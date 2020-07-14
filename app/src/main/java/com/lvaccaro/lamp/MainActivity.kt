@@ -32,6 +32,7 @@ import com.lvaccaro.lamp.Channels.ChannelsActivity
 import com.lvaccaro.lamp.Channels.FundChannelFragment
 import com.lvaccaro.lamp.Services.LightningService
 import com.lvaccaro.lamp.Services.TorService
+import com.lvaccaro.lamp.ui.send.SentToBitcoinFragment
 import com.lvaccaro.lamp.util.Validator
 import org.jetbrains.anko.doAsync
 import org.json.JSONArray
@@ -185,7 +186,7 @@ class MainActivity : AppCompatActivity() {
             }
             R.id.action_invoice -> {
                 val bottomSheetDialog = InvoiceBuildFragment()
-                bottomSheetDialog.show(getSupportFragmentManager(), "Custom Bottom Sheet")
+                bottomSheetDialog.show(supportFragmentManager, "Custom Bottom Sheet")
                 true
             }
             R.id.action_channels -> {
@@ -233,7 +234,7 @@ class MainActivity : AppCompatActivity() {
     fun isServiceRunning(name: String): Boolean {
         val manager = getSystemService(ACTIVITY_SERVICE) as ActivityManager
         for (service in manager.getRunningServices(Int.MAX_VALUE)) {
-            if (name.equals(service.service.getClassName())) {
+            if (name.equals(service.service.className)) {
                 return true
             }
         }
@@ -249,7 +250,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun onHistoryClick() {
-        HistoryFragment().show(getSupportFragmentManager(), "History dialog")
+        HistoryFragment().show(supportFragmentManager, "History dialog")
     }
 
     fun onPowerClick() {
@@ -353,9 +354,9 @@ class MainActivity : AppCompatActivity() {
     fun getQrCode(text: String): Bitmap {
         val SCALE = 16
         try {
-            val matrix = Encoder.encode(text, ErrorCorrectionLevel.M).getMatrix()
-            val height = matrix.getHeight() * SCALE
-            val width = matrix.getWidth() * SCALE
+            val matrix = Encoder.encode(text, ErrorCorrectionLevel.M).matrix
+            val height = matrix.height * SCALE
+            val width = matrix.width * SCALE
             val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
             for (x in 0 until width)
                 for (y in 0 until height) {
@@ -384,7 +385,7 @@ class MainActivity : AppCompatActivity() {
             val tarFile = File(dir(), tarFilename())
             doAsync {
                 uncompress(tarFile, rootDir())
-                tarFile.delete();
+                tarFile.delete()
                 runOnUiThread { powerOff() }
             }
         }
@@ -461,7 +462,7 @@ class MainActivity : AppCompatActivity() {
             }
             Thread.sleep(2000)
         }
-        return false;
+        return false
     }
 
     fun waitLightningBootstrap(): Boolean {
@@ -475,7 +476,7 @@ class MainActivity : AppCompatActivity() {
             }
             Thread.sleep(2000)
         }
-        return false;
+        return false
     }
 
     fun start() {
@@ -602,24 +603,37 @@ class MainActivity : AppCompatActivity() {
     fun scanned(text: String) {
         try {
             Log.d(TAG, "******** Text from scan View *********\n${text}")
-            val result = isBitcoinPayment(text)
-            if(!result.isEmpty()){
+            val result = isBitcoinPayment(text.trim())
+            /**
+             * TODO(vincenzopalazzo): This code in case of exception inside the if below we have the
+             * following print debug
+             *
+             * 2020-07-14 00:43:52.114 17279-17497/com.lvaccaro.lamp D/MainActivity: ***** Bitcoin Address *****
+             * 020-07-14 00:43:52.114 17279-17497/com.lvaccaro.lamp D/MainActivity: ***** RUNNING withdraw command *****
+             * 2020-07-14 00:43:52.115 17279-17497/com.lvaccaro.lamp D/MainActivity: ***** RUNNING connect command *****
+             *
+             * FIXME: Maybe we can use the Validator to se if is the invoice of the node url
+             * In some cases I noted that the invoice use the beach32 format,
+             * so it contains also the network flag.
+             * In the other head we know tha the node contains the @ and
+             * maybe if I'm not loasing somethings, the id has only numbers
+             */
+            if(result.isNotEmpty()){
+                Log.d(TAG, "***** RUNNING withdraw command *****")
                 doWithDrawCommand(result)
                 return
             }
+            Log.d(TAG, "***** RUNNING decodepay command *****")
             val res = cli.exec(this@MainActivity, arrayOf("decodepay", text), true).toText()
             runOnUiThread { showDecodePay(text, res) }
         } catch (e: Exception) {
             try {
+                Log.d(TAG, "***** RUNNING connect command *****")
                 val res = cli.exec(this@MainActivity, arrayOf("connect", text), true).toJSONObject()
                 runOnUiThread { showConnected(res["id"] as String) }
             } catch (e: Exception) {
                 runOnUiThread {
-                    Toast.makeText(
-                        this@MainActivity,
-                        e.localizedMessage,
-                        Toast.LENGTH_LONG
-                    ).show()
+                    showToast( e.localizedMessage, Toast.LENGTH_LONG)
                 }
             }
         }
@@ -627,30 +641,32 @@ class MainActivity : AppCompatActivity() {
 
     private fun doWithDrawCommand(result: List<String>) {
         val address = result[0]
-        var amount: String
+        lateinit var amount: String
         if(result.size == 1) {
-            // The scan activity returned with only an address
-            //In this cases the app should be require the user interaction
-            //Maybe with a dialog
-            //FIXME (vincenzopalazzo) this is only to run without error en for a fist test
+            //In this cases I set the amount to all and inside the dialog the used
+            //can modify the value (if want).
             amount = "all"
         }else{
+            //TODO (vincenzopalazzo) In this cases amount values should be convert in Satoshi
             //Also in this cases I will start the activity to require more information?
-            //For instance, feerate and minconf? Maybe with an advanced setting
+            //For instance, feerate and minconf? Maybe with an advanced setting with combobox
             amount = result[1]
         }
 
-        var resultRPC = cli.exec(this.applicationContext, arrayOf("withdraw", address, amount), true).toJSONObject()
-        Log.d(TAG, resultRPC.toString())
-        showSnackBar(resultRPC.toString(), Snackbar.LENGTH_LONG)
+        val sentToBitcoinDialog = SentToBitcoinFragment()
+        val bundle = Bundle()
+        bundle.putString("address", address)
+        bundle.putString("amount", amount)
+        sentToBitcoinDialog.arguments = bundle
+        sentToBitcoinDialog.show(supportFragmentManager, "SentToBitcoinFragment")
     }
 
     private fun isBitcoinPayment(text: String): List<String> {
-        var result = ArrayList<String>();
+        var result = ArrayList<String>()
         //We know that we have two type of url that can arrive from QR
-        //This type are URL like bitcoin:ADDRESS?amount=10
+        //This type are URL like bitcoin:ADDRESS?amount=10.00
         //OR
-        //The other type, so the QR contains only the url
+        //The other type, so the QR can contains only the address
         if(Validator.isBitcoinURL(text)){
             Log.d(TAG, "***** Bitcoin URL *****")
             val parserResult = Validator.doParseBitcoinURL(text)
@@ -718,7 +734,7 @@ class MainActivity : AppCompatActivity() {
             val textView = TextView(this)
             val qr = ImageView(this)
             val address = res["address"].toString()
-            textView.setText(address)
+            textView.text = address
             qr.setImageBitmap(getQrCode(address))
             val layoutParams = LinearLayout.LayoutParams(300, 300)
             layoutParams.gravity = Gravity.CENTER_HORIZONTAL
@@ -754,7 +770,7 @@ class MainActivity : AppCompatActivity() {
     fun copyToClipboard(key: String, text: String) {
         val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
         val clip: ClipData = ClipData.newPlainText(key, text)
-        clipboard.setPrimaryClip(clip)
+        clipboard.primaryClip = clip
         Toast.makeText(this, "Copied to clipboard", Toast.LENGTH_LONG).show()
     }
 }

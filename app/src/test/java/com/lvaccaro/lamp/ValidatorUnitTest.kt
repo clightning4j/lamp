@@ -48,9 +48,11 @@ class ValidatorUnitTest {
         val resultBitcoin = Validator.isBitcoinAddress("3EktnHQD7RiAE6uzMj2ZifT9YgRrkSgzQX")
         val resultTestnet = Validator.isBitcoinAddress("2N8ozcZ17d8ikcqzBRpjEh2Z3HTZ5F1myv4")
         val resultRegtest = Validator.isBitcoinAddress("2N1VQ42X2Fn6qq2jqK9uV95dgsh97UapKUG")
+        val resultRegtestTwo = Validator.isBitcoinAddress("2N6qSSMGjWhwynjxn7WC27j2tfWZFrUeRPW")
         assertEquals(true, resultBitcoin)
         assertEquals(true, resultTestnet)
         assertEquals(true, resultRegtest)
+        assertEquals(true, resultRegtestTwo)
     }
 
 
