@@ -92,11 +92,6 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        if (isLightningRunning()) {
-            setTheme(R.style.AppTheme)
-        } else {
-            setTheme(R.style.AppTheme_Night)
-        }
         setContentView(R.layout.activity_main)
 
         powerImageView = findViewById<PowerImageView>(R.id.powerImageView)
@@ -306,16 +301,12 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun powerOff() {
-        if (powerImageView.isOn())
-            recreate()
         powerImageView.off()
         timer?.cancel()
         findViewById<TextView>(R.id.statusText).text = "Offline. Rub the lamp to turn on."
     }
 
     fun powerOn() {
-        if (!powerImageView.isOn())
-            recreate()
         powerImageView.on()
         findViewById<TextView>(R.id.statusText).text = ""
     }

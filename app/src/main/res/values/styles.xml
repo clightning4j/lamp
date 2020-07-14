@@ -17,17 +17,6 @@
         <item name="windowNoTitle">true</item>
     </style>
 
-    <style name="AppTheme.Night" parent="Theme.AppCompat.DayNight.DarkActionBar">
-        <item name="colorPrimary">@color/background</item>
-        <item name="colorPrimaryDark">@color/background</item>
-        <item name="android:textColor">@color/light</item>
-        <item name="android:textColorPrimary">@color/light</item>
-        <item name="android:textColorSecondary">@color/light</item>
-        <item name="android:windowBackground">@color/background</item>
-        <item name="android:background">@color/background</item>
-        <item name="background">@color/background</item>
-    </style>
-
     <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 
