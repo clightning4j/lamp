@@ -650,8 +650,9 @@ class MainActivity : AppCompatActivity() {
             //can modify the value (if want).
             amount = "all"
         }else{
-            //TODO (vincenzopalazzo) In this cases amount values should be convert in Satoshi
-            //Also in this cases I will start the activity to require more information?
+            //TODO (vincenzopalazzo) In can choose inside the App setting the unit of bitcoin
+            //that the used want use inside the app.
+            //In addition, in this cases I will start the activity to require more information?
             //For instance, feerate and minconf? Maybe with an advanced setting with combobox
             amount = (result[LampKeys.AMOUNT_KEY]!!.toDouble() * 100000000).toLong().toString()
            // amount = result[LampKeys.AMOUNT_KEY]!!
