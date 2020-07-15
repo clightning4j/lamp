@@ -6,15 +6,17 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.CheckBox
 import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.DialogFragment
 import com.google.android.material.snackbar.Snackbar
+import com.google.android.material.textfield.TextInputEditText
 import com.lvaccaro.lamp.LightningCli
 import com.lvaccaro.lamp.R
 import com.lvaccaro.lamp.toJSONObject
+import com.lvaccaro.lamp.util.Validator
 import org.json.JSONObject
-import java.lang.Exception
 
 
 /**
@@ -27,7 +29,9 @@ class SentToBitcoinFragment : DialogFragment() {
     }
 
     lateinit var addressTextView: TextView
-    lateinit var amoutnTextView: TextView
+    lateinit var amountEditText: TextInputEditText
+    lateinit var labelTextView: TextView
+    lateinit var sendAllaCheckBox: CheckBox
     lateinit var cli: LightningCli
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -47,25 +51,36 @@ class SentToBitcoinFragment : DialogFragment() {
 
         addressTextView = view?.findViewById(R.id.textview_address_btc)!!
         addressTextView.text = arguments?.getString("address")
-        amoutnTextView = view?.findViewById(R.id.textview_amount_btc)!!
-        amoutnTextView.text = arguments?.getString("amount")
+        amountEditText = view?.findViewById(R.id.edit_text_amount)!!
+        amountEditText.setText(arguments?.getString("amount"))
+        sendAllaCheckBox = view?.findViewById(R.id.check_send_all)!!
+        sendAllaCheckBox.isChecked = amountEditText.text.toString().equals("all")
 
         val buttonSendBtc = view?.findViewById<Button>(R.id.button_send_bitcoin)!!
         buttonSendBtc.setOnClickListener{sendBitcoinToAddress()}
+        val validAddress = Validator.isCorrectNetwork(cli,
+            activity?.applicationContext!!, addressTextView.text.toString());
+        if(validAddress != null){
+            amountEditText.error = "ERROR FOUND"
+            buttonSendBtc.isEnabled = false
+            showSnackBar(validAddress, Snackbar.LENGTH_LONG)
+        }
     }
 
     fun sendBitcoinToAddress(){
         lateinit var resultRPC: JSONObject
         try {
-            resultRPC = cli.exec( context!!, arrayOf("withdraw", addressTextView.text.toString(), amoutnTextView.text.toString()), true).toJSONObject()
+            resultRPC = cli.exec( context!!, arrayOf("withdraw", addressTextView.text.toString(),  amountEditText.text.toString()), true).toJSONObject()
             Log.d(TAG, resultRPC.toString())
             // TODO (vincenzopalazzo): add button copy to Snackbar
             showSnackBar(resultRPC["txid"].toString(), Snackbar.LENGTH_LONG)
+            dismiss()
         }catch (ex: Exception){
             showToast(ex.localizedMessage, Toast.LENGTH_LONG)
-            return
-        }finally {
             dismiss()
+            ex.printStackTrace()
+        }finally {
+
         }
     }
 

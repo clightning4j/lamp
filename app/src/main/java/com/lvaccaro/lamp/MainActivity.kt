@@ -23,6 +23,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.core.app.ActivityCompat
 import androidx.core.net.toUri
 import androidx.preference.PreferenceManager
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
 import com.google.zxing.WriterException
@@ -33,13 +34,19 @@ import com.lvaccaro.lamp.Channels.FundChannelFragment
 import com.lvaccaro.lamp.Services.LightningService
 import com.lvaccaro.lamp.Services.TorService
 import com.lvaccaro.lamp.ui.send.SentToBitcoinFragment
+import com.lvaccaro.lamp.util.LampKeys
 import com.lvaccaro.lamp.util.Validator
 import org.jetbrains.anko.doAsync
 import org.json.JSONArray
 import org.json.JSONObject
 import java.lang.Exception
+import java.math.BigDecimal
+import java.math.BigInteger
+import java.util.*
 import java.util.logging.Logger
 import kotlin.collections.ArrayList
+import kotlin.collections.HashMap
+import kotlin.math.roundToLong
 
 
 class MainActivity : AppCompatActivity() {
@@ -587,13 +594,8 @@ class MainActivity : AppCompatActivity() {
             val res = LightningCli().exec(this, arrayOf("stop"))
             log.info("---" + res.toString() + "---")
         } catch (e: Exception) {
-            Snackbar.make(
-                findViewById(android.R.id.content),
-                "Error: ${e.localizedMessage}",
-                Snackbar.LENGTH_LONG)
-                .setBackgroundTint(Color.RED)
-                .show()
-            log.info(e.localizedMessage)
+            showSnackBar("Error: ${e.localizedMessage}", Snackbar.LENGTH_LONG)
+            log.warning(e.localizedMessage)
             e.printStackTrace()
         }
         stopLightningService()
@@ -627,6 +629,7 @@ class MainActivity : AppCompatActivity() {
             val res = cli.exec(this@MainActivity, arrayOf("decodepay", text), true).toText()
             runOnUiThread { showDecodePay(text, res) }
         } catch (e: Exception) {
+            e.printStackTrace()
             try {
                 Log.d(TAG, "***** RUNNING connect command *****")
                 val res = cli.exec(this@MainActivity, arrayOf("connect", text), true).toJSONObject()
@@ -639,10 +642,10 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun doWithDrawCommand(result: List<String>) {
-        val address = result[0]
+    private fun doWithDrawCommand(result: Map<String, String>) {
+        val address = result[LampKeys.ADDRESS_KEY]
         lateinit var amount: String
-        if(result.size == 1) {
+        if(!result.containsKey(LampKeys.AMOUNT_KEY)) {
             //In this cases I set the amount to all and inside the dialog the used
             //can modify the value (if want).
             amount = "all"
@@ -650,7 +653,8 @@ class MainActivity : AppCompatActivity() {
             //TODO (vincenzopalazzo) In this cases amount values should be convert in Satoshi
             //Also in this cases I will start the activity to require more information?
             //For instance, feerate and minconf? Maybe with an advanced setting with combobox
-            amount = result[1]
+            amount = (result[LampKeys.AMOUNT_KEY]!!.toDouble() * 100000000).toLong().toString()
+           // amount = result[LampKeys.AMOUNT_KEY]!!
         }
 
         val sentToBitcoinDialog = SentToBitcoinFragment()
@@ -658,22 +662,23 @@ class MainActivity : AppCompatActivity() {
         bundle.putString("address", address)
         bundle.putString("amount", amount)
         sentToBitcoinDialog.arguments = bundle
-        sentToBitcoinDialog.show(supportFragmentManager, "SentToBitcoinFragment")
+        val fragmentTransaction = supportFragmentManager.beginTransaction()
+        fragmentTransaction.add(sentToBitcoinDialog, "SentToBitcoinFragment")
+        fragmentTransaction.commitAllowingStateLoss()
     }
 
-    private fun isBitcoinPayment(text: String): List<String> {
-        var result = ArrayList<String>()
+    private fun isBitcoinPayment(text: String): Map<String, String> {
+        var result = HashMap<String, String>()
         //We know that we have two type of url that can arrive from QR
         //This type are URL like bitcoin:ADDRESS?amount=10.00
         //OR
         //The other type, so the QR can contains only the address
-        if(Validator.isBitcoinURL(text)){
-            Log.d(TAG, "***** Bitcoin URL *****")
-            val parserResult = Validator.doParseBitcoinURL(text)
-            result.addAll(parserResult)
-        }else if(Validator.isBitcoinAddress(text)){
+        if(Validator.isBitcoinAddress(text)){
             Log.d(TAG, "***** Bitcoin Address *****")
-            result.add(text)
+            result.put(LampKeys.ADDRESS_KEY, text)
+        }else if(Validator.isBitcoinURL(text)){
+            Log.d(TAG, "***** Bitcoin URL *****")
+            result = Validator.doParseBitcoinURL(text)
         }
         return result
     }

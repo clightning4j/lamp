@@ -1,7 +1,10 @@
 package com.lvaccaro.lamp.util
 
-import android.util.Log
-import java.util.*
+import android.content.Context
+import com.lvaccaro.lamp.LightningCli
+import com.lvaccaro.lamp.toJSONObject
+import com.sandro.bitcoinpaymenturi.BitcoinPaymentURI
+import java.lang.Exception
 import kotlin.collections.ArrayList
 
 /**
@@ -15,13 +18,13 @@ class Validator{
 
         fun isBitcoinURL(text: String): Boolean{
             val result = doParseBitcoinURL(text)
-            if(result.size == 2) return true //This is the cases it is the bitcoin URL
+            if(result.isNotEmpty()) return true //This is the cases it is the bitcoin URL
             return false
         }
 
         fun isBitcoinAddress(text: String): Boolean {
             //Support address P2PKH, P2MS && P2SH, P2WPKH, P2WSH
-            return isP2PKH(text) || isP2SH(text) || isWitness(text);
+            return isP2PKH(text) || isP2SH(text) || isWitness(text)
         }
 
         private fun isP2SH(text: String): Boolean {
@@ -51,48 +54,46 @@ class Validator{
             return (mainet ||testnet) && text.length == 34
         }
 
-        /**
-         * The result contains the following information, with the following order
-         * Index 0: Contains address
-         * Index 1: Contains amount. This value exist if the string is an bitcoin url.
-         * Index n: I'm missing somethings? FIXME: Double check
-         *
-         * If the string in incorrect, the result list is empty.
-         */
-        fun doParseBitcoinURL(url: String) : List<String>{
-            val result = ArrayList<String>()
-            //In this cases the url contains the follow patter
-            //bitcoin:ADDRESS?=amount=VALUE
-            var tokenizer = StringTokenizer(url, ":")
-            // Match with the pattern STRING:STRING
-            if(tokenizer.countTokens() == 2){
-                //The variable tmp will contain all trash (not util) information
-                var tmp = tokenizer.nextToken();
-                Log.d(TAG, "**** Bitcoin protocol: ${tmp} *********")
-                val queryString = tokenizer.nextToken()
-                Log.d(TAG, "**** bitcoin protocol: ${queryString} *********")
-                // Reassign the tokenizer variable a new token object
-                tokenizer = StringTokenizer(queryString, "?")
-                // Match with the pattern STRING?STRING
-                if(tokenizer.countTokens() == 2){
-                    var address =  tokenizer.nextToken();
-                    Log.d(TAG, "******** Address inside URL ${address} ********")
-                    result.add(address)
-                    //Parsing the last part of URL
-                    tmp = tokenizer.nextToken()
-                    Log.d(TAG, "******** Amount request inside URL ${tmp} ********")
-                    tokenizer = StringTokenizer(tmp, "=");
-                    // Match with the pattern KEY=VALUE
-                    if (tokenizer.countTokens() == 2){
-                        //amount string
-                        tmp = tokenizer.nextToken()
-                        val amount = tokenizer.nextToken();
-                        Log.d(TAG, "******** Amount inside URL ${address} ********")
-                        result.add(amount)
-                    }
-                }
+        fun doParseBitcoinURL(url: String) : HashMap<String, String>{
+            val result = HashMap<String, String>()
+            val bitcoinPaymentURI = BitcoinPaymentURI.parse(url)
+            result.put(LampKeys.ADDRESS_KEY, bitcoinPaymentURI.address)
+            val ammount = bitcoinPaymentURI.amount?.toString()
+            if (ammount != null) {
+                result.put(LampKeys.AMOUNT_KEY, ammount)
+            }
+            val label = bitcoinPaymentURI.label
+            if (label != null) {
+                result.put(LampKeys.LABEL_KEY, label)
+            }
+            val message = bitcoinPaymentURI.message
+            if (message != null) {
+                result.put(LampKeys.MESSAGE_KEY, message)
             }
             return result
         }
+
+        fun isCorrectNetwork(cli: LightningCli, context: Context, address: String): String?{
+            try{
+                val rpcResponse = cli.exec(context, arrayOf("txprepare", address, "10000"), true).toJSONObject()
+                return null //Address correct
+            }catch (ex: Exception){
+                //Address not correct
+                if(ex.localizedMessage.contains("Cannot afford transaction")){
+                    return null
+                }
+                return ex.localizedMessage
+            }
+        }
+
+        //TODO (vincenzopalazzo) implement it
+        //We know that the bolt start with ln and after with the network
+        //for exampleL bc: for bitcoin and tb for testnet bitcoin
+        fun isBolt11(string: String): Boolean{ return false }
+
+        //TODO (vincenzopalazzo) implement it
+        //It contains a @ and sometime a :
+        //How is convention of the url?
+        fun isLightningNodURI(string: String): Boolean {return false}
     }
 }
