@@ -1,5 +1,6 @@
 package com.lvaccaro.lamp
 
+import com.lvaccaro.lamp.util.LampKeys
 import com.lvaccaro.lamp.util.Validator
 import org.junit.Test
 
@@ -13,7 +14,7 @@ import org.junit.Assert.*
  */
 class ValidatorUnitTest {
 
-    @Test
+    @Test(expected = IllegalStateException::class)
     fun validateBitcoinURL_testOne() {
         val resultParsing = Validator.doParseBitcoinURL("")
         assertEquals(0, resultParsing.size)
@@ -21,13 +22,35 @@ class ValidatorUnitTest {
 
     @Test
     fun validateBitcoinURL_testTwo() {
-        val resultParsing = Validator.doParseBitcoinURL("bitcoin:2NFmhFFEbR2ruAboRZ8gxCeDez81c3ByZeV?amount=102.00000000")
-        assertEquals(2, resultParsing.size)
-        assertEquals("2NFmhFFEbR2ruAboRZ8gxCeDez81c3ByZeV", resultParsing[0])
-        assertEquals("102.00000000", resultParsing[1])
+        val resultParsingOne = Validator.doParseBitcoinURL("bitcoin:2NFmhFFEbR2ruAboRZ8gxCeDez81c3ByZeV?amount=102.00000000")
+        assertEquals(2, resultParsingOne.size)
+        assertEquals("2NFmhFFEbR2ruAboRZ8gxCeDez81c3ByZeV", resultParsingOne[LampKeys.ADDRESS_KEY])
+        assertEquals("102.0", resultParsingOne[LampKeys.AMOUNT_KEY])
+
+        val resultParsingTwo = Validator.doParseBitcoinURL("bitcoin:175tWpb8K1S7NmH4Zx6rewF9WQrcZv245W")
+        assertEquals(1, resultParsingTwo.size)
+        assertEquals("175tWpb8K1S7NmH4Zx6rewF9WQrcZv245W", resultParsingTwo.get(LampKeys.ADDRESS_KEY))
+
+        val resultParsingThree = Validator.doParseBitcoinURL("bitcoin:175tWpb8K1S7NmH4Zx6rewF9WQrcZv245W?label=Luke-Jr")
+        assertEquals(2, resultParsingThree.size)
+        assertEquals("175tWpb8K1S7NmH4Zx6rewF9WQrcZv245W", resultParsingThree.get(LampKeys.ADDRESS_KEY))
+        assertEquals("Luke-Jr", resultParsingThree[LampKeys.LABEL_KEY])
+
+        val resultParsingFour = Validator.doParseBitcoinURL("bitcoin:175tWpb8K1S7NmH4Zx6rewF9WQrcZv245W?amount=20.3&label=Luke-Jr")
+        assertEquals(3, resultParsingFour.size)
+        assertEquals("175tWpb8K1S7NmH4Zx6rewF9WQrcZv245W", resultParsingFour.get(LampKeys.ADDRESS_KEY))
+        assertEquals("20.3", resultParsingFour[LampKeys.AMOUNT_KEY])
+        assertEquals("Luke-Jr", resultParsingFour[LampKeys.LABEL_KEY])
+
+        val resultParsingFive = Validator.doParseBitcoinURL("bitcoin:175tWpb8K1S7NmH4Zx6rewF9WQrcZv245W?amount=50&label=Luke-Jr&message=Donation%20for%20project%20xyz\n")
+        assertEquals(4, resultParsingFive.size)
+        assertEquals("175tWpb8K1S7NmH4Zx6rewF9WQrcZv245W", resultParsingFive.get(LampKeys.ADDRESS_KEY))
+        assertEquals("50.0", resultParsingFive[LampKeys.AMOUNT_KEY])
+        assertEquals("Luke-Jr", resultParsingFive[LampKeys.LABEL_KEY])
+        assertEquals("Donation for project xyz", resultParsingFive[LampKeys.MESSAGE_KEY]?.trim())
     }
 
-    @Test
+    @Test(expected = IllegalStateException::class)
     fun validateBitcoinURL_testThree() {
         val resultParsing = Validator.doParseBitcoinURL("2NFmhFFEbR2ruAboRZ8gxCeDez81c3ByZeV")
         assertEquals(0, resultParsing.size)
