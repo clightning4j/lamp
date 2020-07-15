@@ -687,7 +687,9 @@ class MainActivity : UriResultActivity() {
             //can modify the value (if want).
             amount = "all"
         }else{
-            //Also in this cases I will start the activity to require more information?
+            //TODO (vincenzopalazzo) In can choose inside the App setting the unit of bitcoin
+            //that the used want use inside the app.
+            //In addition, in this cases I will start the activity to require more information?
             //For instance, feerate and minconf? Maybe with an advanced setting with combobox
             amount = result[1]
         }
