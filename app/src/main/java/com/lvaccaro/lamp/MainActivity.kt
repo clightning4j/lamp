@@ -323,12 +323,17 @@ class MainActivity : AppCompatActivity() {
         timer?.cancel()
         findViewById<TextView>(R.id.statusText).text = "Offline. Rub the lamp to turn on."
         findViewById<ImageView>(R.id.qrcodeImageView).visibility = View.GONE
+        findViewById<TextView>(R.id.textViewQr).visibility = View.GONE
+        findViewById<ImageView>(R.id.arrowImageView).visibility = View.GONE
+        findViewById<FloatingActionButton>(R.id.floating_action_button).hide()
         invalidateOptionsMenu()
     }
 
     fun powerOn() {
         powerImageView.on()
-        findViewById<TextView>(R.id.statusText).text = ""
+        findViewById<ImageView>(R.id.arrowImageView).visibility = View.VISIBLE
+        findViewById<TextView>(R.id.textViewQr).visibility = View.VISIBLE
+        findViewById<FloatingActionButton>(R.id.floating_action_button).show()
         invalidateOptionsMenu()
     }
 
