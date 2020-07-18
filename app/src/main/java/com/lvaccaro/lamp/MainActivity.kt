@@ -41,16 +41,14 @@ import java.util.logging.Logger
 import kotlin.concurrent.schedule
 
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : UriResultActivity() {
 
     val REQUEST_SCAN = 102
     val REQUEST_FUNDCHANNEL = 103
     val WRITE_REQUEST_CODE = 101
     val log = Logger.getLogger(MainActivity::class.java.name)
-    val TAG = "MainActivity"
     var downloadID = 0L
     var downloadCertID = 0L
-    val cli = LightningCli()
     lateinit var downloadmanager: DownloadManager
     lateinit var powerImageView: PowerImageView
     var timer: Timer? = null
@@ -221,7 +219,7 @@ class MainActivity : AppCompatActivity() {
                 val clip = clipboard.primaryClip
                 val item = clip?.getItemAt(0)
                 val text = item?.text.toString()
-                doAsync { scanned(text) }
+                doAsync { parse(text) }
                 true
             }
             else -> super.onOptionsItemSelected(item)
@@ -232,7 +230,7 @@ class MainActivity : AppCompatActivity() {
         if (requestCode == REQUEST_SCAN && resultCode == Activity.RESULT_OK) {
             val result = data?.getStringExtra("text")
             if (result != null) {
-                doAsync { scanned(result) }
+                doAsync { parse(result) }
             } else {
                 Snackbar.make(
                     findViewById(android.R.id.content),
@@ -632,72 +630,6 @@ class MainActivity : AppCompatActivity() {
             stopTorService()
             powerOff()
         }
-    }
-
-    fun scanned(text: String) {
-        try {
-            val res = cli.exec(this@MainActivity, arrayOf("decodepay", text), true).toText()
-            runOnUiThread { showDecodePay(text, res) }
-        } catch (e: Exception) {
-            try {
-                val res = cli.exec(this@MainActivity, arrayOf("connect", text), true).toJSONObject()
-                runOnUiThread { showConnected(res["id"] as String) }
-            } catch (e: Exception) {
-                runOnUiThread {
-                    Toast.makeText(
-                        this@MainActivity,
-                        e.localizedMessage,
-                        Toast.LENGTH_LONG
-                    ).show()
-                }
-            }
-        }
-    }
-
-    fun showDecodePay(bolt11: String, decoded: String) {
-        AlertDialog.Builder(this@MainActivity)
-            .setTitle("decodepay")
-            .setMessage(decoded.toString())
-            .setCancelable(true)
-            .setPositiveButton("pay") { dialog, which ->
-                try {
-                    cli.exec(this@MainActivity, arrayOf("pay", bolt11), true)
-                        .toJSONObject()
-                    runOnUiThread {
-                        Toast.makeText(
-                            this@MainActivity,
-                            "Invoice paid",
-                            Toast.LENGTH_LONG
-                        ).show()
-                    }
-                } catch (e: Exception) {
-                    runOnUiThread {
-                        Toast.makeText(
-                            this@MainActivity,
-                            e.localizedMessage,
-                            Toast.LENGTH_LONG
-                        ).show()
-                    }
-                }
-            }
-            .setNegativeButton("cancel") { dialog, which -> }
-            .show()
-    }
-
-    fun showConnected(id: String) {
-        AlertDialog.Builder(this@MainActivity)
-            .setTitle("connect")
-            .setMessage(id)
-            .setPositiveButton("fund channel") { dialog, which ->
-                val bottomSheetDialog =
-                    FundChannelFragment()
-                val args = Bundle()
-                args.putString("uri", id)
-                bottomSheetDialog.arguments = args
-                bottomSheetDialog.show(supportFragmentManager, "Fund channel")
-            }
-            .setNegativeButton("cancel") { dialog, which -> }
-            .show()
     }
 
     fun generateNewAddress() {
