@@ -32,12 +32,14 @@ open class UriResultActivity() : AppCompatActivity() {
         }
 
         try {
-            cli.exec(this, arrayOf("withdraw", text), true).toJSONObject()
-            // withdraw fails due by missing satoshi field
+            // pre-parsing text to avoid multi strings text
+            val address = text.split(" ").first()
+            cli.exec(this, arrayOf("withdraw", address), true).toJSONObject()
             return;
         } catch (e: Exception) {
             val res = JSONObject(e.localizedMessage)
             val message = res["message"] as String
+            // withdraw fails due by missing satoshi field
             if (message == "missing required parameter: satoshi") {
                 runOnUiThread { showWithdraw(text) }
                 return
