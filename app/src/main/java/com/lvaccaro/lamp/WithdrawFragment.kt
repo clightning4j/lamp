@@ -26,6 +26,8 @@ class WithdrawFragment: BottomSheetDialogFragment() {
         savedInstanceState: Bundle?
     ): View? {
         val view = inflater.inflate(R.layout.fragment_withdraw, container, false)
+        val address = arguments?.getString("address")
+        view.findViewById<TextView>(R.id.addressText).text = address ?: ""
         view.findViewById<Button>(R.id.confirmButton).setOnClickListener {
             val satoshi = view.findViewById<TextView>(R.id.satoshiText).text.toString()
             val address = view.findViewById<TextView>(R.id.addressText).text.toString()

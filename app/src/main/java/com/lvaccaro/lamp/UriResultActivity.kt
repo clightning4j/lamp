@@ -6,6 +6,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.lvaccaro.lamp.Channels.FundChannelFragment
+import org.json.JSONObject
 import java.lang.Exception
 
 open class UriResultActivity() : AppCompatActivity() {
@@ -17,7 +18,7 @@ open class UriResultActivity() : AppCompatActivity() {
         try {
             val res = cli.exec(this, arrayOf("decodepay", text), true).toText()
             runOnUiThread { showDecodePay(text, res) }
-            return;
+            return
         } catch (e: Exception) {
             Log.d(TAG, "decodepay: ${e.localizedMessage}")
         }
@@ -25,9 +26,23 @@ open class UriResultActivity() : AppCompatActivity() {
         try {
             val res = cli.exec(this, arrayOf("connect", text), true).toJSONObject()
             runOnUiThread { showConnect(res["id"] as String) }
-            return;
+            return
         } catch (e: Exception) {
             Log.d(TAG, "connect: ${e.localizedMessage}")
+        }
+
+        try {
+            cli.exec(this, arrayOf("withdraw", text), true).toJSONObject()
+            // withdraw fails due by missing satoshi field
+            return;
+        } catch (e: Exception) {
+            val res = JSONObject(e.localizedMessage)
+            val message = res["message"] as String
+            if (message == "missing required parameter: satoshi") {
+                runOnUiThread { showWithdraw(text) }
+                return
+            }
+            Log.d(TAG, "withdraw: ${e.localizedMessage}")
         }
 
         runOnUiThread {
@@ -83,5 +98,13 @@ open class UriResultActivity() : AppCompatActivity() {
             }
             .setNegativeButton("cancel") { _, _ -> }
             .show()
+    }
+
+    private fun showWithdraw(address: String?) {
+        val bottomSheetDialog = WithdrawFragment()
+        val bundle = Bundle()
+        bundle.putString("address", address ?: "")
+        bottomSheetDialog.arguments = bundle
+        bottomSheetDialog.show(supportFragmentManager, "WithdrawFragment")
     }
 }
