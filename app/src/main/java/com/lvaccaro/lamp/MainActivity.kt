@@ -46,6 +46,7 @@ import java.util.*
 import java.util.logging.Logger
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
+import kotlin.concurrent.schedule
 import kotlin.math.roundToLong
 
 
@@ -679,8 +680,8 @@ class MainActivity : UriResultActivity() {
         }
     }
 
-    private fun doWithDrawCommand(result: List<String>) {
-        val address = result[0]
+    private fun doWithDrawCommand(result: Map<String, String>) {
+        val address = result[LampKeys.ADDRESS_KEY]
         lateinit var amount: String
         if(result.size == 1) {
             //In this cases I set the amount to all and inside the dialog the used
@@ -691,7 +692,7 @@ class MainActivity : UriResultActivity() {
             //that the used want use inside the app.
             //In addition, in this cases I will start the activity to require more information?
             //For instance, feerate and minconf? Maybe with an advanced setting with combobox
-            amount = result[1]
+            amount = result[LampKeys.AMOUNT_KEY].toString()
         }
 
         val sentToBitcoinDialog = SentToBitcoinFragment()
@@ -702,8 +703,8 @@ class MainActivity : UriResultActivity() {
         sentToBitcoinDialog.show(supportFragmentManager, "SentToBitcoinFragment")
     }
 
-    private fun isBitcoinPayment(text: String): List<String> {
-        var result = ArrayList<String>()
+    private fun isBitcoinPayment(text: String): Map<String, String> {
+        var result = HashMap<String, String>()
         //We know that we have two type of url that can arrive from QR
         //This type are URL like bitcoin:ADDRESS?amount=10
         //OR

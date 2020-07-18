@@ -6,6 +6,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.lvaccaro.lamp.Channels.FundChannelFragment
+import com.lvaccaro.lamp.util.Validator
 import org.json.JSONObject
 import java.lang.Exception
 
@@ -15,6 +16,7 @@ open class UriResultActivity() : AppCompatActivity() {
     val TAG = "UriResultActivity"
 
     fun parse(text: String) {
+
         try {
             val res = cli.exec(this, arrayOf("decodepay", text), true).toText()
             runOnUiThread { showDecodePay(text, res) }
@@ -31,11 +33,13 @@ open class UriResultActivity() : AppCompatActivity() {
             Log.d(TAG, "connect: ${e.localizedMessage}")
         }
 
+        //TODO(vincenzopalazzo) this function not work with the URI like the string below
+        //bitcoin:tb1qzy5mqyqpl6p67x8psu2phxwp0e7lz79w47e5ad
         try {
             // pre-parsing text to avoid multi strings text
             val address = text.split(" ").first()
             cli.exec(this, arrayOf("withdraw", address), true).toJSONObject()
-            return;
+            return
         } catch (e: Exception) {
             val res = JSONObject(e.localizedMessage)
             val message = res["message"] as String
