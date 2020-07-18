@@ -133,6 +133,13 @@ class MainActivity : UriResultActivity() {
                 )
             }
         }
+
+        if (Intent.ACTION_VIEW == intent.action) {
+            if (arrayListOf<String>("bitcoin", "lightning").contains(intent.data.scheme)) {
+                val text = intent.data.toString().split(":").last()
+                parse(text)
+            }
+        }
     }
 
     override fun onResume() {
