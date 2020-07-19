@@ -680,6 +680,48 @@ class MainActivity : UriResultActivity() {
         }
     }
 
+    private fun isBitcoinPayment(text: String): Map<String, String> {
+        var result = HashMap<String, String>()
+        //We know that we have two type of url that can arrive from QR
+        //This type are URL like bitcoin:ADDRESS?amount=10.00
+        //OR
+        //The other type, so the QR can contains only the address
+        if(Validator.isBitcoinAddress(text)){
+            Log.d(TAG, "***** Bitcoin Address *****")
+            result.put(LampKeys.ADDRESS_KEY, text)
+        }else if(Validator.isBitcoinURL(text)){
+            Log.d(TAG, "***** Bitcoin URL *****")
+            result = Validator.doParseBitcoinURL(text)
+        }
+        return result
+    }
+
+    private fun doWithDrawCommand(result: Map<String, String>) {
+        val address = result[LampKeys.ADDRESS_KEY]
+        lateinit var amount: String
+        if(!result.containsKey(LampKeys.AMOUNT_KEY)) {
+            //In this cases I set the amount to all and inside the dialog the used
+            //can modify the value (if want).
+            amount = "all"
+        }else{
+            //TODO (vincenzopalazzo) In can choose inside the App setting the unit of bitcoin
+            //that the used want use inside the app.
+            //In addition, in this cases I will start the activity to require more information?
+            //For instance, feerate and minconf? Maybe with an advanced setting with combobox
+            amount = (result[LampKeys.AMOUNT_KEY]!!.toDouble() * 100000000).toLong().toString()
+            // amount = result[LampKeys.AMOUNT_KEY]!!
+        }
+
+        val sentToBitcoinDialog = SentToBitcoinFragment()
+        val bundle = Bundle()
+        bundle.putString("address", address)
+        bundle.putString("amount", amount)
+        sentToBitcoinDialog.arguments = bundle
+        val fragmentTransaction = supportFragmentManager.beginTransaction()
+        fragmentTransaction.add(sentToBitcoinDialog, "SentToBitcoinFragment")
+        fragmentTransaction.commitAllowingStateLoss()
+    }
+
     fun showDecodePay(bolt11: String, decoded: String) {
         AlertDialog.Builder(this@MainActivity)
             .setTitle("decodepay")
