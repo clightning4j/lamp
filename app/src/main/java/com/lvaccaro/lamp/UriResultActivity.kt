@@ -6,6 +6,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.lvaccaro.lamp.Channels.FundChannelFragment
+import com.lvaccaro.lamp.util.LampKeys
 import com.lvaccaro.lamp.util.Validator
 import org.json.JSONObject
 import java.lang.Exception
@@ -17,6 +18,45 @@ open class UriResultActivity() : AppCompatActivity() {
 
     fun parse(text: String) {
 
+        // Check is if a Bitcoin payment
+        val isBitcoinAddress = Validator.isBitcoinAddress(text)
+        val isBitcoinURI = Validator.isBitcoinURL(text)
+        val isBoltPayment = Validator.isBolt11(text)
+        val isURINodeConnect = Validator.isLightningNodURI(text)
+        lateinit var resultCommand: String
+        if (isBitcoinAddress) {
+            Log.d(TAG, "*** bitcoin address")
+            resultCommand = runCommandCLightning(LampKeys.WITHDRAW_COMMAND, text)
+            runOnUiThread { showWithdraw(resultCommand) }
+        } else if (isBitcoinURI) {
+            Log.d(TAG, "*** Bitcoin URI")
+            val result = Validator.doParseBitcoinURL(text)
+            resultCommand = runCommandCLightning(
+                LampKeys.WITHDRAW_COMMAND,
+                result[LampKeys.ADDRESS_KEY].toString(),
+                result[LampKeys.AMOUNT_KEY].toString()
+            )
+            //TODO create the method to see this element
+        } else if (isBoltPayment) {
+            Log.d(TAG, "*** Bolt payment")
+            resultCommand = runCommandCLightning(LampKeys.DECODEPAY_COMMAND, text)
+            runOnUiThread { showDecodePay(text, resultCommand) }
+        } else if (isURINodeConnect) {
+            Log.d(TAG, "*** Node URI connect")
+            resultCommand = runCommandCLightning(LampKeys.CONNECT_COMMAND, text)
+            runOnUiThread { showConnect(resultCommand) }
+        } else {
+            resultCommand = "No action found"
+        }
+
+        runOnUiThread {
+            showToastMessage(
+                resultCommand,
+                Toast.LENGTH_LONG
+            )
+        }
+
+/*
         try {
             val res = cli.exec(this, arrayOf("decodepay", text), true).toText()
             runOnUiThread { showDecodePay(text, res) }
@@ -49,15 +89,26 @@ open class UriResultActivity() : AppCompatActivity() {
                 return
             }
             Log.d(TAG, "withdraw: ${e.localizedMessage}")
-        }
+        }*/
+    }
 
-        runOnUiThread {
-            Toast.makeText(
-                this,
-                "No action found",
-                Toast.LENGTH_LONG
-            ).show()
+    fun runCommandCLightning(command: String, vararg parameter: String): String {
+        try {
+            val rpcResult =
+                cli.exec(this, arrayOf(command, parameter.toString()), true).toJSONObject()
+            return rpcResult.toString()
+        } catch (ex: Exception) {
+            val answer = JSONObject(ex.localizedMessage)
+            showToastMessage(answer["massage"].toString(), Toast.LENGTH_LONG)
+            return answer["message"].toString()
         }
+    }
+
+    fun showToastMessage(message: String, duration: Int) {
+        Toast.makeText(
+            this, message,
+            duration
+        ).show()
     }
 
     private fun showDecodePay(bolt11: String, decoded: String) {
@@ -71,11 +122,7 @@ open class UriResultActivity() : AppCompatActivity() {
                     cli.exec(this, arrayOf("pay", bolt11), true)
                         .toJSONObject()
                     runOnUiThread {
-                        Toast.makeText(
-                            this,
-                            "Invoice paid",
-                            Toast.LENGTH_LONG
-                        ).show()
+                        showToastMessage("Invoice paid", Toast.LENGTH_LONG)
                     }
                 } catch (e: Exception) {
                     runOnUiThread {

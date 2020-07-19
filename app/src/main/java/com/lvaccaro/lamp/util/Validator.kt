@@ -1,11 +1,14 @@
 package com.lvaccaro.lamp.util
 
 import android.content.Context
+import android.util.Log
 import com.lvaccaro.lamp.LightningCli
 import com.lvaccaro.lamp.toJSONObject
 import com.sandro.bitcoinpaymenturi.BitcoinPaymentURI
 import java.lang.Exception
+import java.util.*
 import kotlin.collections.ArrayList
+import kotlin.collections.HashMap
 
 /**
  * @author https://github.com/vincenzopalazzo
@@ -56,7 +59,7 @@ class Validator{
 
         fun doParseBitcoinURL(url: String) : HashMap<String, String>{
             val result = HashMap<String, String>()
-            val bitcoinPaymentURI = BitcoinPaymentURI.parse(url)
+            val bitcoinPaymentURI = BitcoinPaymentURI.parse(url) ?: return result
             result.put(LampKeys.ADDRESS_KEY, bitcoinPaymentURI.address)
             val ammount = bitcoinPaymentURI.amount?.toString()
             if (ammount != null) {
@@ -86,14 +89,42 @@ class Validator{
             }
         }
 
-        //TODO (vincenzopalazzo) implement it
-        //We know that the bolt start with ln and after with the network
-        //for exampleL bc: for bitcoin and tb for testnet bitcoin
-        fun isBolt11(string: String): Boolean{ return false }
+        fun isBolt11(string: String): Boolean{
+            val startString = string.subSequence(0, 6)
+            Log.d(TAG, "First subsequences is ${startString}")
+            val lnNetwork = startString.subSequence(0, 2)
+            Log.d(TAG, "Network tag ${lnNetwork}")
+            val network = startString.subSequence(2, 4)
+            Log.d(TAG, "Network tag is ${network}")
+            // FIXME: check if this is a number
+            val timestamp = startString.subSequence(4, 6)
+            Log.d(TAG, "Timestamp is ${timestamp}")
+            return isPrefix("ln", lnNetwork) &&
+                    (isPrefix("bc", network)|| isPrefix("tb", network))
+        }
 
-        //TODO (vincenzopalazzo) implement it
-        //It contains a @ and sometime a :
-        //How is convention of the url?
-        fun isLightningNodURI(string: String): Boolean {return false}
+        private fun isPrefix(prefix: String, result: CharSequence): Boolean {
+           return prefix.equals(result)
+        }
+
+        fun isLightningNodURI(string: String): Boolean {
+            //FIXME: Check more details about the node id
+            // for example is possible check if there is some illegal value like ? or letter with upper case
+            val patternNode = "0360dca2f35336d303643a7fb172ba6185b9086aa1fbd6063a1447050f2dda0f87"
+            if(string.contains("@")){
+                val token = StringTokenizer(string, "@")
+                if(token.countTokens() == 2){
+                    val nodeid = token.nextToken()
+                    val networkInfo = token.nextToken()
+                    return (networkInfo.contains(":") || networkInfo.contains(".onion")) &&
+                            nodeid.length == patternNode.length
+                }
+            }else{
+                // is only a node id?
+                return string.trim().length == patternNode.length
+            }
+            // No node id
+            return false
+        }
     }
 }

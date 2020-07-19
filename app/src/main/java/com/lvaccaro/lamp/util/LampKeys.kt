@@ -6,5 +6,8 @@ class LampKeys {
         val AMOUNT_KEY = "AMOUNT_KEY"
         val LABEL_KEY = "LABEL_KEY"
         val MESSAGE_KEY = "MESSAGE_KEY"
+        val WITHDRAW_COMMAND = "withdraw"
+        val DECODEPAY_COMMAND = "decodepay"
+        val CONNECT_COMMAND = "connect"
     }
 }
