@@ -3,7 +3,6 @@ package com.lvaccaro.lamp
 import android.Manifest
 import android.app.Activity
 import android.app.ActivityManager
-import androidx.appcompat.app.AppCompatActivity
 import android.app.DownloadManager
 import android.content.*
 import android.net.Uri
@@ -23,7 +22,6 @@ import androidx.appcompat.app.AlertDialog
 import androidx.core.app.ActivityCompat
 import androidx.core.net.toUri
 import androidx.preference.PreferenceManager
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
 import com.google.zxing.WriterException
@@ -40,14 +38,10 @@ import org.jetbrains.anko.doAsync
 import org.json.JSONArray
 import org.json.JSONObject
 import java.lang.Exception
-import java.math.BigDecimal
-import java.math.BigInteger
 import java.util.*
 import java.util.logging.Logger
-import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 import kotlin.concurrent.schedule
-import kotlin.math.roundToLong
 
 
 class MainActivity : UriResultActivity() {

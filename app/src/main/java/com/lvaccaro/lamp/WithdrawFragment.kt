@@ -12,6 +12,8 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+import com.lvaccaro.lamp.util.LampKeys
+import kotlinx.android.synthetic.main.list_tx.*
 import org.jetbrains.anko.doAsync
 import java.lang.Exception
 
@@ -25,14 +27,15 @@ class WithdrawFragment: BottomSheetDialogFragment() {
         savedInstanceState: Bundle?
     ): View? {
         val view = inflater.inflate(R.layout.fragment_withdraw, container, false)
-        val address = arguments?.getString("address")
+        val address = arguments?.getString(LampKeys.ADDRESS_KEY)
+        val satoshi = arguments?.getString(LampKeys.AMOUNT_KEY)
         view.findViewById<TextView>(R.id.addressText).text = address ?: ""
+        view.findViewById<TextView>(R.id.satoshiText).text = satoshi ?: ""
         view.findViewById<Button>(R.id.confirmButton).setOnClickListener {
             val satoshi = view.findViewById<TextView>(R.id.satoshiText).text.toString()
             val address = view.findViewById<TextView>(R.id.addressText).text.toString()
             doAsync { withdraw(address, satoshi) }
         }
-
         return view
     }
 

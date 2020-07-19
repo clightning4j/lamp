@@ -7,7 +7,6 @@ import com.lvaccaro.lamp.toJSONObject
 import com.sandro.bitcoinpaymenturi.BitcoinPaymentURI
 import java.lang.Exception
 import java.util.*
-import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 
 /**

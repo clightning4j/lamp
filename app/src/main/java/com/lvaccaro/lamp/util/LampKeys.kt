@@ -9,5 +9,6 @@ class LampKeys {
         val WITHDRAW_COMMAND = "withdraw"
         val DECODEPAY_COMMAND = "decodepay"
         val CONNECT_COMMAND = "connect"
+        val MESSAGE_JSON_KEY = "message"
     }
 }

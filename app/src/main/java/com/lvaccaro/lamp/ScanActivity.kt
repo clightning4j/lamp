@@ -14,8 +14,6 @@ import androidx.appcompat.app.AppCompatActivity
 import com.google.zxing.Result
 import me.dm7.barcodescanner.zxing.ZXingScannerView
 
-//TODO(vincenzopalazzo) look here if I can leave this without check on null value
-
 class ScanActivity : AppCompatActivity(), ZXingScannerView.ResultHandler {
     private val TAG = "ScanActivity"
     lateinit var mScannerView: ZXingScannerView
