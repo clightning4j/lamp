@@ -5,6 +5,7 @@ import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import com.google.android.material.snackbar.Snackbar
 import com.lvaccaro.lamp.Channels.FundChannelFragment
 import com.lvaccaro.lamp.Services.CLightningException
 import com.lvaccaro.lamp.util.LampKeys
@@ -28,7 +29,6 @@ open class UriResultActivity() : AppCompatActivity() {
             if (isBitcoinAddress) {
                 val parm = HashMap<String, String>()
                 Log.d(TAG, "*** Bitcoin address")
-                //resultCommand = runCommandCLightning(LampKeys.WITHDRAW_COMMAND, arrayOf(text))
                 parm.put(LampKeys.ADDRESS_KEY, text)
                 runOnUiThread {
                     showWithdraw(parm)
@@ -58,48 +58,19 @@ open class UriResultActivity() : AppCompatActivity() {
             if(resultCommand == null){
                 return
             }
+            var message = ""
+            if(resultCommand.has(LampKeys.MESSAGE_JSON_KEY)){
+                message = resultCommand.get(LampKeys.MESSAGE_JSON_KEY).toString()
+            }else if(resultCommand.has("id")){
+                message = "Connected to node"
+            }
             runOnUiThread {
                 showToastMessage(
-                    resultCommand.toString(),
+                    message,
                     Toast.LENGTH_LONG
                 )
             }
         }
-
-/*
-        try {
-            val res = cli.exec(this, arrayOf("decodepay", text), true).toText()
-            runOnUiThread { showDecodePay(text, res) }
-            return
-        } catch (e: Exception) {
-            Log.d(TAG, "decodepay: ${e.localizedMessage}")
-        }
-
-        try {
-            val res = cli.exec(this, arrayOf("connect", text), true).toJSONObject()
-            runOnUiThread { showConnect(res["id"] as String) }
-            return
-        } catch (e: Exception) {
-            Log.d(TAG, "connect: ${e.localizedMessage}")
-        }
-
-        //TODO(vincenzopalazzo) this function not work with the URI like the string below
-        //bitcoin:tb1qzy5mqyqpl6p67x8psu2phxwp0e7lz79w47e5ad
-        try {
-            // pre-parsing text to avoid multi strings text
-            val address = text.split(" ").first()
-            cli.exec(this, arrayOf("withdraw", address), true).toJSONObject()
-            return
-        } catch (e: Exception) {
-            val res = JSONObject(e.localizedMessage)
-            val message = res["message"] as String
-            // withdraw fails due by missing satoshi field
-            if (message == "missing required parameter: satoshi") {
-                runOnUiThread { showWithdraw(text) }
-                return
-            }
-            Log.d(TAG, "withdraw: ${e.localizedMessage}")
-        }*/
     }
 
     fun runCommandCLightning(command: String, parameter: Array<String>): JSONObject {
@@ -118,13 +89,6 @@ open class UriResultActivity() : AppCompatActivity() {
             showToastMessage(answer[LampKeys.MESSAGE_JSON_KEY].toString(), Toast.LENGTH_LONG)
             throw CLightningException(ex.cause)
         }
-    }
-
-    fun showToastMessage(message: String, duration: Int) {
-        Toast.makeText(
-            this, message,
-            duration
-        ).show()
     }
 
     private fun showDecodePay(bolt11: String, decoded: String) {
@@ -186,5 +150,17 @@ open class UriResultActivity() : AppCompatActivity() {
         bundle.putString(LampKeys.AMOUNT_KEY, amount)
         bottomSheetDialog.arguments = bundle
         bottomSheetDialog.show(supportFragmentManager, "WithdrawFragment")
+    }
+
+    protected fun showToastMessage(message: String, duration: Int) {
+        if(message.isEmpty()) return
+        Toast.makeText(
+            this, message,
+            duration
+        ).show()
+    }
+
+    protected fun showSnackBar(message: String, duration: Int){
+        Snackbar.make(findViewById(android.R.id.content), message, duration).show()
     }
 }

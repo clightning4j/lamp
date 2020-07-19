@@ -28,19 +28,14 @@ import com.google.zxing.WriterException
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel
 import com.google.zxing.qrcode.encoder.Encoder
 import com.lvaccaro.lamp.Channels.ChannelsActivity
-import com.lvaccaro.lamp.Channels.FundChannelFragment
 import com.lvaccaro.lamp.Services.LightningService
 import com.lvaccaro.lamp.Services.TorService
-import com.lvaccaro.lamp.ui.send.SentToBitcoinFragment
-import com.lvaccaro.lamp.util.LampKeys
-import com.lvaccaro.lamp.util.Validator
 import org.jetbrains.anko.doAsync
 import org.json.JSONArray
 import org.json.JSONObject
 import java.lang.Exception
 import java.util.*
 import java.util.logging.Logger
-import kotlin.collections.HashMap
 import kotlin.concurrent.schedule
 
 
@@ -634,134 +629,6 @@ class MainActivity : UriResultActivity() {
         stopTorService()
     }
 
-    fun scanned(text: String) {
-        try {
-            Log.d(TAG, "******** Text from scan View *********\n${text}")
-            val result = isBitcoinPayment(text.trim())
-            /**
-             * TODO(vincenzopalazzo): This code in case of exception inside the if below we have the
-             * following print debug
-             *
-             * 2020-07-14 00:43:52.114 17279-17497/com.lvaccaro.lamp D/MainActivity: ***** Bitcoin Address *****
-             * 020-07-14 00:43:52.114 17279-17497/com.lvaccaro.lamp D/MainActivity: ***** RUNNING withdraw command *****
-             * 2020-07-14 00:43:52.115 17279-17497/com.lvaccaro.lamp D/MainActivity: ***** RUNNING connect command *****
-             *
-             * FIXME: Maybe we can use the Validator to se if is the invoice of the node url
-             * In some cases I noted that the invoice use the beach32 format,
-             * so it contains also the network flag.
-             * In the other head we know tha the node contains the @ and
-             * maybe if I'm not loasing somethings, the id has only numbers
-             */
-            if(result.isNotEmpty()){
-                Log.d(TAG, "***** RUNNING withdraw command *****")
-                doWithDrawCommand(result)
-                return
-            }
-            Log.d(TAG, "***** RUNNING decodepay command *****")
-            val res = cli.exec(this@MainActivity, arrayOf("decodepay", text), true).toText()
-            runOnUiThread { showDecodePay(text, res) }
-        } catch (e: Exception) {
-            e.printStackTrace()
-            try {
-                Log.d(TAG, "***** RUNNING connect command *****")
-                val res = cli.exec(this@MainActivity, arrayOf("connect", text), true).toJSONObject()
-                runOnUiThread { showConnected(res["id"] as String) }
-            } catch (e: Exception) {
-                runOnUiThread {
-                    showToast( e.localizedMessage, Toast.LENGTH_LONG)
-                }
-            }
-        }
-    }
-
-    private fun isBitcoinPayment(text: String): Map<String, String> {
-        var result = HashMap<String, String>()
-        //We know that we have two type of url that can arrive from QR
-        //This type are URL like bitcoin:ADDRESS?amount=10.00
-        //OR
-        //The other type, so the QR can contains only the address
-        if(Validator.isBitcoinAddress(text)){
-            Log.d(TAG, "***** Bitcoin Address *****")
-            result.put(LampKeys.ADDRESS_KEY, text)
-        }else if(Validator.isBitcoinURL(text)){
-            Log.d(TAG, "***** Bitcoin URL *****")
-            result = Validator.doParseBitcoinURL(text)
-        }
-        return result
-    }
-
-    private fun doWithDrawCommand(result: Map<String, String>) {
-        val address = result[LampKeys.ADDRESS_KEY]
-        lateinit var amount: String
-        if(!result.containsKey(LampKeys.AMOUNT_KEY)) {
-            //In this cases I set the amount to all and inside the dialog the used
-            //can modify the value (if want).
-            amount = "all"
-        }else{
-            //TODO (vincenzopalazzo) In can choose inside the App setting the unit of bitcoin
-            //that the used want use inside the app.
-            //In addition, in this cases I will start the activity to require more information?
-            //For instance, feerate and minconf? Maybe with an advanced setting with combobox
-            amount = (result[LampKeys.AMOUNT_KEY]!!.toDouble() * 100000000).toLong().toString()
-            // amount = result[LampKeys.AMOUNT_KEY]!!
-        }
-
-        val sentToBitcoinDialog = SentToBitcoinFragment()
-        val bundle = Bundle()
-        bundle.putString("address", address)
-        bundle.putString("amount", amount)
-        sentToBitcoinDialog.arguments = bundle
-        val fragmentTransaction = supportFragmentManager.beginTransaction()
-        fragmentTransaction.add(sentToBitcoinDialog, "SentToBitcoinFragment")
-        fragmentTransaction.commitAllowingStateLoss()
-    }
-
-    fun showDecodePay(bolt11: String, decoded: String) {
-        AlertDialog.Builder(this@MainActivity)
-            .setTitle("decodepay")
-            .setMessage(decoded.toString())
-            .setCancelable(true)
-            .setPositiveButton("pay") { dialog, which ->
-                try {
-                    cli.exec(this@MainActivity, arrayOf("pay", bolt11), true)
-                        .toJSONObject()
-                    runOnUiThread {
-                        Toast.makeText(
-                            this@MainActivity,
-                            "Invoice paid",
-                            Toast.LENGTH_LONG
-                        ).show()
-                    }
-                } catch (e: Exception) {
-                    runOnUiThread {
-                        Toast.makeText(
-                            this@MainActivity,
-                            e.localizedMessage,
-                            Toast.LENGTH_LONG
-                        ).show()
-                    }
-                }
-            }
-            .setNegativeButton("cancel") { dialog, which -> }
-            .show()
-    }
-
-    fun showConnected(id: String) {
-        AlertDialog.Builder(this@MainActivity)
-            .setTitle("connect")
-            .setMessage(id)
-            .setPositiveButton("fund channel") { dialog, which ->
-                val bottomSheetDialog =
-                    FundChannelFragment()
-                val args = Bundle()
-                args.putString("uri", id)
-                bottomSheetDialog.arguments = args
-                bottomSheetDialog.show(supportFragmentManager, "Fund channel")
-            }
-            .setNegativeButton("cancel") { dialog, which -> }
-            .show()
-    }
-
     fun generateNewAddress() {
         val res = cli.exec(
             this@MainActivity,
@@ -795,14 +662,6 @@ class MainActivity : UriResultActivity() {
                 .setCancelable(false)
                 .show()
         }
-    }
-
-    private fun showSnackBar(message: String, duration: Int){
-        Snackbar.make(findViewById(android.R.id.content), message, duration).show()
-    }
-
-    private fun showToast(message: String, duration: Int){
-        Toast.makeText(applicationContext, message, duration).show()
     }
 
     fun copyToClipboard(key: String, text: String) {
