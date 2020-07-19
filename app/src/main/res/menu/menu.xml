@@ -1,7 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
-xmlns:app="http://schemas.android.com/apk/res-auto"
-xmlns:tools="http://schemas.android.com/tools">
+xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/action_stop"
+        android:orderInCategory="100"
+        android:title="@string/id_stop"
+        android:icon="@android:drawable/ic_lock_power_off"
+        app:showAsAction="always" />
     <item
         android:id="@+id/action_invoice"
         android:orderInCategory="100"
@@ -10,10 +15,8 @@ xmlns:tools="http://schemas.android.com/tools">
         app:showAsAction="always" />
     <item
         android:id="@+id/action_channels"
-        android:icon="@android:drawable/ic_menu_sort_by_size"
         android:orderInCategory="100"
-        android:title="@string/id_channels"
-        app:showAsAction="always" />
+        android:title="@string/id_channels" />
     <item
         android:id="@+id/action_new_address"
         android:orderInCategory="100"

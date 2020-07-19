@@ -88,11 +88,6 @@ class MainActivity : UriResultActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        if (isLightningRunning()) {
-            setTheme(R.style.AppTheme)
-        } else {
-            setTheme(R.style.AppTheme_Night)
-        }
         setContentView(R.layout.activity_main)
 
         powerImageView = findViewById<PowerImageView>(R.id.powerImageView)
@@ -187,8 +182,26 @@ class MainActivity : UriResultActivity() {
         return true
     }
 
+    override fun onPrepareOptionsMenu(menu: Menu?): Boolean {
+        if (!isLightningRunning()) {
+            menu?.apply {
+                removeItem(R.id.action_console)
+                removeItem(R.id.action_invoice)
+                removeItem(R.id.action_channels)
+                removeItem(R.id.action_withdraw)
+                removeItem(R.id.action_new_address)
+                removeItem(R.id.action_stop)
+            }
+        }
+        return super.onPrepareOptionsMenu(menu)
+    }
+
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
+            R.id.action_stop -> {
+                doAsync { stop() }
+                true
+            }
             R.id.action_settings -> {
                 startActivityForResult(Intent(this, SettingsActivity::class.java), 100)
                 true
@@ -309,18 +322,22 @@ class MainActivity : UriResultActivity() {
     }
 
     fun powerOff() {
-        if (powerImageView.isOn())
-            recreate()
         powerImageView.off()
         timer?.cancel()
         findViewById<TextView>(R.id.statusText).text = "Offline. Rub the lamp to turn on."
+        findViewById<ImageView>(R.id.qrcodeImageView).visibility = View.GONE
+        findViewById<TextView>(R.id.textViewQr).visibility = View.GONE
+        findViewById<ImageView>(R.id.arrowImageView).visibility = View.GONE
+        findViewById<FloatingActionButton>(R.id.floating_action_button).hide()
+        invalidateOptionsMenu()
     }
 
     fun powerOn() {
-        if (!powerImageView.isOn())
-            recreate()
         powerImageView.on()
-        findViewById<TextView>(R.id.statusText).text = ""
+        findViewById<ImageView>(R.id.arrowImageView).visibility = View.VISIBLE
+        findViewById<TextView>(R.id.textViewQr).visibility = View.VISIBLE
+        findViewById<FloatingActionButton>(R.id.floating_action_button).show()
+        invalidateOptionsMenu()
     }
 
     fun getInfo() {
@@ -360,11 +377,14 @@ class MainActivity : UriResultActivity() {
                     visibility = View.VISIBLE
                 }
                 val delta = blockcount - blockheight
-                findViewById<TextView>(R.id.statusText).text = if (delta > 0) "Syncing blocks -${delta}" else "Online"
+                findViewById<TextView>(R.id.statusText).text = if (delta > 0) "Syncing blocks -${delta}" else ""
             }
             val qrcode = getQrCode(txt)
             runOnUiThread {
-                findViewById<ImageView>(R.id.qrcodeImageView).setImageBitmap(qrcode)
+                findViewById<ImageView>(R.id.qrcodeImageView).apply {
+                    visibility = View.VISIBLE
+                    setImageBitmap(qrcode)
+                }
             }
         } catch (e: Exception) {
             log.info("---" + e.localizedMessage + "---")
@@ -575,7 +595,7 @@ class MainActivity : UriResultActivity() {
                 return@doAsync
             }
             try {
-                LightningCli().exec(this@MainActivity, arrayOf("getinfo"), true).toJSONObject()
+                getInfo()
                 runOnUiThread { powerOn() }
             } catch (e: Exception) {
                 stop()
