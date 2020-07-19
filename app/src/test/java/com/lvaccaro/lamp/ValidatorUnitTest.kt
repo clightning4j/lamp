@@ -14,10 +14,10 @@ import org.junit.Assert.*
  */
 class ValidatorUnitTest {
 
-    @Test(expected = IllegalStateException::class)
+    @Test
     fun validateBitcoinURL_testOne() {
         val resultParsing = Validator.doParseBitcoinURL("")
-        assertEquals(0, resultParsing.size)
+        assertTrue(resultParsing.isEmpty())
     }
 
     @Test
@@ -26,7 +26,7 @@ class ValidatorUnitTest {
             Validator.doParseBitcoinURL("bitcoin:2NFmhFFEbR2ruAboRZ8gxCeDez81c3ByZeV?amount=102.00000000")
         assertEquals(2, resultParsingOne.size)
         assertEquals("2NFmhFFEbR2ruAboRZ8gxCeDez81c3ByZeV", resultParsingOne[LampKeys.ADDRESS_KEY])
-        assertEquals("102.0", resultParsingOne[LampKeys.AMOUNT_KEY])
+        assertEquals("102.00000000", resultParsingOne[LampKeys.AMOUNT_KEY])
 
         val resultParsingTwo =
             Validator.doParseBitcoinURL("bitcoin:175tWpb8K1S7NmH4Zx6rewF9WQrcZv245W")
@@ -62,15 +62,15 @@ class ValidatorUnitTest {
             "175tWpb8K1S7NmH4Zx6rewF9WQrcZv245W",
             resultParsingFive.get(LampKeys.ADDRESS_KEY)
         )
-        assertEquals("50.0", resultParsingFive[LampKeys.AMOUNT_KEY])
+        assertEquals("50", resultParsingFive[LampKeys.AMOUNT_KEY])
         assertEquals("Luke-Jr", resultParsingFive[LampKeys.LABEL_KEY])
         assertEquals("Donation for project xyz", resultParsingFive[LampKeys.MESSAGE_KEY]?.trim())
     }
 
-    @Test(expected = IllegalStateException::class)
+    @Test
     fun validateBitcoinURL_testThree() {
         val resultParsing = Validator.doParseBitcoinURL("2NFmhFFEbR2ruAboRZ8gxCeDez81c3ByZeV")
-        assertEquals(0, resultParsing.size)
+        assertTrue(resultParsing.isEmpty())
     }
 
     @Test //P2PKH
@@ -136,7 +136,7 @@ class ValidatorUnitTest {
     }
 
     @Test
-    fun isBolt11_testTwo(){
+    fun isBolt11_testTwo() {
         val bolt11 =
             """
             lnbc2500u1pvjluezpp5qqqsyqcyq5rqwzqfqqqsyqcyq5rqwzqfqqqsyqcyq5rqwzqfqypqdpquwpc4curk03c9
@@ -148,42 +148,44 @@ class ValidatorUnitTest {
     }
 
     @Test
-    fun isBolt11_testThree(){
+    fun isBolt11_testThree() {
         val bolt11 = "bcrt1q7ezrtfqx2w4wg6vmlsk9uaxqeuxgpewdn09zc8"
         val result = Validator.isBolt11(bolt11)
         assertFalse(result)
     }
 
     @Test
-    fun isBolt11_testFour(){
-        val bolt11 = "0360dca2f35336d303643a7fb172ba6185b9086aa1fbd6063a1447050f2dda0f87@127.0.0.1:9735"
+    fun isBolt11_testFour() {
+        val bolt11 =
+            "0360dca2f35336d303643a7fb172ba6185b9086aa1fbd6063a1447050f2dda0f87@127.0.0.1:9735"
         val result = Validator.isBolt11(bolt11)
         assertFalse(result)
     }
 
     @Test
-    fun isNodeID_testOne(){
-        val nodeid = "0360dca2f35336d303643a7fb172ba6185b9086aa1fbd6063a1447050f2dda0f87@127.0.0.1:9735"
+    fun isNodeID_testOne() {
+        val nodeid =
+            "0360dca2f35336d303643a7fb172ba6185b9086aa1fbd6063a1447050f2dda0f87@127.0.0.1:9735"
         val result = Validator.isLightningNodURI(nodeid)
         assertTrue(result)
     }
 
     @Test
-    fun isNodeID_testTwo(){
+    fun isNodeID_testTwo() {
         val nodeid = "0360dca2f35336d303643a7fb172ba6185b9086aa1fbd6063a1447050f2dda0f87"
         val result = Validator.isLightningNodURI(nodeid)
         assertTrue(result)
     }
 
     @Test
-    fun isNodeID_testThree(){
+    fun isNodeID_testThree() {
         val nodeid = "bcrt1q7ezrtfqx2w4wg6vmlsk9uaxqeuxgpewdn09zc8"
         val result = Validator.isLightningNodURI(nodeid)
         assertFalse(result)
     }
 
     @Test
-    fun isNodeID_testFour(){
+    fun isNodeID_testFour() {
         val nodeid =
             """
             lnbc2500u1pvjluezpp5qqqsyqcyq5rqwzqfqqqsyqcyq5rqwzqfqqqsyqcyq5rqwzqfqypqdpquwpc4curk03c9

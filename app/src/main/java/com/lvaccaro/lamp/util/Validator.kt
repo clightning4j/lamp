@@ -1,26 +1,29 @@
 package com.lvaccaro.lamp.util
 
 import android.content.Context
+import android.net.UrlQuerySanitizer
+import android.net.UrlQuerySanitizer.ValueSanitizer
 import android.util.Log
 import com.lvaccaro.lamp.LightningCli
 import com.lvaccaro.lamp.toJSONObject
 import com.sandro.bitcoinpaymenturi.BitcoinPaymentURI
-import java.lang.Exception
+import java.nio.charset.Charset
 import java.util.*
 import kotlin.collections.HashMap
+
 
 /**
  * @author https://github.com/vincenzopalazzo
  */
-class Validator{
+class Validator {
 
-    companion object{
+    companion object {
 
         val TAG = Validator.javaClass.canonicalName
 
-        fun isBitcoinURL(text: String): Boolean{
+        fun isBitcoinURL(text: String): Boolean {
             val result = doParseBitcoinURL(text)
-            if(result.isNotEmpty()) return true //This is the cases it is the bitcoin URL
+            if (result.isNotEmpty()) return true //This is the cases it is the bitcoin URL
             return false
         }
 
@@ -31,7 +34,6 @@ class Validator{
 
         private fun isP2SH(text: String): Boolean {
             val mainet = text.startsWith("3") && text.length == 34
-            //FIXME (vincenzopalazzo): I noted that for the P2SH and witness script that used this convention
             //the address generated in testnet network in 1 character more large
             val testnet = text.startsWith("2") && text.length == 35
             return (mainet || testnet)
@@ -42,53 +44,91 @@ class Validator{
             val testnetFlag = "tb"
             val regtestFlag = "bcrt"
 
-            val mainet = text.startsWith(bitcoinFlag) &&((text.length == 42) || (text.length == 62))
-            val testnet = text.startsWith(testnetFlag) && ((text.length == 42) || (text.length == 62))
-            //FIXME (vincenzopalazzo): I suppose the increase of address lenght because the flag is 2 character more large.
-            val regtest = text.startsWith(regtestFlag) && ((text.length == 44) || (text.length == 64))
+            val mainet =
+                text.startsWith(bitcoinFlag) && ((text.length == 42) || (text.length == 62))
+            val testnet =
+                text.startsWith(testnetFlag) && ((text.length == 42) || (text.length == 62))
+            val regtest =
+                text.startsWith(regtestFlag) && ((text.length == 44) || (text.length == 64))
             return mainet || testnet || regtest
         }
 
         private fun isP2PKH(text: String): Boolean {
             val mainet = text.startsWith("1")
             val testnet = text.startsWith("m")
-                            || text.startsWith("n")
-            return (mainet ||testnet) && text.length == 34
+                    || text.startsWith("n")
+            return (mainet || testnet) && text.length == 34
         }
 
-        fun doParseBitcoinURL(url: String) : HashMap<String, String>{
+        fun doParseBitcoinURL(url: String): HashMap<String, String> {
             val result = HashMap<String, String>()
-            val bitcoinPaymentURI = BitcoinPaymentURI.parse(url) ?: return result
-            result.put(LampKeys.ADDRESS_KEY, bitcoinPaymentURI.address)
-            val ammount = bitcoinPaymentURI.amount?.toString()
-            if (ammount != null) {
-                result.put(LampKeys.AMOUNT_KEY, ammount)
-            }
-            val label = bitcoinPaymentURI.label
-            if (label != null) {
-                result.put(LampKeys.LABEL_KEY, label)
-            }
-            val message = bitcoinPaymentURI.message
-            if (message != null) {
-                result.put(LampKeys.MESSAGE_KEY, message)
+            if(url.trim().isEmpty()) return result
+
+            //In this cases the url contains the follow patter
+            //bitcoin:ADDRESS?amount=VALUE
+            var tokenizer = StringTokenizer(url.replace("%20", " "), ":")
+            // Match with the pattern STRING:STRING
+            if (tokenizer.countTokens() == 2) {
+                //The variable tmp will contain all trash (not util) information
+                var tmp = tokenizer.nextToken();
+                Log.d(TAG, "**** Bitcoin protocol: ${tmp} *********")
+                val queryString = tokenizer.nextToken()
+                Log.d(TAG, "**** bitcoin URI: ${queryString} *********")
+                // Reassign the tokenizer variable a new token object
+                tokenizer = StringTokenizer(queryString, "?")
+                // Match with the pattern STRING?STRING
+                if (tokenizer.countTokens() == 2) {
+                    var address = tokenizer.nextToken()
+                    Log.d(TAG, "******** Address inside URL ${address} ********")
+                    result.put(LampKeys.ADDRESS_KEY, address)
+                    //Parsing parameter URI
+                    tmp = tokenizer.nextToken()
+                    Log.d(TAG, "******** Parameters inside URL ${tmp} ********")
+                    tokenizer = StringTokenizer(tmp, "&")
+                    while (tokenizer.hasMoreTokens()){
+                        val parameter = tokenizer.nextToken()
+                        Log.d(TAG, "Parameter ${parameter}")
+                        if(!parseParameter(parameter, result)) break
+                    }
+                }else if(tokenizer.countTokens() == 1){
+                    var address = tokenizer.nextToken()
+                    Log.d(TAG, "******** Address inside URL ${address} ********")
+                    result.put(LampKeys.ADDRESS_KEY, address)
+                }
             }
             return result
         }
 
-        fun isCorrectNetwork(cli: LightningCli, context: Context, address: String): String?{
-            try{
-                val rpcResponse = cli.exec(context, arrayOf("txprepare", address, "10000"), true).toJSONObject()
+        private fun parseParameter(uri: String, result: HashMap<String, String>): Boolean{
+            val tokes = StringTokenizer(uri, "=")
+            if (tokes.countTokens() == 2) {
+                //amount string
+                val key = tokes.nextToken()
+                Log.d(TAG, "******** key ${key} ********")
+                val value = tokes.nextToken();
+                Log.d(TAG, "******** Value ${value} ********")
+                result.put(key, value)
+                return true
+            }
+            return false
+        }
+
+        fun isCorrectNetwork(cli: LightningCli, context: Context, address: String): String? {
+            try {
+                val rpcResponse =
+                    cli.exec(context, arrayOf("txprepare", address, "10000"), true).toJSONObject()
                 return null //Address correct
-            }catch (ex: Exception){
-                //Address not correct
-                if(ex.localizedMessage.contains("Cannot afford transaction")){
+            } catch (ex: Exception) {
+                //not enough bitcoin to create the transaction but the address was correct
+                if (ex.localizedMessage.contains("Cannot afford transaction")) {
                     return null
                 }
+                //Address not correct
                 return ex.localizedMessage
             }
         }
 
-        fun isBolt11(string: String): Boolean{
+        fun isBolt11(string: String): Boolean {
             val startString = string.subSequence(0, 6)
             Log.d(TAG, "First subsequences is ${startString}")
             val lnNetwork = startString.subSequence(0, 2)
@@ -99,26 +139,26 @@ class Validator{
             val timestamp = startString.subSequence(4, 6)
             Log.d(TAG, "Timestamp is ${timestamp}")
             return isPrefix("ln", lnNetwork) &&
-                    (isPrefix("bc", network)|| isPrefix("tb", network))
+                    (isPrefix("bc", network) || isPrefix("tb", network))
         }
 
         private fun isPrefix(prefix: String, result: CharSequence): Boolean {
-           return prefix.equals(result)
+            return prefix.equals(result)
         }
 
         fun isLightningNodURI(string: String): Boolean {
             //FIXME: Check more details about the node id
             // for example is possible check if there is some illegal value like ? or letter with upper case
             val patternNode = "0360dca2f35336d303643a7fb172ba6185b9086aa1fbd6063a1447050f2dda0f87"
-            if(string.contains("@")){
+            if (string.contains("@")) {
                 val token = StringTokenizer(string, "@")
-                if(token.countTokens() == 2){
+                if (token.countTokens() == 2) {
                     val nodeid = token.nextToken()
                     val networkInfo = token.nextToken()
                     return (networkInfo.contains(":") || networkInfo.contains(".onion")) &&
                             nodeid.length == patternNode.length
                 }
-            }else{
+            } else {
                 // is only a node id?
                 return string.trim().length == patternNode.length
             }
