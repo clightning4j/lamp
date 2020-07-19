@@ -68,9 +68,9 @@ class SettingsActivity : AppCompatActivity() {
                     val dir = File(activity?.rootDir(), "")
                     val downloadDir =
                         activity?.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS)!!
-                    var resultOperation = File(downloadDir, MainActivity.tarFilename()).delete() &&
-                    File(downloadDir, "cacert.pem").delete() &&
-                    File(dir, "lightningd").delete() &&
+                    File(downloadDir, MainActivity.tarFilename()).delete()
+                    File(downloadDir, "cacert.pem").delete()
+                    val resultOperation = File(dir, "lightningd").delete() &&
                     File(dir, "lightning-cli").delete() &&
                     File(dir, "lightning_channeld").delete() &&
                     File(dir, "lightning_closingd").delete() &&
