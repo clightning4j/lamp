@@ -73,6 +73,15 @@ class ValidatorUnitTest {
         assertTrue(resultParsing.isEmpty())
     }
 
+    @Test
+    fun validateBitcoinURI_testFour(){
+        val uri = "bitcoin:175tWpb8K1S7NmH4Zx6rewF9WQrcZv245W?req-somethingyoudontunderstand=50&req-somethingelseyoudontget=999"
+        val resultParsing = Validator.doParseBitcoinURL(uri)
+        assertEquals("175tWpb8K1S7NmH4Zx6rewF9WQrcZv245W", resultParsing.get(LampKeys.ADDRESS_KEY))
+        assertEquals("50", resultParsing.get("req-somethingyoudontunderstand"))
+        assertEquals("999", resultParsing.get("req-somethingelseyoudontget"))
+    }
+
     @Test //P2PKH
     fun validateBitcoinAddress_testOne() {
         val resultBitcoin = Validator.isBitcoinAddress("17VZNX1SN5NtKa8UQFxwQbFeFc3iqRYhem")
@@ -161,6 +170,18 @@ class ValidatorUnitTest {
         val result = Validator.isBolt11(bolt11)
         assertFalse(result)
     }
+    @Test
+    fun isABolt11_testFive() {
+        val bolt11 =
+            """
+            lnbcapvjluezpp5qqqsyqcyq5rqwzqfqqqsyqcyq5rqwzqfqqqsyqcyq5rqwzqfqypqdpl2pkx2ctnv5sxxmmwwd
+            5kgetjypeh2ursdae8g6twvus8g6rfwvs8qun0dfjkxaq8rkx3yf5tcsyz3d73gafnh3cax9rn
+            449d9p5uxz9ezhhypd0elx87sjle52x86fux2ypatgddc6k63n7erqz25le42c4u4ecky03ylcqca784w
+            """.trimIndent().trim()
+        val result = Validator.isBolt11(bolt11)
+        assertFalse(result)
+    }
+
 
     @Test
     fun isNodeID_testOne() {

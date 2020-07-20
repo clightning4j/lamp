@@ -1,12 +1,9 @@
 package com.lvaccaro.lamp.util
 
 import android.content.Context
-import android.net.UrlQuerySanitizer
-import android.net.UrlQuerySanitizer.ValueSanitizer
 import android.util.Log
 import com.lvaccaro.lamp.LightningCli
 import com.lvaccaro.lamp.toJSONObject
-import com.sandro.bitcoinpaymenturi.BitcoinPaymentURI
 import java.nio.charset.Charset
 import java.util.*
 import kotlin.collections.HashMap
@@ -63,10 +60,9 @@ class Validator {
         fun doParseBitcoinURL(url: String): HashMap<String, String> {
             val result = HashMap<String, String>()
             if(url.trim().isEmpty()) return result
-
             //In this cases the url contains the follow patter
             //bitcoin:ADDRESS?amount=VALUE
-            var tokenizer = StringTokenizer(url.replace("%20", " "), ":")
+            var tokenizer = StringTokenizer(url.trim().replace("%20", " "), ":")
             // Match with the pattern STRING:STRING
             if (tokenizer.countTokens() == 2) {
                 //The variable tmp will contain all trash (not util) information
@@ -77,23 +73,26 @@ class Validator {
                 // Reassign the tokenizer variable a new token object
                 tokenizer = StringTokenizer(queryString, "?")
                 // Match with the pattern STRING?STRING
-                if (tokenizer.countTokens() == 2) {
-                    var address = tokenizer.nextToken()
-                    Log.d(TAG, "******** Address inside URL ${address} ********")
-                    result.put(LampKeys.ADDRESS_KEY, address)
-                    //Parsing parameter URI
-                    tmp = tokenizer.nextToken()
-                    Log.d(TAG, "******** Parameters inside URL ${tmp} ********")
-                    tokenizer = StringTokenizer(tmp, "&")
-                    while (tokenizer.hasMoreTokens()){
-                        val parameter = tokenizer.nextToken()
-                        Log.d(TAG, "Parameter ${parameter}")
-                        if(!parseParameter(parameter, result)) break
+                when(tokenizer.countTokens()){
+                    1 -> {
+                        var address = tokenizer.nextToken()
+                        Log.d(TAG, "******** Address inside URL ${address} ********")
+                        result.put(LampKeys.ADDRESS_KEY, address)
                     }
-                }else if(tokenizer.countTokens() == 1){
-                    var address = tokenizer.nextToken()
-                    Log.d(TAG, "******** Address inside URL ${address} ********")
-                    result.put(LampKeys.ADDRESS_KEY, address)
+                    2 -> {
+                        var address = tokenizer.nextToken()
+                        Log.d(TAG, "******** Address inside URL ${address} ********")
+                        result.put(LampKeys.ADDRESS_KEY, address)
+                        //Parsing parameter URI
+                        tmp = tokenizer.nextToken()
+                        Log.d(TAG, "******** Parameters inside URL ${tmp} ********")
+                        tokenizer = StringTokenizer(tmp, "&")
+                        while (tokenizer.hasMoreTokens()){
+                            val parameter = tokenizer.nextToken()
+                            Log.d(TAG, "Parameter ${parameter}")
+                            if(!parseParameter(parameter, result)) break
+                        }
+                    }
                 }
             }
             return result
@@ -102,7 +101,6 @@ class Validator {
         private fun parseParameter(uri: String, result: HashMap<String, String>): Boolean{
             val tokes = StringTokenizer(uri, "=")
             if (tokes.countTokens() == 2) {
-                //amount string
                 val key = tokes.nextToken()
                 Log.d(TAG, "******** key ${key} ********")
                 val value = tokes.nextToken();
@@ -115,8 +113,7 @@ class Validator {
 
         fun isCorrectNetwork(cli: LightningCli, context: Context, address: String): String? {
             try {
-                val rpcResponse =
-                    cli.exec(context, arrayOf("txprepare", address, "10000"), true).toJSONObject()
+                cli.exec(context, arrayOf("txprepare", address, "10000"), true).toJSONObject()
                 return null //Address correct
             } catch (ex: Exception) {
                 //not enough bitcoin to create the transaction but the address was correct
@@ -135,11 +132,21 @@ class Validator {
             Log.d(TAG, "Network tag ${lnNetwork}")
             val network = startString.subSequence(2, 4)
             Log.d(TAG, "Network tag is ${network}")
-            // FIXME: check if this is a number
-            val timestamp = startString.subSequence(4, 6)
+            // minimum cases, the time stamp can be more big but not more small of one digit
+            val timestamp = startString.subSequence(4, 5)
+            //val timestampIsNum = timestamp.matches("-?\\d+(\\.\\d+)?".toRegex()) NOT HUMAN READBLE
+            var timestampIsNum = true
+            timestamp.forEach find@{ charatter ->
+                if (charatter.isLetter()){
+                    timestampIsNum = false
+                    return@find
+                }
+            }
             Log.d(TAG, "Timestamp is ${timestamp}")
+            Log.d(TAG, "The timestamp contains all numbers? ${timestampIsNum}")
             return isPrefix("ln", lnNetwork) &&
                     (isPrefix("bc", network) || isPrefix("tb", network))
+                      && timestampIsNum
         }
 
         private fun isPrefix(prefix: String, result: CharSequence): Boolean {
