@@ -5,19 +5,22 @@ import android.app.Activity
 import android.app.ActivityManager
 import android.app.DownloadManager
 import android.content.*
-import android.net.Uri
-import android.util.Log
-import java.io.*
-import org.apache.commons.compress.archivers.tar.TarArchiveInputStream
-import org.apache.commons.compress.compressors.xz.XZCompressorInputStream
-import org.apache.commons.compress.utils.IOUtils
-import org.apache.commons.compress.archivers.tar.TarArchiveEntry
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.Color
-import android.os.*
-import android.view.*
-import android.widget.*
+import android.net.Uri
+import android.os.Build
+import android.os.Bundle
+import android.os.Environment
+import android.util.Log
+import android.view.Gravity
+import android.view.Menu
+import android.view.MenuItem
+import android.view.View
+import android.widget.ImageView
+import android.widget.LinearLayout
+import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.core.app.ActivityCompat
 import androidx.core.net.toUri
@@ -30,10 +33,18 @@ import com.google.zxing.qrcode.encoder.Encoder
 import com.lvaccaro.lamp.Channels.ChannelsActivity
 import com.lvaccaro.lamp.Services.LightningService
 import com.lvaccaro.lamp.Services.TorService
+import org.apache.commons.compress.archivers.tar.TarArchiveEntry
+import org.apache.commons.compress.archivers.tar.TarArchiveInputStream
+import org.apache.commons.compress.compressors.xz.XZCompressorInputStream
+import org.apache.commons.compress.utils.IOUtils
+import org.jetbrains.anko.contentView
 import org.jetbrains.anko.doAsync
 import org.json.JSONArray
 import org.json.JSONObject
-import java.lang.Exception
+import java.io.BufferedInputStream
+import java.io.File
+import java.io.FileInputStream
+import java.io.FileOutputStream
 import java.util.*
 import java.util.logging.Logger
 import kotlin.concurrent.schedule
@@ -41,15 +52,16 @@ import kotlin.concurrent.schedule
 
 class MainActivity : UriResultActivity() {
 
-    val REQUEST_SCAN = 102
-    val REQUEST_FUNDCHANNEL = 103
-    val WRITE_REQUEST_CODE = 101
-    val log = Logger.getLogger(MainActivity::class.java.name)
-    var downloadID = 0L
-    var downloadCertID = 0L
-    lateinit var downloadmanager: DownloadManager
-    lateinit var powerImageView: PowerImageView
-    var timer: Timer? = null
+    private val REQUEST_SCAN = 102
+    private val REQUEST_FUNDCHANNEL = 103
+    private val WRITE_REQUEST_CODE = 101
+    private val log = Logger.getLogger(MainActivity::class.java.name)
+    private var downloadID = 0L
+    private var downloadCertID = 0L
+    private lateinit var downloadmanager: DownloadManager
+    private lateinit var powerImageView: PowerImageView
+    private lateinit var viewOnRunning: View
+    private var timer: Timer? = null
 
     companion object {
         val RELEASE = "release_clightning_0.9.0"
@@ -94,6 +106,7 @@ class MainActivity : UriResultActivity() {
         powerImageView.setOnClickListener { this.onPowerClick() }
         val arrowImageView = findViewById<ImageView>(R.id.arrowImageView)
         arrowImageView.setOnClickListener { this.onHistoryClick() }
+        viewOnRunning = findViewById(R.id.content_main_status_on)
 
         val addressTextView = findViewById<TextView>(R.id.textViewQr)
         addressTextView.setOnClickListener {
@@ -324,12 +337,16 @@ class MainActivity : UriResultActivity() {
         findViewById<ImageView>(R.id.qrcodeImageView).visibility = View.GONE
         findViewById<TextView>(R.id.textViewQr).visibility = View.GONE
         findViewById<ImageView>(R.id.arrowImageView).visibility = View.GONE
+        viewOnRunning?.visibility = View.GONE
         findViewById<FloatingActionButton>(R.id.floating_action_button).hide()
         invalidateOptionsMenu()
     }
 
     fun powerOn() {
         powerImageView.on()
+        viewOnRunning?.visibility = View.VISIBLE
+        findViewById<ImageView>(R.id.arrowImageView).visibility = View.VISIBLE
+        findViewById<TextView>(R.id.textViewQr).visibility = View.VISIBLE
         //FIXME(vincenzopalazzo): This is only for the moment
         //These component are set visible inside the command getinfo
         //I removed it because now if the node has not expose with a binding address
