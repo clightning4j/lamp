@@ -12,6 +12,15 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
+        <TextView
+            android:id="@+id/statusText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/powerImageView"
+            android:layout_marginStart="32dp"
+            android:layout_marginEnd="32dp"
+            android:textAlignment="center"/>
+
         <com.lvaccaro.lamp.PowerImageView
             android:id="@+id/powerImageView"
             android:layout_width="70dp"
@@ -21,8 +30,15 @@
             android:layout_margin="20dp"
             android:background="@drawable/ic_lamp_off" />
 
-        <TextView
-            android:id="@+id/statusText"
+        <include
+            android:id="@+id/content_main_status_on"
+            android:visibility="gone"
+            layout="@layout/fragment_on_main_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/powerImageView" />
+
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@id/powerImageView"
