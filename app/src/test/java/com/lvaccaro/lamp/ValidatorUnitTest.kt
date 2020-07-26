@@ -170,6 +170,7 @@ class ValidatorUnitTest {
         val result = Validator.isBolt11(bolt11)
         assertFalse(result)
     }
+
     @Test
     fun isABolt11_testFive() {
         val bolt11 =
@@ -182,6 +183,18 @@ class ValidatorUnitTest {
         assertFalse(result)
     }
 
+    @Test
+    fun isABolt11_testSix() {
+        val bolt11 =
+            """
+            lnbcrt100n1p03chsnpp5n72j2e0ykwz7ue37e60qn623z9elq4fguv52ny7jjqmv990zajeqdql2pshjmt9de6zqamfw
+            35zqurp09kk2eqxqyjw5qcqp2sp5h0renl745kd7c86z2g49lkuhua3j66an80szd58qdpeyzhdkrl3srzjqfnup6dhq3x
+            ls5v5pw0ksgrx0gcerqpr2pd6y6ckhstql6qfncta6qq24qqqqqgqqqqqqqqpqqqqqzsqqc9qy9qsqfy8e5x6aya75n3ayd
+            5e8rsvkmepgq9gwf8v9ram560y5vlrapk9pwjxcfewfpvvnw97v49xzlce6zqmc5znv0ke6e3un5lm4hk8uewqq5dug0s
+            """.trimIndent().trim()
+        val result = Validator.isBolt11(bolt11)
+        assertFalse(result)
+    }
 
     @Test
     fun isNodeID_testOne() {

@@ -126,14 +126,26 @@ class Validator {
         }
 
         fun isBolt11(string: String): Boolean {
-            val startString = string.subSequence(0, 6)
+            // These variable (step and len) are used to check the type of invoice
+            // I need this variable because the prifix from (mainet, testnet) to regtest
+            // have different length.
+            // This function check the format bolt11 mensioned inside the bolt11.
+            // other sanity check will do from lightningd daemon.
+            var step = 2
+            var len = 6
+            if(string.startsWith("lnbcrt")){
+                step = 4
+                len = 7;
+            }
+            val startString = string.subSequence(0, len)
             Log.d(TAG, "First subsequences is ${startString}")
-            val lnNetwork = startString.subSequence(0, 2)
+            val lnNetwork = startString.subSequence(0, step)
             Log.d(TAG, "Network tag ${lnNetwork}")
-            val network = startString.subSequence(2, 4)
+            val network = startString.subSequence(step, step + 2)
+            step += 2
             Log.d(TAG, "Network tag is ${network}")
             // minimum cases, the time stamp can be more big but not more small of one digit
-            val timestamp = startString.subSequence(4, 5)
+            val timestamp = startString.subSequence(step, step + 1)
             //val timestampIsNum = timestamp.matches("-?\\d+(\\.\\d+)?".toRegex()) NOT HUMAN READBLE
             var timestampIsNum = true
             timestamp.forEach find@{ charatter ->
@@ -145,7 +157,8 @@ class Validator {
             Log.d(TAG, "Timestamp is ${timestamp}")
             Log.d(TAG, "The timestamp contains all numbers? ${timestampIsNum}")
             return isPrefix("ln", lnNetwork) &&
-                    (isPrefix("bc", network) || isPrefix("tb", network))
+                    (isPrefix("bc", network)
+                            || isPrefix("tb", network))
                       && timestampIsNum
         }
 
