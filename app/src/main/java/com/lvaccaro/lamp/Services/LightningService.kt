@@ -5,10 +5,12 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.os.Environment
+import android.os.FileObserver
 import androidx.preference.PreferenceManager
 import com.lvaccaro.lamp.MainActivity
 import com.lvaccaro.lamp.R
 import com.lvaccaro.lamp.rootDir
+import com.lvaccaro.lamp.util.LogObserver
 import java.io.File
 import java.util.logging.Logger
 
@@ -19,6 +21,7 @@ class LightningService : IntentService("LightningService") {
     var globber: Globber? = null
     val NOTIFICATION_ID = 573948
     val daemon = "lightningd"
+    lateinit var logObserver: FileObserver
 
     override fun onHandleIntent(workIntent: Intent?) {
         val dataString = workIntent!!.dataString
@@ -26,7 +29,6 @@ class LightningService : IntentService("LightningService") {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND)
-
         log.info("start $daemon service")
         val lightningDir = File(rootDir(), ".lightning")
         val bitcoinDir = File(rootDir(), ".bitcoin")
@@ -60,7 +62,7 @@ class LightningService : IntentService("LightningService") {
             // 10 days to catch a cheating attempt
             String.format("--watchtime-blocks=%s", 10 * 24 * 6))
 
-        if (!alias.isEmpty()) {
+        if (alias.isNotEmpty()) {
             options.add(String.format("--alias=%s", alias))
         }
 
@@ -96,22 +98,23 @@ class LightningService : IntentService("LightningService") {
             options.add("--always-use-proxy=true")
         }
 
-        if (!proxy.isEmpty()) {
+        if (proxy.isNotEmpty()) {
             options.add(String.format("--proxy=%s", proxy))
         }
-        if (!announceaddr.isEmpty()) {
+        if (announceaddr.isNotEmpty()) {
             options.add(String.format("--announce-addr=%s", announceaddr))
         }
-        if (!bindaddr.isEmpty()) {
+        if (bindaddr.isNotEmpty()) {
             options.add(String.format("--bind-addr=%s", bindaddr))
         }
-        if (!addr.isEmpty()) {
+        if (addr.isNotEmpty()) {
             options.add(String.format("--addr=%s", addr))
         }
 
         val pb = ProcessBuilder(options)
         pb.directory(binaryDir)
         pb.redirectErrorStream(true)
+        logObserver = LogObserver(rootDir().absolutePath,"$daemon.log")
         val logFile = File(rootDir(),"$daemon.log")
         if(logFile.exists()){
             logFile.delete()
@@ -130,10 +133,11 @@ class LightningService : IntentService("LightningService") {
         log.info("exit $daemon service")
 
         startForeground()
+        logObserver.startWatching();
         return Service.START_STICKY
     }
 
-    fun startForeground() {
+    private fun startForeground() {
         val intent = Intent(this, MainActivity::class.java)
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         val pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_ONE_SHOT)
@@ -170,6 +174,7 @@ class LightningService : IntentService("LightningService") {
         globber?.interrupt()
         process = null
         globber = null
+        logObserver.startWatching()
         cancelNotification()
     }
 }

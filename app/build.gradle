@@ -7,7 +7,7 @@ android {
     buildToolsVersion "29.0.3"
     defaultConfig {
         applicationId "com.lvaccaro.lamp"
-        minSdkVersion 19
+        minSdkVersion 24
         targetSdkVersion 28
         versionCode 34
         versionName "3.4"

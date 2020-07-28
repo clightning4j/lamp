@@ -93,7 +93,7 @@ class MainActivity : UriResultActivity() {
         }
     }
 
-    fun dir(): File {
+    private fun dir(): File {
         return getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS)!!
     }
 
@@ -149,7 +149,6 @@ class MainActivity : UriResultActivity() {
 
     override fun onResume() {
         super.onResume()
-
         if (!File(rootDir(), "lightning-cli").exists()) {
             findViewById<TextView>(R.id.statusText).text =
                 "Rub the lamp to download ${RELEASE} binaries."
@@ -160,7 +159,10 @@ class MainActivity : UriResultActivity() {
                 "Offline. Rub the lamp to start."
             return
         }
-        doAsync { getInfo() }
+        viewOnRunning.visibility = View.VISIBLE
+        doAsync {
+            getInfo()
+        }
     }
 
     override fun onPause() {
@@ -273,7 +275,7 @@ class MainActivity : UriResultActivity() {
         }
     }
 
-    fun isServiceRunning(name: String): Boolean {
+    private fun isServiceRunning(name: String): Boolean {
         val manager = getSystemService(ACTIVITY_SERVICE) as ActivityManager
         for (service in manager.getRunningServices(Int.MAX_VALUE)) {
             if (name.equals(service.service.className)) {
@@ -283,19 +285,19 @@ class MainActivity : UriResultActivity() {
         return false
     }
 
-    fun isLightningRunning(): Boolean {
+    private fun isLightningRunning(): Boolean {
         return isServiceRunning(LightningService::class.java.canonicalName)
     }
 
-    fun isTorRunning(): Boolean {
+    private fun isTorRunning(): Boolean {
         return isServiceRunning(TorService::class.java.canonicalName)
     }
 
-    fun onHistoryClick() {
-        HistoryFragment().show(supportFragmentManager, "History dialog")
+    private fun onHistoryClick() {
+        HistoryFragment().show(getSupportFragmentManager(), "History dialog")
     }
 
-    fun onPowerClick() {
+    private fun onPowerClick() {
         if (powerImageView.isAnimating()) {
             return
         }
@@ -333,28 +335,28 @@ class MainActivity : UriResultActivity() {
         }
     }
 
-    fun powerOff() {
+    private fun powerOff() {
         powerImageView.off()
         timer?.cancel()
         findViewById<TextView>(R.id.statusText).text = "Offline. Rub the lamp to turn on."
         findViewById<ImageView>(R.id.qrcodeImageView).visibility = View.GONE
         findViewById<TextView>(R.id.textViewQr).visibility = View.GONE
         findViewById<ImageView>(R.id.arrowImageView).visibility = View.GONE
-        viewOnRunning?.visibility = View.GONE
+        viewOnRunning.visibility = View.GONE
         findViewById<FloatingActionButton>(R.id.floating_action_button).hide()
         invalidateOptionsMenu()
     }
 
-    fun powerOn() {
+    private fun powerOn() {
         powerImageView.on()
-        viewOnRunning?.visibility = View.VISIBLE
+        viewOnRunning.visibility = View.VISIBLE
         findViewById<ImageView>(R.id.arrowImageView).visibility = View.VISIBLE
         findViewById<TextView>(R.id.textViewQr).visibility = View.VISIBLE
         findViewById<FloatingActionButton>(R.id.floating_action_button).show()
         invalidateOptionsMenu()
     }
 
-    fun getInfo() {
+    private fun getInfo() {
         try {
             val resChainInfo =
                 LightningCli().exec(this@MainActivity, arrayOf("getchaininfo"), true).toJSONObject()
@@ -415,7 +417,7 @@ class MainActivity : UriResultActivity() {
         }
     }
 
-    fun getQrCode(text: String): Bitmap {
+    private fun getQrCode(text: String): Bitmap {
         val SCALE = 16
         try {
             val matrix = Encoder.encode(text, ErrorCorrectionLevel.M).matrix
@@ -452,7 +454,7 @@ class MainActivity : UriResultActivity() {
         }
     }
 
-    fun download() {
+    private fun download() {
         // Download bitcoin_ndk package
         val tarFile = File(dir(), tarFilename())
         val request = DownloadManager.Request(Uri.parse(url()))
@@ -473,7 +475,7 @@ class MainActivity : UriResultActivity() {
         downloadCertID = downloadmanager.enqueue(requestCert)
     }
 
-    fun uncompress(inputFile: File, outputDir: File) {
+    private fun uncompress(inputFile: File, outputDir: File) {
         if (!outputDir.exists()) {
             outputDir.mkdir()
         }
@@ -513,7 +515,7 @@ class MainActivity : UriResultActivity() {
         inputFile.delete()
     }
 
-    fun waitTorBootstrap(): Boolean {
+    private fun waitTorBootstrap(): Boolean {
         val logFile = File(rootDir(), "tor.log")
         for (i in 0..10) {
             try {
@@ -526,7 +528,7 @@ class MainActivity : UriResultActivity() {
         return false
     }
 
-    fun waitLightningBootstrap(): Boolean {
+    private fun waitLightningBootstrap(): Boolean {
         val logFile = File(rootDir(), "lightningd.log")
         for (i in 0..10) {
             try {
@@ -540,7 +542,7 @@ class MainActivity : UriResultActivity() {
         return false
     }
 
-    fun start() {
+    private fun start() {
         val sharedPref = PreferenceManager.getDefaultSharedPreferences(applicationContext)
         val rpcuser = sharedPref.getString("bitcoin-rpcuser", "").toString()
         val rpcpassword = sharedPref.getString("bitcoin-rpcpassword", "").toString()
@@ -633,7 +635,7 @@ class MainActivity : UriResultActivity() {
         stopService(Intent(this, LightningService::class.java))
     }
 
-    fun startTor() {
+    private fun startTor() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             startForegroundService(Intent(this, TorService::class.java))
         } else {
@@ -641,7 +643,7 @@ class MainActivity : UriResultActivity() {
         }
     }
 
-    fun startLightning() {
+    private fun startLightning() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             startForegroundService(Intent(this, LightningService::class.java))
         } else {
@@ -649,7 +651,7 @@ class MainActivity : UriResultActivity() {
         }
     }
 
-    fun stop() {
+    private fun stop() {
         log.info("---onStop---")
         try {
             val res = LightningCli().exec(this, arrayOf("stop"))
@@ -663,7 +665,7 @@ class MainActivity : UriResultActivity() {
         stopTorService()
     }
 
-    fun generateNewAddress() {
+    private fun generateNewAddress() {
         val res = cli.exec(
             this@MainActivity,
             arrayOf("newaddr"),
@@ -698,7 +700,7 @@ class MainActivity : UriResultActivity() {
         }
     }
 
-    fun copyToClipboard(key: String, text: String) {
+    private fun copyToClipboard(key: String, text: String) {
         val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
         val clip: ClipData = ClipData.newPlainText(key, text)
         clipboard.primaryClip = clip
