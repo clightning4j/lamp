@@ -4,7 +4,6 @@ import android.content.Context
 import android.util.Log
 import com.lvaccaro.lamp.LightningCli
 import com.lvaccaro.lamp.toJSONObject
-import java.nio.charset.Charset
 import java.util.*
 import kotlin.collections.HashMap
 
@@ -66,8 +65,9 @@ class Validator {
             // Match with the pattern STRING:STRING
             if (tokenizer.countTokens() == 2) {
                 //The variable tmp will contain all trash (not util) information
-                var tmp = tokenizer.nextToken();
+                var tmp = tokenizer.nextToken()
                 Log.d(TAG, "**** Bitcoin protocol: ${tmp} *********")
+                if(!isProtocolPrefix(tmp)) return result;
                 val queryString = tokenizer.nextToken()
                 Log.d(TAG, "**** bitcoin URI: ${queryString} *********")
                 // Reassign the tokenizer variable a new token object
@@ -96,6 +96,11 @@ class Validator {
                 }
             }
             return result
+        }
+
+        private fun isProtocolPrefix(protocol: String?): Boolean {
+            return protocol.equals("bitcoin", false) ||
+                    protocol.equals("lightning", false)
         }
 
         private fun parseParameter(uri: String, result: HashMap<String, String>): Boolean{

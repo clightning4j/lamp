@@ -230,4 +230,63 @@ class ValidatorUnitTest {
         assertFalse(result)
     }
 
+    @Test
+    fun isNodeID_testFive() {
+        val nodeid =
+            """
+            0219f8900ee78a89f050c24d8b69492954f9fdbabed753710845eb75d3a75a5880@139.162.159.79:9735
+            """.trimIndent().trim()
+        val result = Validator.isLightningNodURI(nodeid)
+        assertTrue(result)
+    }
+
+    @Test
+    fun isCorrectValue_testOne() {
+        val nodeid =
+            """
+            0219f8900ee78a89f050c24d8b69492954f9fdbabed753710845eb75d3a75a5880@139.162.159.79:9735
+            """.trimIndent().trim()
+        val bitcoinAddress = Validator.isBitcoinAddress(nodeid)
+        val bitcoinURI = Validator.isBitcoinURL(nodeid)
+        val bolt11 = Validator.isBolt11(nodeid)
+        val nodeURL = Validator.isLightningNodURI(nodeid)
+        assertFalse(bitcoinAddress)
+        assertFalse(bitcoinURI)
+        assertFalse(bolt11)
+        assertTrue(nodeURL)
+    }
+
+    @Test
+    fun isCorrectValue_testTwo() {
+        val invoice =
+            """
+            lnbc2500u1pvjluezpp5qqqsyqcyq5rqwzqfqqqsyqcyq5rqwzqfqqqsyqcyq5rqwzqfqypqdpquwpc4curk03c9
+            wlrswe78q4eyqc7d8d0xqzpuyk0sg5g70me25alkluzd2x62aysf2pyy8edtjeevuv4p2d5p76r4zkmneet7
+            uvyakky2zr4cusd45tftc9c5fh0nnqpnl2jfll544esqchsrny
+            """.trimIndent().trim()
+        val bitcoinAddress = Validator.isBitcoinAddress(invoice)
+        val bitcoinURI = Validator.isBitcoinURL(invoice)
+        val bolt11 = Validator.isBolt11(invoice)
+        val nodeURL = Validator.isLightningNodURI(invoice)
+        assertFalse(bitcoinAddress)
+        assertFalse(bitcoinURI)
+        assertTrue(bolt11)
+        assertFalse(nodeURL)
+    }
+
+    @Test
+    fun isCorrectValue_testThree() {
+        val adderss =
+            """
+            bcrt1q7ezrtfqx2w4wg6vmlsk9uaxqeuxgpewdn09zc8
+            """.trimIndent().trim()
+        val bitcoinAddress = Validator.isBitcoinAddress(adderss)
+        val bitcoinURI = Validator.isBitcoinURL(adderss)
+        val bolt11 = Validator.isBolt11(adderss)
+        val nodeURL = Validator.isLightningNodURI(adderss)
+        assertTrue(bitcoinAddress)
+        assertFalse(bitcoinURI)
+        assertFalse(bolt11)
+        assertFalse(nodeURL)
+    }
 }
