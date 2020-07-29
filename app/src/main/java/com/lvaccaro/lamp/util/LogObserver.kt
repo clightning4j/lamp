@@ -1,19 +1,21 @@
 package com.lvaccaro.lamp.util
 
+import android.content.Context
 import android.os.Build
 import android.os.FileObserver
 import android.util.Log
 import com.lvaccaro.lamp.util.hendler.IEventHandler
+import com.lvaccaro.lamp.util.hendler.NewChannelPayment
 import java.io.File
 import java.io.LineNumberReader
 
 /**
  * This class is an implementation of FileObserver discussed inside the PRs XX
- * The ideas is ideated from @lvaccaro
+ * The ideas is from @lvaccaro
  *
  * Info about the clightning node
  *
- * ---- Node create a transaction (with keysend, pay)----
+ * ---- Node create a transaction (with fundchannel)----
  * Pattern log: 2020-07-28T09:26:28.411Z DEBUG wallet: Owning output 1 89846sat (SEGWIT) txid 33c1f5d2df4f425898dc6eb49dae51aaab1d430ee7c0da2cab18123d5c1192f0
  *
  * ------ Node receive transaction to blockchain ----
@@ -24,19 +26,26 @@ import java.io.LineNumberReader
  *
  * @author https://github.com/vincenzopalazzo
  */
-class LogObserver(var path: String, var nameFile: String) : FileObserver(path) {
+class LogObserver(val context: Context, val path: String, val nameFile: String) : FileObserver(path) {
+
+    init {
+        initHandler()
+    }
 
     companion object {
         val TAG = LogObserver::class.java.canonicalName
     }
 
-    private lateinit var actionHandler: Map<String, IEventHandler>
+    private lateinit var actionHandler: ArrayList<IEventHandler>
     private lateinit var logFile: File
     private var actualLine = 0
     private var lineNumberReader: LineNumberReader? = null
 
+
     fun initHandler() {
-        //TODO init after
+        actionHandler = ArrayList<IEventHandler>()
+        actionHandler.add(NewChannelPayment("TEST"))
+        Log.d(TAG, "actionHandler inizialized")
     }
 
     override fun onEvent(event: Int, file: String?) {
@@ -60,7 +69,7 @@ class LogObserver(var path: String, var nameFile: String) : FileObserver(path) {
         var line: String? = lineNumberReader?.readLine()
         while (line != null){
             readLogLine(line)
-            Log.e(TAG, line)
+            Log.d(TAG, line)
             line = lineNumberReader?.readLine()
         }
         Log.d(TAG, "****** New number of line ${actualLine} ********")
@@ -68,6 +77,7 @@ class LogObserver(var path: String, var nameFile: String) : FileObserver(path) {
 
     private fun readLogLine(line: String) {
         Log.e(TAG, "******** ACTUAL LINE ${line} ********")
+        actionHandler.forEach { it -> it.doReceive(context, line) }
         actualLine++
     }
 

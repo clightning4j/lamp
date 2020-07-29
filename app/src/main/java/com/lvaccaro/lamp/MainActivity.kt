@@ -24,6 +24,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.core.app.ActivityCompat
 import androidx.core.net.toUri
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.preference.PreferenceManager
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
@@ -33,6 +34,7 @@ import com.google.zxing.qrcode.encoder.Encoder
 import com.lvaccaro.lamp.Channels.ChannelsActivity
 import com.lvaccaro.lamp.Services.LightningService
 import com.lvaccaro.lamp.Services.TorService
+import com.lvaccaro.lamp.Services.SimulatorPlugin
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream
 import org.apache.commons.compress.compressors.xz.XZCompressorInputStream
@@ -61,6 +63,7 @@ class MainActivity : UriResultActivity() {
     private lateinit var powerImageView: PowerImageView
     private lateinit var viewOnRunning: View
     private var timer: Timer? = null
+    private lateinit var notificationReceiver: NotificationReceiver
 
     companion object {
         val RELEASE = "release_clightning_0.9.0"
@@ -106,6 +109,10 @@ class MainActivity : UriResultActivity() {
         val arrowImageView = findViewById<ImageView>(R.id.arrowImageView)
         arrowImageView.setOnClickListener { this.onHistoryClick() }
         viewOnRunning = findViewById(R.id.content_main_status_on)
+
+        notificationReceiver = NotificationReceiver(viewOnRunning)
+        val localBroadcastManager = LocalBroadcastManager.getInstance(this)
+        localBroadcastManager.registerReceiver(notificationReceiver, IntentFilter("TEST"))
 
         val addressTextView = findViewById<TextView>(R.id.textViewQr)
         addressTextView.setOnClickListener {
@@ -162,6 +169,7 @@ class MainActivity : UriResultActivity() {
         viewOnRunning.visibility = View.VISIBLE
         doAsync {
             getInfo()
+            runIntent("TEST")
         }
     }
 
@@ -354,6 +362,7 @@ class MainActivity : UriResultActivity() {
         findViewById<TextView>(R.id.textViewQr).visibility = View.VISIBLE
         findViewById<FloatingActionButton>(R.id.floating_action_button).show()
         invalidateOptionsMenu()
+        runIntent("TEST")
     }
 
     private fun getInfo() {
@@ -705,5 +714,38 @@ class MainActivity : UriResultActivity() {
         val clip: ClipData = ClipData.newPlainText(key, text)
         clipboard.primaryClip = clip
         Toast.makeText(this, "Copied to clipboard", Toast.LENGTH_LONG).show()
+    }
+
+    private fun runIntent(key: String){
+        //TODO(vincenzopalazzo): only a test
+        val intent = Intent(key)
+        LocalBroadcastManager.getInstance(applicationContext).sendBroadcast(intent)
+    }
+
+    class NotificationReceiver(val view: View) : BroadcastReceiver() {
+
+        companion object{
+            val TAG = NotificationReceiver::class.java.canonicalName
+        }
+
+        // I can create a mediator that I can use to call all method inside the
+        //lightning-cli and return a json if the answer i ok or I throw an execeptions
+        private val cli = LightningCli()
+
+        override fun onReceive(context: Context?, intent: Intent?) {
+            Log.d(TAG, "onReceive action ${intent?.action}")
+            when (intent?.action) {
+                "TEST" -> updateBalanceView(context, intent)
+            }
+        }
+
+        fun updateBalanceView(context: Context?, intent: Intent?) {
+            val listFunds = cli.exec(context!!, arrayOf("listfunds"),true).toJSONObject()
+            val balance = SimulatorPlugin.funds(listFunds)
+            view.findViewById<TextView>(R.id.off_chain_balance).text = balance["off_chain"].toString()
+            view.findViewById<TextView>(R.id.on_chain_balance).text = balance["on_chain"].toString()
+            val message: String? = intent?.extras?.get("message")?.toString()
+            Toast.makeText(context, message ?: "Balance update", Toast.LENGTH_LONG).show()
+        }
     }
 }

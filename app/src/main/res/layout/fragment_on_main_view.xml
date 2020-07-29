@@ -63,13 +63,14 @@
                     android:text="sathoshi engaged on channels"/>
 
                 <TextView
+                    android:id="@+id/off_chain_balance"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_alignParentEnd="true"
                     android:layout_centerInParent="true"
                     android:textStyle="bold"
                     android:textSize="18sp"
-                    android:text="100000 msat"/>
+                    android:text="Unavaible msat"/>
 
             </RelativeLayout>
         </LinearLayout>
@@ -130,13 +131,14 @@
                     android:text="sathoshi engaged on blockchain"/>
 
                 <TextView
+                    android:id="@+id/on_chain_balance"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_alignParentEnd="true"
                     android:layout_centerInParent="true"
                     android:textStyle="bold"
                     android:textSize="18sp"
-                    android:text="100000 msat"/>
+                    android:text="Unavaible msat"/>
 
             </RelativeLayout>
         </LinearLayout>

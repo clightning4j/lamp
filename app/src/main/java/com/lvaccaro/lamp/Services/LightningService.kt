@@ -114,7 +114,7 @@ class LightningService : IntentService("LightningService") {
         val pb = ProcessBuilder(options)
         pb.directory(binaryDir)
         pb.redirectErrorStream(true)
-        logObserver = LogObserver(rootDir().absolutePath,"$daemon.log")
+        logObserver = LogObserver(applicationContext, rootDir().absolutePath,"$daemon.log")
         val logFile = File(rootDir(),"$daemon.log")
         if(logFile.exists()){
             logFile.delete()
