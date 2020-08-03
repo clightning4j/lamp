@@ -6,6 +6,7 @@ import android.os.FileObserver
 import android.util.Log
 import com.lvaccaro.lamp.util.hendler.IEventHandler
 import com.lvaccaro.lamp.util.hendler.NewChannelPayment
+import com.lvaccaro.lamp.util.hendler.ShutdownNode
 import java.io.File
 import java.io.LineNumberReader
 
@@ -15,8 +16,16 @@ import java.io.LineNumberReader
  *
  * Info about the clightning node
  *
- * ---- Node create a transaction (with fundchannel)----
- * Pattern log: 2020-07-28T09:26:28.411Z DEBUG wallet: Owning output 1 89846sat (SEGWIT) txid 33c1f5d2df4f425898dc6eb49dae51aaab1d430ee7c0da2cab18123d5c1192f0
+ * ---- Node create a transaction (with fundchannel or when I receive the onchain tx)----
+ * Pattern log: DEBUG wallet: Owning output 1 89846sat (SEGWIT) txid 33c1f5d2df4f425898dc6eb49dae51aaab1d430ee7c0da2cab18123d5c1192f0
+ * ---- Node make a withdraw action
+ * Patter log: DEBUG lightningd: sendrawtransaction
+ *
+ * --- Node adding block
+ * Pattern log: DEBUG lightningd: Adding block
+ *
+ * ---- Shutdown node with command close----
+ * Pattern log: 2020-08-03T15:38:38.812Z UNUSUAL lightningd: JSON-RPC shutdown
  *
  * ------ Node receive transaction to blockchain ----
  * Pattern log: No debug log
@@ -44,7 +53,8 @@ class LogObserver(val context: Context, val path: String, val nameFile: String) 
 
     fun initHandler() {
         actionHandler = ArrayList<IEventHandler>()
-        actionHandler.add(NewChannelPayment("TEST"))
+        actionHandler.add(NewChannelPayment(LampKeys.NODE_NOTIFICATION_FUNDCHANNEL))
+        actionHandler.add(ShutdownNode(LampKeys.NODE_NOTIFICATION_SHUTDOWN))
         Log.d(TAG, "actionHandler inizialized")
     }
 

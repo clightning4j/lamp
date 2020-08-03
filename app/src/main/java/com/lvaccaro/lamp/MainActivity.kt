@@ -35,6 +35,7 @@ import com.lvaccaro.lamp.Channels.ChannelsActivity
 import com.lvaccaro.lamp.Services.LightningService
 import com.lvaccaro.lamp.Services.TorService
 import com.lvaccaro.lamp.Services.SimulatorPlugin
+import com.lvaccaro.lamp.util.LampKeys
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream
 import org.apache.commons.compress.compressors.xz.XZCompressorInputStream
@@ -110,9 +111,8 @@ class MainActivity : UriResultActivity() {
         arrowImageView.setOnClickListener { this.onHistoryClick() }
         viewOnRunning = findViewById(R.id.content_main_status_on)
 
-        notificationReceiver = NotificationReceiver(viewOnRunning)
-        val localBroadcastManager = LocalBroadcastManager.getInstance(this)
-        localBroadcastManager.registerReceiver(notificationReceiver, IntentFilter("TEST"))
+        notificationReceiver = NotificationReceiver(this)
+        registerLocalReceiver(notificationReceiver)
 
         val addressTextView = findViewById<TextView>(R.id.textViewQr)
         addressTextView.setOnClickListener {
@@ -169,7 +169,7 @@ class MainActivity : UriResultActivity() {
         viewOnRunning.visibility = View.VISIBLE
         doAsync {
             getInfo()
-            runIntent("TEST")
+            runIntent(LampKeys.NODE_NOTIFICATION_FUNDCHANNEL)
         }
     }
 
@@ -283,6 +283,25 @@ class MainActivity : UriResultActivity() {
         }
     }
 
+    //Update View method
+    /**
+     * This method is called inside the brodcast receiver
+     */
+    fun updateBalanceView(context: Context?, intent: Intent?) {
+        val listFunds = cli.exec(context!!, arrayOf("listfunds"), true).toJSONObject()
+        val balance = SimulatorPlugin.funds(listFunds)
+        viewOnRunning.findViewById<TextView>(R.id.off_chain_balance).text =
+            balance["off_chain"].toString()
+        viewOnRunning.findViewById<TextView>(R.id.on_chain_balance).text =
+            balance["on_chain"].toString()
+        val message: String? = intent?.extras?.get("message")?.toString()
+        Toast.makeText(context, message ?: "Balance update", Toast.LENGTH_LONG).show()
+    }
+
+    fun shutdownView(context: Context?, intent: Intent?) {
+
+    }
+
     private fun isServiceRunning(name: String): Boolean {
         val manager = getSystemService(ACTIVITY_SERVICE) as ActivityManager
         for (service in manager.getRunningServices(Int.MAX_VALUE)) {
@@ -362,7 +381,7 @@ class MainActivity : UriResultActivity() {
         findViewById<TextView>(R.id.textViewQr).visibility = View.VISIBLE
         findViewById<FloatingActionButton>(R.id.floating_action_button).show()
         invalidateOptionsMenu()
-        runIntent("TEST")
+        runIntent(LampKeys.NODE_NOTIFICATION_FUNDCHANNEL)
     }
 
     private fun getInfo() {
@@ -402,7 +421,8 @@ class MainActivity : UriResultActivity() {
                     visibility = View.VISIBLE
                 }
                 val delta = blockcount - blockheight
-                findViewById<TextView>(R.id.statusText).text = if (delta > 0) "Syncing blocks -${delta}" else ""
+                findViewById<TextView>(R.id.statusText).text =
+                    if (delta > 0) "Syncing blocks -${delta}" else ""
             }
             val qrcode = getQrCode(txt)
             runOnUiThread {
@@ -484,6 +504,7 @@ class MainActivity : UriResultActivity() {
         downloadCertID = downloadmanager.enqueue(requestCert)
     }
 
+    //FIXME(vincenzopalazzo) Maybe is better make this operation with a different class?
     private fun uncompress(inputFile: File, outputDir: File) {
         if (!outputDir.exists()) {
             outputDir.mkdir()
@@ -604,7 +625,8 @@ class MainActivity : UriResultActivity() {
             runOnUiThread {
                 findViewById<TextView>(R.id.statusText).text =
                     "Starting lightning..."
-                startLightning() }
+                startLightning()
+            }
             // wait lightning to be bootstrapped
             if (!waitLightningBootstrap()) {
                 runOnUiThread {
@@ -640,7 +662,7 @@ class MainActivity : UriResultActivity() {
         stopService(Intent(this, TorService::class.java))
     }
 
-    private fun stopLightningService(){
+    private fun stopLightningService() {
         stopService(Intent(this, LightningService::class.java))
     }
 
@@ -716,36 +738,37 @@ class MainActivity : UriResultActivity() {
         Toast.makeText(this, "Copied to clipboard", Toast.LENGTH_LONG).show()
     }
 
-    private fun runIntent(key: String){
-        //TODO(vincenzopalazzo): only a test
+    private fun registerLocalReceiver(notificationReceiver: NotificationReceiver) {
+        val localBroadcastManager = LocalBroadcastManager.getInstance(this)
+        val intentFilter = IntentFilter()
+        intentFilter.addAction(LampKeys.NODE_NOTIFICATION_SHUTDOWN)
+        intentFilter.addAction(LampKeys.NODE_NOTIFICATION_FUNDCHANNEL)
+        localBroadcastManager.registerReceiver(notificationReceiver, intentFilter)
+    }
+
+    private fun runIntent(key: String) {
         val intent = Intent(key)
         LocalBroadcastManager.getInstance(applicationContext).sendBroadcast(intent)
     }
 
-    class NotificationReceiver(val view: View) : BroadcastReceiver() {
+    class NotificationReceiver(val mainActivity: MainActivity) : BroadcastReceiver() {
 
-        companion object{
+        companion object {
             val TAG = NotificationReceiver::class.java.canonicalName
         }
 
         // I can create a mediator that I can use to call all method inside the
         //lightning-cli and return a json if the answer i ok or I throw an execeptions
-        private val cli = LightningCli()
 
         override fun onReceive(context: Context?, intent: Intent?) {
             Log.d(TAG, "onReceive action ${intent?.action}")
             when (intent?.action) {
-                "TEST" -> updateBalanceView(context, intent)
+                LampKeys.NODE_NOTIFICATION_FUNDCHANNEL -> mainActivity.updateBalanceView(
+                    context,
+                    intent
+                )
+                LampKeys.NODE_NOTIFICATION_SHUTDOWN -> mainActivity.powerOff()
             }
-        }
-
-        fun updateBalanceView(context: Context?, intent: Intent?) {
-            val listFunds = cli.exec(context!!, arrayOf("listfunds"),true).toJSONObject()
-            val balance = SimulatorPlugin.funds(listFunds)
-            view.findViewById<TextView>(R.id.off_chain_balance).text = balance["off_chain"].toString()
-            view.findViewById<TextView>(R.id.on_chain_balance).text = balance["on_chain"].toString()
-            val message: String? = intent?.extras?.get("message")?.toString()
-            Toast.makeText(context, message ?: "Balance update", Toast.LENGTH_LONG).show()
         }
     }
 }

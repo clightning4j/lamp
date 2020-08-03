@@ -144,6 +144,8 @@ open class UriResultActivity() : AppCompatActivity() {
         }
         var amount = ""
         if(param!!.contains(LampKeys.AMOUNT_KEY)){
+            //FIXME(vincenzopalazzo): create a converted class to set the set the correct ammounet.
+            //For instance, Validator.toMilliSatoshi()
             amount = (param!![LampKeys.AMOUNT_KEY]!!.toDouble() * 100000000).toLong().toString()
         }
         bundle.putString(LampKeys.ADDRESS_KEY, address)

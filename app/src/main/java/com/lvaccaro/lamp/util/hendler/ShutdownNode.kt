@@ -5,20 +5,19 @@ import android.content.Intent
 import android.util.Log
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 
-class NewChannelPayment(val actionName: String): IEventHandler{
+class ShutdownNode(val actionName: String): IEventHandler{
 
     companion object{
-        val TAG = NewChannelPayment::class.java.canonicalName
-        val PATTERN_ONE = "DEBUG wallet: Owning output"
-        val PATTERN_TWO = "DEBUG lightningd: sendrawtransaction"
+        val TAG = ShutdownNode.javaClass.canonicalName
+        val PATTERN = "UNUSUAL lightningd: JSON-RPC shutdown"
     }
 
     override fun doReceive(context: Context, information: String) {
-        if(information.contains(PATTERN_ONE) || information.contains(PATTERN_TWO)){
-            Log.e(TAG, "****** Action received ${actionName} ******")
+        if(information.contentEquals(PATTERN)){
+            Log.e(NewChannelPayment.TAG, "****** Action received ${actionName} ******")
             val intent = Intent()
             intent.action = actionName
-            intent.putExtra("message", "Payment sent")
+            intent.putExtra("message", "Shutdown")
             LocalBroadcastManager.getInstance(context).sendBroadcast(intent)
         }
     }
