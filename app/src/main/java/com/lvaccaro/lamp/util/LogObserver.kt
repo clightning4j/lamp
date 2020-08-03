@@ -24,6 +24,9 @@ import java.io.LineNumberReader
  * --- Node adding block
  * Pattern log: DEBUG lightningd: Adding block
  *
+ * --- Node sendrawtransaction
+ * Pattern log: DEBUG plugin-esplora: sendrawtx exit 0
+ *
  * ---- Shutdown node with command close----
  * Pattern log: 2020-08-03T15:38:38.812Z UNUSUAL lightningd: JSON-RPC shutdown
  *
