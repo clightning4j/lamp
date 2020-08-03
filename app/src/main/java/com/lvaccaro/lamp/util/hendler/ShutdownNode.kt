@@ -13,7 +13,7 @@ class ShutdownNode(val actionName: String): IEventHandler{
     }
 
     override fun doReceive(context: Context, information: String) {
-        if(information.contentEquals(PATTERN)){
+        if(information.contains(PATTERN)){
             Log.e(NewChannelPayment.TAG, "****** Action received ${actionName} ******")
             val intent = Intent()
             intent.action = actionName

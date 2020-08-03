@@ -22,6 +22,7 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
+import androidx.cardview.widget.CardView
 import androidx.core.app.ActivityCompat
 import androidx.core.net.toUri
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
@@ -296,10 +297,6 @@ class MainActivity : UriResultActivity() {
             balance["on_chain"].toString()
         val message: String? = intent?.extras?.get("message")?.toString()
         Toast.makeText(context, message ?: "Balance update", Toast.LENGTH_LONG).show()
-    }
-
-    fun shutdownView(context: Context?, intent: Intent?) {
-
     }
 
     private fun isServiceRunning(name: String): Boolean {
@@ -767,7 +764,10 @@ class MainActivity : UriResultActivity() {
                     context,
                     intent
                 )
-                LampKeys.NODE_NOTIFICATION_SHUTDOWN -> mainActivity.powerOff()
+                LampKeys.NODE_NOTIFICATION_SHUTDOWN -> {
+                    mainActivity.powerOff()
+                    mainActivity.recreate()
+                }
             }
         }
     }
