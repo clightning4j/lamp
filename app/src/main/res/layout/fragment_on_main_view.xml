@@ -4,8 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:id="@+id/on_main_view"
-    android:layout_centerInParent="true"
-    android:layout_marginBottom="56dp">
+    android:layout_centerInParent="true">
 
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/off_chain_card"
@@ -13,15 +12,14 @@
         android:layout_height="wrap_content"
         android:layout_marginLeft="10dp"
         android:layout_marginRight="10dp"
-        android:layout_marginTop="25dp"
         android:layout_marginBottom="10dp"
+        android:layout_below="@+id/statusText"
         android:theme="@style/Theme.MaterialComponents.Light"
         android:padding="10dp"
         android:background="@color/cardview_light_background"
-        android:layout_below="@+id/powerImageView"
-        android:checkable="true"
-        android:clickable="true"
-        android:focusable="true">
+        android:checkable="false"
+        android:clickable="false"
+        android:focusable="false">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -47,7 +45,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:background="@color/design_default_color_background"
-                    android:textSize="25sp"
+                    android:textSize="25dp"
                     android:textStyle="bold"
                     android:text="Off chain"/>
 
@@ -58,7 +56,7 @@
                     android:layout_below="@+id/amount_off_chain_text"
                     android:layout_marginTop="20dp"
                     android:background="@color/design_default_color_background"
-                    android:textSize="15sp"
+                    android:textSize="15dp"
                     android:textStyle="bold"
                     android:text="sathoshi engaged on channels"/>
 
@@ -69,7 +67,7 @@
                     android:layout_alignParentEnd="true"
                     android:layout_centerInParent="true"
                     android:textStyle="bold"
-                    android:textSize="18sp"
+                    android:textSize="18dp"
                     android:text="Unavaible msat"/>
 
             </RelativeLayout>
@@ -82,13 +80,12 @@
         android:layout_height="wrap_content"
         android:layout_marginLeft="10dp"
         android:layout_marginRight="10dp"
-        android:layout_marginBottom="25dp"
         android:theme="@style/Theme.MaterialComponents.Light"
         android:padding="10dp"
         android:background="@color/cardview_light_background"
-        android:checkable="true"
-        android:clickable="true"
-        android:focusable="true">
+        android:checkable="false"
+        android:clickable="false"
+        android:focusable="false">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -115,7 +112,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:background="@color/design_default_color_background"
-                    android:textSize="25sp"
+                    android:textSize="25dp"
                     android:textStyle="bold"
                     android:text="On Chain"/>
 
@@ -126,7 +123,7 @@
                     android:layout_below="@+id/amount_on_chain_text"
                     android:layout_marginTop="20dp"
                     android:background="@color/design_default_color_background"
-                    android:textSize="15sp"
+                    android:textSize="15dp"
                     android:textStyle="bold"
                     android:text="sathoshi engaged on blockchain"/>
 
@@ -137,7 +134,7 @@
                     android:layout_alignParentEnd="true"
                     android:layout_centerInParent="true"
                     android:textStyle="bold"
-                    android:textSize="18sp"
+                    android:textSize="18dp"
                     android:text="Unavaible msat"/>
 
             </RelativeLayout>

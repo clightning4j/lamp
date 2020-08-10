@@ -58,13 +58,11 @@ class LogObserver(val context: Context, val path: String, val nameFile: String) 
         actionHandler = ArrayList<IEventHandler>()
         actionHandler.add(NewChannelPayment(LampKeys.NODE_NOTIFICATION_FUNDCHANNEL))
         actionHandler.add(ShutdownNode(LampKeys.NODE_NOTIFICATION_SHUTDOWN))
-        Log.d(TAG, "actionHandler inizialized")
     }
 
     override fun onEvent(event: Int, file: String?) {
         if(file == null) return
         if (file?.equals(nameFile)) {
-            Log.d(TAG, "********* Event inside log ${file} ******")
             when (event) {
                 FileObserver.MODIFY -> readNewLines()
             }
@@ -75,8 +73,8 @@ class LogObserver(val context: Context, val path: String, val nameFile: String) 
         if(lineNumberReader == null)
             initFileLog()
 
+        //FIXME(vicenzopalazzo): This is real util?
         if(lineNumberReader == null) return
-        Log.d(TAG, "***** FILE modified *******")
         Log.d(TAG, "***** Actual line: ${actualLine}")
         lineNumberReader?.lineNumber = actualLine
         var line: String? = lineNumberReader?.readLine()
@@ -85,11 +83,9 @@ class LogObserver(val context: Context, val path: String, val nameFile: String) 
             Log.d(TAG, line)
             line = lineNumberReader?.readLine()
         }
-        Log.d(TAG, "****** New number of line ${actualLine} ********")
     }
 
     private fun readLogLine(line: String) {
-        Log.e(TAG, "******** ACTUAL LINE ${line} ********")
         actionHandler.forEach { it -> it.doReceive(context, line) }
         actualLine++
     }
@@ -100,6 +96,5 @@ class LogObserver(val context: Context, val path: String, val nameFile: String) 
         //FIXME: level api that are enable this line about is Android nougat
         // for the actual version of lightning_ndk I don't need to insert the check of the version
         actualLine = lineNumberReader!!.lines().count().toInt()
-        Log.d(TAG, "The log file contains ${actualLine} lines")
     }
 }
