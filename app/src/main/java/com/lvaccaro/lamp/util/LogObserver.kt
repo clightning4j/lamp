@@ -75,7 +75,6 @@ class LogObserver(val context: Context, val path: String, val nameFile: String) 
 
         //FIXME(vicenzopalazzo): This is real util?
         if(lineNumberReader == null) return
-        Log.d(TAG, "***** Actual line: ${actualLine}")
         lineNumberReader?.lineNumber = actualLine
         var line: String? = lineNumberReader?.readLine()
         while (line != null){

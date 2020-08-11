@@ -1,4 +1,4 @@
-package com.lvaccaro.lamp.Services
+package com.lvaccaro.lamp.util
 
 import android.util.Log
 import org.json.JSONArray
@@ -12,8 +12,9 @@ class SimulatorPlugin{
 
         fun funds(jsonObject: JSONObject): JSONObject{
             val response = JSONObject()
-            var onChainFunds = 0;
-            var offChainFunds = 0;
+            var onChainFunds = 0
+            var offChainFunds = 0
+            var fundsToUs = 0
             if(jsonObject.has("outputs")){
                 val outputs: JSONArray = jsonObject["outputs"] as JSONArray
                 for (i in 0 until outputs.length()){
@@ -35,6 +36,22 @@ class SimulatorPlugin{
             }
             response.put("on_chain", onChainFunds.toString() + " msat")
             response.put("off_chain", offChainFunds.toString() + " msat")
+            return response
+        }
+
+        fun fundsInChannel(listFunds: JSONObject): Any {
+            var fundsToUs = 0
+            val peers = listFunds["peers"] as JSONArray
+            for (i in 0 until peers.length()) {
+                val peer = peers.get(i) as? JSONObject
+                val peerChannels = peer?.get("channels") as JSONArray
+                for (j in 0 until peerChannels.length()) {
+                    val channel = peerChannels.get(j) as JSONObject
+                    fundsToUs += channel["msatoshi_to_us"] as Int
+                }
+            }
+            val response = JSONObject()
+            response.put("to_us", fundsToUs.toString())
             return response
         }
     }

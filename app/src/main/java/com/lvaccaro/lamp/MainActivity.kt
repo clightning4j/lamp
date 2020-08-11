@@ -34,7 +34,7 @@ import com.google.zxing.qrcode.encoder.Encoder
 import com.lvaccaro.lamp.Channels.ChannelsActivity
 import com.lvaccaro.lamp.Services.LightningService
 import com.lvaccaro.lamp.Services.TorService
-import com.lvaccaro.lamp.Services.SimulatorPlugin
+import com.lvaccaro.lamp.util.SimulatorPlugin
 import com.lvaccaro.lamp.util.LampKeys
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream
@@ -289,11 +289,15 @@ class MainActivity : UriResultActivity() {
      */
     fun updateBalanceView(context: Context?, intent: Intent?) {
         val listFunds = cli.exec(context!!, arrayOf("listfunds"), true).toJSONObject()
+        val listpeers = cli.exec(context!!, arrayOf("listpeers"), true).toJSONObject()
         val balance = SimulatorPlugin.funds(listFunds)
         viewOnRunning.findViewById<TextView>(R.id.off_chain_balance).text =
             balance["off_chain"].toString()
         viewOnRunning.findViewById<TextView>(R.id.on_chain_balance).text =
             balance["on_chain"].toString()
+        val fundInChannels: JSONObject = SimulatorPlugin.fundsInChannel(listpeers) as JSONObject
+        viewOnRunning.findViewById<TextView>(R.id.value_balance_text).text =
+            fundInChannels["to_us"].toString()
         val message: String? = intent?.extras?.get("message")?.toString()
         Toast.makeText(context, message ?: "Balance update", Toast.LENGTH_LONG).show()
     }
@@ -360,6 +364,7 @@ class MainActivity : UriResultActivity() {
 
     private fun powerOff() {
         powerImageView.off()
+        powerImageView.visibility = View.VISIBLE
         timer?.cancel()
         findViewById<TextView>(R.id.statusText).text = "Offline. Rub the lamp to turn on."
         findViewById<ImageView>(R.id.qrcodeImageView).visibility = View.GONE
@@ -372,6 +377,7 @@ class MainActivity : UriResultActivity() {
 
     private fun powerOn() {
         powerImageView.on()
+        powerImageView.visibility = View.GONE
         viewOnRunning.visibility = View.VISIBLE
         findViewById<ImageView>(R.id.arrowImageView).visibility = View.VISIBLE
         findViewById<TextView>(R.id.textViewQr).visibility = View.VISIBLE

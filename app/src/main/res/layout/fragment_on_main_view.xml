@@ -7,13 +7,60 @@
     android:layout_centerInParent="true">
 
     <com.google.android.material.card.MaterialCardView
+        android:id="@+id/fund_in_channel_card"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="50dp"
+        android:layout_marginEnd="40dp"
+        android:layout_marginBottom="30dp"
+        android:layout_marginTop="30dp"
+        android:layout_below="@+id/statusText"
+        android:theme="@style/Theme.MaterialComponents.Light"
+        android:checkable="false"
+        android:clickable="false"
+        android:focusable="false">
+
+        <RelativeLayout
+            android:paddingTop="30dp"
+            android:paddingBottom="30dp"
+            android:paddingRight="15dp"
+            android:paddingLeft="15dp"
+            android:background="@color/colorPrimary"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <TextView
+                android:id="@+id/value_balance_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="15dp"
+                android:layout_centerInParent="true"
+                android:textSize="28dp"
+                android:textStyle="bold"
+                android:text="0"/>
+
+            <TextView
+                android:id="@+id/valute_text_view"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignBaseline="@+id/value_balance_text"
+                android:layout_toEndOf="@+id/value_balance_text"
+                android:text="msat"
+                android:textSize="20dp"
+                android:textStyle="bold" />
+
+        </RelativeLayout>
+
+    </com.google.android.material.card.MaterialCardView>
+
+    <com.google.android.material.card.MaterialCardView
         android:id="@+id/off_chain_card"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginLeft="10dp"
         android:layout_marginRight="10dp"
         android:layout_marginBottom="10dp"
-        android:layout_below="@+id/statusText"
+        android:layout_below="@+id/fund_in_channel_card"
         android:theme="@style/Theme.MaterialComponents.Light"
         android:padding="10dp"
         android:background="@color/cardview_light_background"
