@@ -30,6 +30,7 @@ import com.google.zxing.qrcode.encoder.Encoder
 import com.lvaccaro.lamp.Channels.ChannelsActivity
 import com.lvaccaro.lamp.Services.LightningService
 import com.lvaccaro.lamp.Services.TorService
+import org.jetbrains.anko.contentView
 import org.jetbrains.anko.doAsync
 import org.json.JSONArray
 import org.json.JSONObject
@@ -334,8 +335,13 @@ class MainActivity : UriResultActivity() {
 
     fun powerOn() {
         powerImageView.on()
-        findViewById<ImageView>(R.id.arrowImageView).visibility = View.VISIBLE
-        findViewById<TextView>(R.id.textViewQr).visibility = View.VISIBLE
+        //FIXME(vincenzopalazzo): This is only for the moment
+        //These component are set visible inside the command getinfo
+        //I removed it because now if the node has not expose with a binding address
+        //this value are not util, However this information are util for the people in the same network.
+
+        //findViewById<ImageView>(R.id.arrowImageView).visibility = View.VISIBLE
+        //findViewById<TextView>(R.id.textViewQr).visibility = View.VISIBLE
         findViewById<FloatingActionButton>(R.id.floating_action_button).show()
         invalidateOptionsMenu()
     }
@@ -349,15 +355,18 @@ class MainActivity : UriResultActivity() {
                 LightningCli().exec(this@MainActivity, arrayOf("getinfo"), true).toJSONObject()
             val id = res["id"] as String
             val addresses = res["address"] as JSONArray
-            if (addresses.length() == 0)
-                throw Exception("no address found")
-            var address = addresses[0] as JSONObject
-            if (!address.has("address"))
-                throw Exception("no address found")
-            val txt = id + "@" + address.getString("address")
-            val alias = res["alias"] as String
-            val blockheight = res["blockheight"] as Int
+            // the node have an address?
+            var public = addresses.length() != 0
+            if (!public)
+                showSnackBarMessage("Node not exposed with the public network")
 
+            val alias = res["alias"] as String
+            var txt = ""
+            if(public){
+                val address = addresses[0] as JSONObject
+                txt = id + "@" + address.getString("address")
+            }
+            val blockheight = res["blockheight"] as Int
             // instantiate timer to monitor block syncing progress
             timer?.cancel()
             if (blockcount > blockheight) {
@@ -370,22 +379,25 @@ class MainActivity : UriResultActivity() {
             runOnUiThread {
                 title = alias
                 powerImageView.on()
-                findViewById<ImageView>(R.id.arrowImageView).visibility = View.VISIBLE
-                findViewById<FloatingActionButton>(R.id.floating_action_button).show()
-                findViewById<TextView>(R.id.textViewQr).apply {
-                    text = txt
-                    visibility = View.VISIBLE
+                if(public){
+                    findViewById<ImageView>(R.id.arrowImageView).visibility = View.VISIBLE
+                    findViewById<TextView>(R.id.textViewQr).apply {
+                        text = txt
+                        visibility = View.VISIBLE
+                    }
+                    val qrcode = getQrCode(txt)
+                    runOnUiThread {
+                        findViewById<ImageView>(R.id.qrcodeImageView).apply {
+                            visibility = View.VISIBLE
+                            setImageBitmap(qrcode)
+                        }
+                    }
                 }
+                findViewById<FloatingActionButton>(R.id.floating_action_button).show()
                 val delta = blockcount - blockheight
                 findViewById<TextView>(R.id.statusText).text = if (delta > 0) "Syncing blocks -${delta}" else ""
             }
-            val qrcode = getQrCode(txt)
-            runOnUiThread {
-                findViewById<ImageView>(R.id.qrcodeImageView).apply {
-                    visibility = View.VISIBLE
-                    setImageBitmap(qrcode)
-                }
-            }
+
         } catch (e: Exception) {
             log.info("---" + e.localizedMessage + "---")
             runOnUiThread {
@@ -399,6 +411,10 @@ class MainActivity : UriResultActivity() {
                 powerOff()
             }
         }
+    }
+
+    private fun showSnackBarMessage(message: String, duration: Int = Snackbar.LENGTH_LONG){
+        Snackbar.make(this.contentView?.rootView!!, message, duration).show()
     }
 
     fun getQrCode(text: String): Bitmap {
