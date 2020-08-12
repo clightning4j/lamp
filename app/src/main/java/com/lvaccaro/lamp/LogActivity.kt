@@ -1,7 +1,9 @@
 package com.lvaccaro.lamp
 
+import android.os.AsyncTask
 import android.os.Bundle
 import android.text.method.ScrollingMovementMethod
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.EditText
@@ -9,14 +11,17 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 
 import kotlinx.android.synthetic.main.activity_log.*
-import org.jetbrains.anko.doAsync
-import java.io.BufferedReader
 import java.io.File
-import java.lang.Exception
+import java.io.LineNumberReader
+import java.util.stream.Collectors
 
 class LogActivity : AppCompatActivity() {
 
-    var daemon = "lightningd"
+    companion object {
+        val TAG = LogActivity::class.java.canonicalName
+    }
+
+    private var daemon = "lightningd"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -54,7 +59,12 @@ class LogActivity : AppCompatActivity() {
 
     fun readLog() {
         title = "Log $daemon"
-        val logFile = File(rootDir(),"$daemon.log")
+
+        val logFile = File(rootDir(), "$daemon.log")
+        Log.d(TAG, "File log: ${logFile.absolutePath}")
+        Log.d(TAG, "File dim: ${logFile.length()} Mb")
+        Log.d(TAG, "------------------------------------------")
+        Log.d(TAG, logFile.readText())
         if (!logFile.exists()) {
             Toast.makeText(this, "No log file found", Toast.LENGTH_LONG).show()
             return
@@ -62,29 +72,44 @@ class LogActivity : AppCompatActivity() {
         val et = findViewById<EditText>(R.id.editText)
         et.movementMethod = ScrollingMovementMethod()
         et.isVerticalScrollBarEnabled = true
-        et.setText("")
+        et.setText("Waiting log")
 
-        read(logFile.bufferedReader(), et)
+        val loadLogTask = LoadLogTask(this, et)
+        loadLogTask.execute(logFile)
     }
 
-    fun read(logReader: BufferedReader, et: EditText) {
-        var text = "."
-        while (!text.isEmpty()) {
-            text = read100(logReader)
-            et.append(text)
+    fun showToastMessage(message: String, duration: Int = Toast.LENGTH_LONG){
+        Toast.makeText(this, message, duration).show()
+    }
+
+    private class LoadLogTask(val activity: LogActivity, val editText: EditText): AsyncTask<File, String, String>() {
+
+        override fun doInBackground(vararg params: File?): String? {
+            var text: String
+            var logReader = LineNumberReader(params[0]?.reader())
+            var lines: List<String> = logReader.lines().collect(Collectors.toList())
+            text = readBuffer(lines)
+            return text
         }
-    }
 
-    fun read100(logReader: BufferedReader): String {
-        val sb = StringBuilder()
-        for (i in 0..100) {
-            try {
-                val line = logReader.readLine() ?: break
-                sb.append(line)
-            } catch (e: Exception) {
-                break
+        override fun onPreExecute() {
+            super.onPreExecute()
+            activity.showToastMessage("Loading log")
+        }
+
+        override fun onPostExecute(result: String?) {
+            super.onPostExecute(result)
+            editText.setText(result)
+            activity.showToastMessage("Log ready")
+        }
+
+        fun readBuffer(lines: List<String>): String {
+            val sb = StringBuilder()
+            val linesIt = lines.iterator()
+            while (linesIt.hasNext()) {
+                sb.append(linesIt.next())
             }
+            return sb.toString()
         }
-        return sb.toString()
     }
 }
