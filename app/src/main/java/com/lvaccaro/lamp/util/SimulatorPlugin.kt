@@ -34,8 +34,8 @@ class SimulatorPlugin{
                     Log.d(TAG, "****** Off chain fund ${offChainFunds}")
                 }
             }
-            response.put("on_chain", onChainFunds.toString() + " msat")
-            response.put("off_chain", offChainFunds.toString() + " msat")
+            response.put("on_chain", onChainFunds.toString())
+            response.put("off_chain", offChainFunds.toString())
             return response
         }
 

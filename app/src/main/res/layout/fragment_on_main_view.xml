@@ -1,190 +1,155 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
     android:id="@+id/on_main_view"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
     android:layout_centerInParent="true">
 
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/fund_in_channel_card"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="50dp"
-        android:layout_marginEnd="40dp"
-        android:layout_marginBottom="30dp"
-        android:layout_marginTop="30dp"
         android:layout_below="@+id/statusText"
-        android:theme="@style/Theme.MaterialComponents.Light"
+        android:layout_marginStart="25dp"
+        android:layout_marginTop="30dp"
+        android:layout_marginEnd="25dp"
         android:checkable="false"
         android:clickable="false"
-        android:focusable="false">
+        android:elevation="10dp"
+        android:focusable="false"
+        android:theme="@style/Theme.MaterialComponents.Light"
+        app:cardCornerRadius="10dp"
+        app:strokeColor="@color/cardview_light_background"
+        app:strokeWidth="3dp">
 
         <RelativeLayout
-            android:paddingTop="30dp"
-            android:paddingBottom="30dp"
-            android:paddingRight="15dp"
-            android:paddingLeft="15dp"
-            android:background="@color/colorPrimary"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="wrap_content">
+
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_alignParentStart="true"
+                android:layout_marginLeft="29dp"
+                android:layout_marginTop="15dp"
+                android:src="@drawable/ic_baseline_account_balance_24" />
 
             <TextView
                 android:id="@+id/value_balance_text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="15dp"
+                android:layout_alignParentTop="true"
                 android:layout_centerInParent="true"
+                android:layout_marginEnd="15dp"
+                android:padding="5dp"
+                android:text="0"
                 android:textSize="28dp"
-                android:textStyle="bold"
-                android:text="0"/>
+                android:textStyle="bold" />
 
             <TextView
                 android:id="@+id/valute_text_view"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignBaseline="@+id/value_balance_text"
+                android:layout_centerInParent="true"
                 android:layout_toEndOf="@+id/value_balance_text"
                 android:text="msat"
                 android:textSize="20dp"
                 android:textStyle="bold" />
 
+            <TextView
+                android:id="@+id/on_chain"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/value_balance_text"
+                android:layout_centerInParent="true"
+                android:layout_marginEnd="15dp"
+                android:padding="5dp"
+                android:text="0"
+                android:textSize="18dp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignBaseline="@+id/on_chain"
+                android:layout_centerInParent="true"
+                android:layout_toEndOf="@+id/on_chain"
+                android:text="msat"
+                android:textSize="15dp"
+                android:textStyle="bold" />
+
+
+            <ImageView
+                android:id="@+id/icon_lightning"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_below="@+id/valute_text_view"
+                android:layout_alignParentStart="true"
+                android:layout_marginLeft="29dp"
+                android:layout_marginTop="13dp"
+                android:src="@drawable/ic_lightning" />
+
+            <TextView
+                android:id="@+id/off_chain"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/on_chain"
+                android:layout_centerInParent="true"
+                android:layout_marginEnd="15dp"
+                android:padding="5dp"
+                android:text="0"
+                android:textSize="18dp"
+                android:textStyle="bold" />
+
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_below="@+id/icon_lightning"
+                android:layout_alignParentStart="true"
+                android:layout_marginLeft="29dp"
+                android:layout_marginTop="13dp"
+                android:src="@drawable/ic_blockchain" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignBaseline="@+id/off_chain"
+                android:layout_centerInParent="true"
+                android:layout_toEndOf="@+id/off_chain"
+                android:text="msat"
+                android:textSize="15dp"
+                android:textStyle="bold" />
+
         </RelativeLayout>
-
     </com.google.android.material.card.MaterialCardView>
 
-    <com.google.android.material.card.MaterialCardView
-        android:id="@+id/off_chain_card"
-        android:layout_width="match_parent"
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/button_send"
+        style="@style/Widget.MaterialComponents.Button.TextButton.Icon"
+        android:layout_width="150dp"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="10dp"
-        android:layout_marginRight="10dp"
-        android:layout_marginBottom="10dp"
         android:layout_below="@+id/fund_in_channel_card"
-        android:theme="@style/Theme.MaterialComponents.Light"
-        android:padding="10dp"
-        android:background="@color/cardview_light_background"
-        android:checkable="false"
-        android:clickable="false"
-        android:focusable="false">
+        android:layout_alignParentStart="true"
+        android:layout_marginStart="15dp"
+        android:padding="18dp"
+        android:text="Send"
+        android:textColor="@color/colorPrimary"
+        app:strokeColor="@color/cardview_light_background"
+        app:strokeWidth="1dp" />
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:paddingLeft="10dp"
-            android:paddingRight="10dp"
-            android:paddingTop="10dp"
-            android:paddingBottom="10dp">
-
-            <ImageView
-                android:id="@+id/off_chain_icon"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center|left"
-                android:layout_marginRight="20dp"
-                app:srcCompat="@drawable/ic_lightning"/>
-
-            <RelativeLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content">
-                <TextView
-                    android:id="@+id/amount_off_chain_text"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:background="@color/design_default_color_background"
-                    android:textSize="25dp"
-                    android:textStyle="bold"
-                    android:text="Off chain"/>
-
-                <TextView
-                    android:id="@+id/description_off_chain"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@+id/amount_off_chain_text"
-                    android:layout_marginTop="20dp"
-                    android:background="@color/design_default_color_background"
-                    android:textSize="15dp"
-                    android:textStyle="bold"
-                    android:text="sathoshi engaged on channels"/>
-
-                <TextView
-                    android:id="@+id/off_chain_balance"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentEnd="true"
-                    android:layout_centerInParent="true"
-                    android:textStyle="bold"
-                    android:textSize="18dp"
-                    android:text="Unavaible msat"/>
-
-            </RelativeLayout>
-        </LinearLayout>
-    </com.google.android.material.card.MaterialCardView>
-
-    <com.google.android.material.card.MaterialCardView
-        android:layout_below="@+id/off_chain_card"
-        android:layout_width="match_parent"
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/button_receive"
+        style="@style/Widget.MaterialComponents.Button.TextButton.Icon"
+        android:layout_width="150dp"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="10dp"
-        android:layout_marginRight="10dp"
-        android:theme="@style/Theme.MaterialComponents.Light"
-        android:padding="10dp"
-        android:background="@color/cardview_light_background"
-        android:checkable="false"
-        android:clickable="false"
-        android:focusable="false">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:paddingLeft="10dp"
-            android:paddingRight="10dp"
-            android:paddingTop="10dp"
-            android:paddingBottom="10dp">
-
-            <ImageView
-                android:id="@+id/on_chain_icon"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center|left"
-                android:layout_marginRight="20dp"
-                app:srcCompat="@drawable/ic_blockchain"/>
-
-            <RelativeLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content">
-
-                <TextView
-                    android:id="@+id/amount_on_chain_text"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:background="@color/design_default_color_background"
-                    android:textSize="25dp"
-                    android:textStyle="bold"
-                    android:text="On Chain"/>
-
-                <TextView
-                    android:id="@+id/description_on_chain"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@+id/amount_on_chain_text"
-                    android:layout_marginTop="20dp"
-                    android:background="@color/design_default_color_background"
-                    android:textSize="15dp"
-                    android:textStyle="bold"
-                    android:text="sathoshi engaged on blockchain"/>
-
-                <TextView
-                    android:id="@+id/on_chain_balance"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentEnd="true"
-                    android:layout_centerInParent="true"
-                    android:textStyle="bold"
-                    android:textSize="18dp"
-                    android:text="Unavaible msat"/>
-
-            </RelativeLayout>
-        </LinearLayout>
-    </com.google.android.material.card.MaterialCardView>
+        android:layout_below="@+id/fund_in_channel_card"
+        android:layout_alignParentEnd="true"
+        android:layout_marginEnd="15dp"
+        android:padding="18dp"
+        android:text="receive"
+        android:textColor="@color/colorPrimary"
+        app:strokeColor="@color/cardview_light_background"
+        app:strokeWidth="1dp" />
 </RelativeLayout>

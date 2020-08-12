@@ -26,6 +26,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.net.toUri
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.preference.PreferenceManager
+import com.google.android.material.button.MaterialButton
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
 import com.google.zxing.WriterException
@@ -36,6 +37,7 @@ import com.lvaccaro.lamp.Services.LightningService
 import com.lvaccaro.lamp.Services.TorService
 import com.lvaccaro.lamp.util.SimulatorPlugin
 import com.lvaccaro.lamp.util.LampKeys
+import com.lvaccaro.lamp.view.pay.PayViewActivity
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream
 import org.apache.commons.compress.compressors.xz.XZCompressorInputStream
@@ -144,6 +146,15 @@ class MainActivity : UriResultActivity() {
                     WRITE_REQUEST_CODE
                 )
             }
+        }
+
+        viewOnRunning.findViewById<MaterialButton>(R.id.button_receive).setOnClickListener {
+            val bottomSheetDialog = InvoiceBuildFragment()
+            bottomSheetDialog.show(supportFragmentManager, "Custom Bottom Sheet")
+        }
+
+        viewOnRunning.findViewById<MaterialButton>(R.id.button_send).setOnClickListener {
+            startActivity(Intent(this,  PayViewActivity::class.java))
         }
 
         if (Intent.ACTION_VIEW == intent.action) {
@@ -272,11 +283,7 @@ class MainActivity : UriResultActivity() {
             if (result != null) {
                 doAsync { parse(result) }
             } else {
-                Snackbar.make(
-                    findViewById(android.R.id.content),
-                    "Scan failed",
-                    Snackbar.LENGTH_LONG
-                ).show()
+                showSnackBar("Scan failed")
             }
         } else {
             super.onActivityResult(requestCode, resultCode, data)
@@ -291,15 +298,15 @@ class MainActivity : UriResultActivity() {
         val listFunds = cli.exec(context!!, arrayOf("listfunds"), true).toJSONObject()
         val listpeers = cli.exec(context!!, arrayOf("listpeers"), true).toJSONObject()
         val balance = SimulatorPlugin.funds(listFunds)
-        viewOnRunning.findViewById<TextView>(R.id.off_chain_balance).text =
+        viewOnRunning.findViewById<TextView>(R.id.off_chain).text =
             balance["off_chain"].toString()
-        viewOnRunning.findViewById<TextView>(R.id.on_chain_balance).text =
+        viewOnRunning.findViewById<TextView>(R.id.on_chain).text =
             balance["on_chain"].toString()
         val fundInChannels: JSONObject = SimulatorPlugin.fundsInChannel(listpeers) as JSONObject
         viewOnRunning.findViewById<TextView>(R.id.value_balance_text).text =
             fundInChannels["to_us"].toString()
         val message: String? = intent?.extras?.get("message")?.toString()
-        Toast.makeText(context, message ?: "Balance update", Toast.LENGTH_LONG).show()
+        showToastMessage(message ?: "Balance update")
     }
 
     private fun isServiceRunning(name: String): Boolean {
@@ -416,6 +423,7 @@ class MainActivity : UriResultActivity() {
             runOnUiThread {
                 title = alias
                 powerImageView.on()
+                powerImageView.visibility = View.GONE
                 findViewById<ImageView>(R.id.arrowImageView).visibility = View.VISIBLE
                 findViewById<FloatingActionButton>(R.id.floating_action_button).show()
                 findViewById<TextView>(R.id.textViewQr).apply {

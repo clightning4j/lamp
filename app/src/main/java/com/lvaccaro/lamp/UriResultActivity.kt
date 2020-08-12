@@ -154,7 +154,7 @@ open class UriResultActivity() : AppCompatActivity() {
         bottomSheetDialog.show(supportFragmentManager, "WithdrawFragment")
     }
 
-    protected fun showToastMessage(message: String, duration: Int) {
+    protected fun showToastMessage(message: String, duration: Int = Toast.LENGTH_LONG) {
         if(message.isEmpty()) return
         Toast.makeText(
             this, message,
@@ -162,7 +162,7 @@ open class UriResultActivity() : AppCompatActivity() {
         ).show()
     }
 
-    protected fun showSnackBar(message: String, duration: Int){
+    protected fun showSnackBar(message: String, duration: Int = Snackbar.LENGTH_LONG){
         Snackbar.make(findViewById(android.R.id.content), message, duration).show()
     }
 }
