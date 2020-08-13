@@ -24,7 +24,9 @@ import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.core.app.ActivityCompat
 import androidx.core.net.toUri
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.preference.PreferenceManager
+import com.google.android.material.button.MaterialButton
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
 import com.google.zxing.WriterException
@@ -33,6 +35,9 @@ import com.google.zxing.qrcode.encoder.Encoder
 import com.lvaccaro.lamp.Channels.ChannelsActivity
 import com.lvaccaro.lamp.Services.LightningService
 import com.lvaccaro.lamp.Services.TorService
+import com.lvaccaro.lamp.util.SimulatorPlugin
+import com.lvaccaro.lamp.util.LampKeys
+import com.lvaccaro.lamp.view.pay.PayViewActivity
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream
 import org.apache.commons.compress.compressors.xz.XZCompressorInputStream
@@ -62,6 +67,7 @@ class MainActivity : UriResultActivity() {
     private lateinit var powerImageView: PowerImageView
     private lateinit var viewOnRunning: View
     private var timer: Timer? = null
+    private lateinit var notificationReceiver: NotificationReceiver
 
     companion object {
         val RELEASE = "release_clightning_0.9.0"
@@ -94,7 +100,7 @@ class MainActivity : UriResultActivity() {
         }
     }
 
-    fun dir(): File {
+    private fun dir(): File {
         return getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS)!!
     }
 
@@ -107,6 +113,9 @@ class MainActivity : UriResultActivity() {
         val arrowImageView = findViewById<ImageView>(R.id.arrowImageView)
         arrowImageView.setOnClickListener { this.onHistoryClick() }
         viewOnRunning = findViewById(R.id.content_main_status_on)
+
+        notificationReceiver = NotificationReceiver(this)
+        registerLocalReceiver(notificationReceiver)
 
         val addressTextView = findViewById<TextView>(R.id.textViewQr)
         addressTextView.setOnClickListener {
@@ -140,6 +149,15 @@ class MainActivity : UriResultActivity() {
             }
         }
 
+        viewOnRunning.findViewById<MaterialButton>(R.id.button_receive).setOnClickListener {
+            val bottomSheetDialog = InvoiceBuildFragment()
+            bottomSheetDialog.show(supportFragmentManager, "Custom Bottom Sheet")
+        }
+
+        viewOnRunning.findViewById<MaterialButton>(R.id.button_send).setOnClickListener {
+            startActivity(Intent(this,  PayViewActivity::class.java))
+        }
+
         if (Intent.ACTION_VIEW == intent.action) {
             if (arrayListOf<String>("bitcoin", "lightning").contains(intent.data.scheme)) {
                 val text = intent.data.toString().split(":").last()
@@ -150,7 +168,6 @@ class MainActivity : UriResultActivity() {
 
     override fun onResume() {
         super.onResume()
-
         if (!File(rootDir(), "lightning-cli").exists()) {
             findViewById<TextView>(R.id.statusText).text =
                 "Rub the lamp to download ${RELEASE} binaries."
@@ -161,7 +178,11 @@ class MainActivity : UriResultActivity() {
                 "Offline. Rub the lamp to start."
             return
         }
-        doAsync { getInfo() }
+        viewOnRunning.visibility = View.VISIBLE
+        doAsync {
+            getInfo()
+            runIntent(LampKeys.NODE_NOTIFICATION_FUNDCHANNEL)
+        }
     }
 
     override fun onPause() {
@@ -270,7 +291,26 @@ class MainActivity : UriResultActivity() {
         }
     }
 
-    fun isServiceRunning(name: String): Boolean {
+    //Update View method
+    /**
+     * This method is called inside the brodcast receiver
+     */
+    fun updateBalanceView(context: Context?, intent: Intent?) {
+        val listFunds = cli.exec(context!!, arrayOf("listfunds"), true).toJSONObject()
+        val listpeers = cli.exec(context!!, arrayOf("listpeers"), true).toJSONObject()
+        val balance = SimulatorPlugin.funds(listFunds)
+        viewOnRunning.findViewById<TextView>(R.id.off_chain).text =
+            balance["off_chain"].toString()
+        viewOnRunning.findViewById<TextView>(R.id.on_chain).text =
+            balance["on_chain"].toString()
+        val fundInChannels: JSONObject = SimulatorPlugin.fundsInChannel(listpeers) as JSONObject
+        viewOnRunning.findViewById<TextView>(R.id.value_balance_text).text =
+            fundInChannels["to_us"].toString()
+        val message: String? = intent?.extras?.get("message")?.toString()
+        showToastMessage(message ?: "Balance update")
+    }
+
+    private fun isServiceRunning(name: String): Boolean {
         val manager = getSystemService(ACTIVITY_SERVICE) as ActivityManager
         for (service in manager.getRunningServices(Int.MAX_VALUE)) {
             if (name.equals(service.service.className)) {
@@ -280,19 +320,19 @@ class MainActivity : UriResultActivity() {
         return false
     }
 
-    fun isLightningRunning(): Boolean {
+    private fun isLightningRunning(): Boolean {
         return isServiceRunning(LightningService::class.java.canonicalName)
     }
 
-    fun isTorRunning(): Boolean {
+    private fun isTorRunning(): Boolean {
         return isServiceRunning(TorService::class.java.canonicalName)
     }
 
-    fun onHistoryClick() {
-        HistoryFragment().show(supportFragmentManager, "History dialog")
+    private fun onHistoryClick() {
+        HistoryFragment().show(getSupportFragmentManager(), "History dialog")
     }
 
-    fun onPowerClick() {
+    private fun onPowerClick() {
         if (powerImageView.isAnimating()) {
             return
         }
@@ -330,21 +370,23 @@ class MainActivity : UriResultActivity() {
         }
     }
 
-    fun powerOff() {
+    private fun powerOff() {
         powerImageView.off()
+        powerImageView.visibility = View.VISIBLE
         timer?.cancel()
         findViewById<TextView>(R.id.statusText).text = "Offline. Rub the lamp to turn on."
         findViewById<ImageView>(R.id.qrcodeImageView).visibility = View.GONE
         findViewById<TextView>(R.id.textViewQr).visibility = View.GONE
         findViewById<ImageView>(R.id.arrowImageView).visibility = View.GONE
-        viewOnRunning?.visibility = View.GONE
+        viewOnRunning.visibility = View.GONE
         findViewById<FloatingActionButton>(R.id.floating_action_button).hide()
         invalidateOptionsMenu()
     }
 
-    fun powerOn() {
+    private fun powerOn() {
         powerImageView.on()
-        viewOnRunning?.visibility = View.VISIBLE
+        powerImageView.visibility = View.GONE
+        viewOnRunning.visibility = View.VISIBLE
         findViewById<ImageView>(R.id.arrowImageView).visibility = View.VISIBLE
         findViewById<TextView>(R.id.textViewQr).visibility = View.VISIBLE
         //FIXME(vincenzopalazzo): This is only for the moment
@@ -356,9 +398,10 @@ class MainActivity : UriResultActivity() {
         //findViewById<TextView>(R.id.textViewQr).visibility = View.VISIBLE
         findViewById<FloatingActionButton>(R.id.floating_action_button).show()
         invalidateOptionsMenu()
+        runIntent(LampKeys.NODE_NOTIFICATION_FUNDCHANNEL)
     }
 
-    fun getInfo() {
+    private fun getInfo() {
         try {
             val resChainInfo =
                 LightningCli().exec(this@MainActivity, arrayOf("getchaininfo"), true).toJSONObject()
@@ -395,9 +438,11 @@ class MainActivity : UriResultActivity() {
                         visibility = View.VISIBLE
                     }
                 }
+                powerImageView.visibility = View.GONE
                 findViewById<FloatingActionButton>(R.id.floating_action_button).show()
                 val delta = blockcount - blockheight
-                findViewById<TextView>(R.id.statusText).text = if (delta > 0) "Syncing blocks -${delta}" else ""
+                findViewById<TextView>(R.id.statusText).text =
+                    if (delta > 0) "Syncing blocks -${delta}" else ""
             }
 
             // Generate qrcode
@@ -458,7 +503,7 @@ class MainActivity : UriResultActivity() {
         }
     }
 
-    fun download() {
+    private fun download() {
         // Download bitcoin_ndk package
         val tarFile = File(dir(), tarFilename())
         val request = DownloadManager.Request(Uri.parse(url()))
@@ -479,7 +524,8 @@ class MainActivity : UriResultActivity() {
         downloadCertID = downloadmanager.enqueue(requestCert)
     }
 
-    fun uncompress(inputFile: File, outputDir: File) {
+    //FIXME(vincenzopalazzo) Maybe is better make this operation with a different class?
+    private fun uncompress(inputFile: File, outputDir: File) {
         if (!outputDir.exists()) {
             outputDir.mkdir()
         }
@@ -519,7 +565,7 @@ class MainActivity : UriResultActivity() {
         inputFile.delete()
     }
 
-    fun waitTorBootstrap(): Boolean {
+    private fun waitTorBootstrap(): Boolean {
         val logFile = File(rootDir(), "tor.log")
         for (i in 0..10) {
             try {
@@ -532,7 +578,7 @@ class MainActivity : UriResultActivity() {
         return false
     }
 
-    fun waitLightningBootstrap(): Boolean {
+    private fun waitLightningBootstrap(): Boolean {
         val logFile = File(rootDir(), "lightningd.log")
         for (i in 0..10) {
             try {
@@ -546,7 +592,7 @@ class MainActivity : UriResultActivity() {
         return false
     }
 
-    fun start() {
+    private fun start() {
         val sharedPref = PreferenceManager.getDefaultSharedPreferences(applicationContext)
         val rpcuser = sharedPref.getString("bitcoin-rpcuser", "").toString()
         val rpcpassword = sharedPref.getString("bitcoin-rpcpassword", "").toString()
@@ -595,7 +641,8 @@ class MainActivity : UriResultActivity() {
             runOnUiThread {
                 findViewById<TextView>(R.id.statusText).text =
                     "Starting lightning..."
-                startLightning() }
+                startLightning()
+            }
             // wait lightning to be bootstrapped
             if (!waitLightningBootstrap()) {
                 showMessageOnToast("Lightning start failed")
@@ -621,11 +668,11 @@ class MainActivity : UriResultActivity() {
         stopService(Intent(this, TorService::class.java))
     }
 
-    private fun stopLightningService(){
+    private fun stopLightningService() {
         stopService(Intent(this, LightningService::class.java))
     }
 
-    fun startTor() {
+    private fun startTor() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             startForegroundService(Intent(this, TorService::class.java))
         } else {
@@ -633,7 +680,7 @@ class MainActivity : UriResultActivity() {
         }
     }
 
-    fun startLightning() {
+    private fun startLightning() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             startForegroundService(Intent(this, LightningService::class.java))
         } else {
@@ -641,7 +688,7 @@ class MainActivity : UriResultActivity() {
         }
     }
 
-    fun stop() {
+    private fun stop() {
         log.info("---onStop---")
         try {
             val res = LightningCli().exec(this, arrayOf("stop"))
@@ -658,7 +705,7 @@ class MainActivity : UriResultActivity() {
         }
     }
 
-    fun generateNewAddress() {
+    private fun generateNewAddress() {
         val res = cli.exec(
             this@MainActivity,
             arrayOf("newaddr"),
@@ -693,10 +740,47 @@ class MainActivity : UriResultActivity() {
         }
     }
 
-    fun copyToClipboard(key: String, text: String) {
+    private fun copyToClipboard(key: String, text: String) {
         val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
         val clip: ClipData = ClipData.newPlainText(key, text)
         clipboard.primaryClip = clip
         showMessageOnToast("Copied to clipboard")
+    }
+
+    private fun registerLocalReceiver(notificationReceiver: NotificationReceiver) {
+        val localBroadcastManager = LocalBroadcastManager.getInstance(this)
+        val intentFilter = IntentFilter()
+        intentFilter.addAction(LampKeys.NODE_NOTIFICATION_SHUTDOWN)
+        intentFilter.addAction(LampKeys.NODE_NOTIFICATION_FUNDCHANNEL)
+        localBroadcastManager.registerReceiver(notificationReceiver, intentFilter)
+    }
+
+    private fun runIntent(key: String) {
+        val intent = Intent(key)
+        LocalBroadcastManager.getInstance(applicationContext).sendBroadcast(intent)
+    }
+
+    class NotificationReceiver(val mainActivity: MainActivity) : BroadcastReceiver() {
+
+        companion object {
+            val TAG = NotificationReceiver::class.java.canonicalName
+        }
+
+        // I can create a mediator that I can use to call all method inside the
+        //lightning-cli and return a json if the answer i ok or I throw an execeptions
+
+        override fun onReceive(context: Context?, intent: Intent?) {
+            Log.d(TAG, "onReceive action ${intent?.action}")
+            when (intent?.action) {
+                LampKeys.NODE_NOTIFICATION_FUNDCHANNEL -> mainActivity.updateBalanceView(
+                    context,
+                    intent
+                )
+                LampKeys.NODE_NOTIFICATION_SHUTDOWN -> {
+                    mainActivity.powerOff()
+                    mainActivity.recreate()
+                }
+            }
+        }
     }
 }
