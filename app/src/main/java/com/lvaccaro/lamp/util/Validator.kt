@@ -118,7 +118,9 @@ class Validator {
 
         fun isCorrectNetwork(cli: LightningCli, context: Context, address: String): String? {
             try {
-                cli.exec(context, arrayOf("txprepare", address, "10000"), true).toJSONObject()
+                val rpcResult = cli.exec(context, arrayOf("txprepare", address, "1000"), true).toJSONObject()
+                //release the input to see the correct balance inside the output
+                cli.exec(context, arrayOf("txdiscard", rpcResult["txid"].toString()), true).toJSONObject()
                 return null //Address correct
             } catch (ex: Exception) {
                 //not enough bitcoin to create the transaction but the address was correct

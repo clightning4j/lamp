@@ -1,6 +1,5 @@
 package com.lvaccaro.lamp.Services
 
-import android.util.Log
 import java.io.*
 import java.util.logging.Logger
 

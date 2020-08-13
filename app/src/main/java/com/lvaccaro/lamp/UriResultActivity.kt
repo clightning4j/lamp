@@ -144,6 +144,8 @@ open class UriResultActivity() : AppCompatActivity() {
         }
         var amount = ""
         if(param!!.contains(LampKeys.AMOUNT_KEY)){
+            //FIXME(vincenzopalazzo): create a converted class to set the set the correct ammounet.
+            //For instance, Validator.toMilliSatoshi()
             amount = (param!![LampKeys.AMOUNT_KEY]!!.toDouble() * 100000000).toLong().toString()
         }
         bundle.putString(LampKeys.ADDRESS_KEY, address)
@@ -152,7 +154,7 @@ open class UriResultActivity() : AppCompatActivity() {
         bottomSheetDialog.show(supportFragmentManager, "WithdrawFragment")
     }
 
-    protected fun showToastMessage(message: String, duration: Int) {
+    protected fun showToastMessage(message: String, duration: Int = Toast.LENGTH_LONG) {
         if(message.isEmpty()) return
         Toast.makeText(
             this, message,
@@ -160,7 +162,7 @@ open class UriResultActivity() : AppCompatActivity() {
         ).show()
     }
 
-    protected fun showSnackBar(message: String, duration: Int){
+    protected fun showSnackBar(message: String, duration: Int = Snackbar.LENGTH_LONG){
         Snackbar.make(findViewById(android.R.id.content), message, duration).show()
     }
 }
