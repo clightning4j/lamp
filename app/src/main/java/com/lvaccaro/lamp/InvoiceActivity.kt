@@ -19,7 +19,7 @@ import java.util.*
 
 class InvoiceActivity : AppCompatActivity() {
 
-    val cli = LightningCli()
+    private val cli = LightningCli()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -47,7 +47,7 @@ class InvoiceActivity : AppCompatActivity() {
     }
 
 
-    fun decodeInvoice(bolt11: String) {
+    private fun decodeInvoice(bolt11: String) {
         val res = cli.exec(this, arrayOf("decodepay", bolt11), true)
             .toJSONObject()
         val amountMsat = res["amount_msat"] as String
@@ -60,7 +60,7 @@ class InvoiceActivity : AppCompatActivity() {
         }
     }
 
-    fun waitInvoice(label: String) {
+    private fun waitInvoice(label: String) {
         try {
         cli.exec(this, arrayOf("waitinvoice", label), true).toJSONObject()
             runOnUiThread {
@@ -83,14 +83,14 @@ class InvoiceActivity : AppCompatActivity() {
     }
 
 
-    fun copyToClipboard(key: String, text: String) {
+    private fun copyToClipboard(key: String, text: String) {
         val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
         val clip: ClipData = ClipData.newPlainText(key, text)
         clipboard.setPrimaryClip(clip)
         Toast.makeText(this, "Copied to clipboard", Toast.LENGTH_LONG).show()
     }
 
-    fun getQrCode(text: String): Bitmap {
+    private fun getQrCode(text: String): Bitmap {
         val SCALE = 16
         try {
             val matrix = Encoder.encode(text, ErrorCorrectionLevel.M).getMatrix()

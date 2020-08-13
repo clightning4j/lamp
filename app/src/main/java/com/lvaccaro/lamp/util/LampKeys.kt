@@ -10,5 +10,10 @@ class LampKeys {
         val DECODEPAY_COMMAND = "decodepay"
         val CONNECT_COMMAND = "connect"
         val MESSAGE_JSON_KEY = "message"
+
+
+        //Key notification
+        val NODE_NOTIFICATION_SHUTDOWN: String = "SHUTDOWN_NODE_NOTIFICATION"
+        val NODE_NOTIFICATION_FUNDCHANNEL: String = "NODE_NOTIFICATION_FUNDCHANNEL"
     }
 }

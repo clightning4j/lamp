@@ -14,7 +14,7 @@ import java.lang.Exception
 
 class InvoiceBuildFragment: BottomSheetDialogFragment() {
 
-    val cli = LightningCli()
+    private val cli = LightningCli()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -42,7 +42,6 @@ class InvoiceBuildFragment: BottomSheetDialogFragment() {
                     description
                 ), true
             ).toJSONObject()
-            val bolt11 = res["bolt11"].toString()
             activity?.runOnUiThread {
                 val intent = Intent(activity, InvoiceActivity::class.java)
                 intent.putExtra("bolt11", res["bolt11"] as String)

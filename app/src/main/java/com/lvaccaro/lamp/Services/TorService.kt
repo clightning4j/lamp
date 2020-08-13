@@ -63,7 +63,10 @@ class TorService : IntentService("TorService") {
         process = pb.start()
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
             // Redirection output to file
-            globber = Globber(process!!.inputStream, logFile);
+            globber = Globber(
+                process!!.inputStream,
+                logFile
+            );
             globber?.start()
         }
 
@@ -77,7 +80,8 @@ class TorService : IntentService("TorService") {
     fun startForeground() {
         val intent = Intent(this, MainActivity::class.java)
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-        val pendingIntent = PendingIntent.getActivity(this, NOTIFICATION_ID, intent, PendingIntent.FLAG_ONE_SHOT)
+        val pendingIntent = PendingIntent.getActivity(this,
+            NOTIFICATION_ID, intent, PendingIntent.FLAG_ONE_SHOT)
 
         val notification = Notification.Builder(this)
             .setContentTitle("$daemon is running")
