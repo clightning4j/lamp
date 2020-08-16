@@ -661,8 +661,11 @@ class MainActivity : UriResultActivity() {
             log.warning(e.localizedMessage)
             e.printStackTrace()
         }
-        stopLightningService()
-        stopTorService()
+        runOnUiThread {
+            stopLightningService()
+            stopTorService()
+            powerOff()
+        }
     }
 
     fun generateNewAddress() {
