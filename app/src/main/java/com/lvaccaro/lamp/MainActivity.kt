@@ -43,6 +43,7 @@ import org.apache.commons.compress.archivers.tar.TarArchiveEntry
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream
 import org.apache.commons.compress.compressors.xz.XZCompressorInputStream
 import org.apache.commons.compress.utils.IOUtils
+import com.lvaccaro.lamp.util.UI
 import org.jetbrains.anko.contentView
 import org.jetbrains.anko.doAsync
 import org.json.JSONArray
@@ -123,7 +124,8 @@ class MainActivity : UriResultActivity() {
 
         val addressTextView = findViewById<TextView>(R.id.textViewQr)
         addressTextView.setOnClickListener {
-            copyToClipboard(
+            UI.copyToClipboard(
+                this,
                 "address",
                 addressTextView.text.toString()
             )
@@ -476,7 +478,7 @@ class MainActivity : UriResultActivity() {
             }
 
             // Generate qrcode
-            if(public){
+            if (public) {
                 val qrcode = getQrCode(txt)
                 runOnUiThread {
                     findViewById<ImageView>(R.id.qrcodeImageView).apply {
@@ -763,7 +765,7 @@ class MainActivity : UriResultActivity() {
                 .setTitle("New address")
                 .setView(container)
                 .setPositiveButton("clipboard") { dialog, which ->
-                    copyToClipboard("address", address)
+                    UI.copyToClipboard(this, "address", address)
                 }.setNegativeButton("cancel") { dialog, which -> }
                 .setCancelable(false)
                 .show()

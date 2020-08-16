@@ -17,6 +17,7 @@ import androidx.core.widget.addTextChangedListener
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.google.android.material.switchmaterial.SwitchMaterial
 import com.lvaccaro.lamp.util.LampKeys
+import com.lvaccaro.lamp.util.UI
 import kotlinx.android.synthetic.main.list_tx.*
 import org.jetbrains.anko.doAsync
 import java.lang.Exception
@@ -73,7 +74,7 @@ class WithdrawFragment: BottomSheetDialogFragment() {
                     .setTitle("Transaction Sent")
                     .setMessage("Tx ID: ${txid}")
                     .setPositiveButton("clipboard") { dialog, which ->
-                        copyToClipboard("address", address)
+                        UI.copyToClipboard(context!!, "address", address)
                     }.setNegativeButton("continue") { dialog, which -> }
                     .setCancelable(false)
                     .show()
@@ -87,12 +88,5 @@ class WithdrawFragment: BottomSheetDialogFragment() {
                 ).show()
             }
         }
-    }
-
-    fun copyToClipboard(key: String, text: String) {
-        val clipboard = context!!.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-        val clip: ClipData = ClipData.newPlainText(key, text)
-        clipboard.setPrimaryClip(clip)
-        Toast.makeText(context!!, "Copied to clipboard", Toast.LENGTH_LONG).show()
     }
 }

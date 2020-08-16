@@ -14,6 +14,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.google.zxing.WriterException
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel
 import com.google.zxing.qrcode.encoder.Encoder
+import com.lvaccaro.lamp.util.UI
 import kotlinx.android.synthetic.main.activity_invoice.*
 import org.jetbrains.anko.doAsync
 import org.json.JSONObject
@@ -34,7 +35,7 @@ class InvoiceActivity : AppCompatActivity() {
         val label = intent.getStringExtra("label")
 
         bolt11Text.text = bolt11
-        bolt11Text.setOnClickListener { copyToClipboard("bolt11", bolt11) }
+        bolt11Text.setOnClickListener { UI.copyToClipboard(this, "bolt11", bolt11) }
 
         // get qrcode
         doAsync {
@@ -109,13 +110,6 @@ class InvoiceActivity : AppCompatActivity() {
                 ).show()
             }
         }
-    }
-
-    private fun copyToClipboard(key: String, text: String) {
-        val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-        val clip: ClipData = ClipData.newPlainText(key, text)
-        clipboard.setPrimaryClip(clip)
-        Toast.makeText(this, "Copied to clipboard", Toast.LENGTH_LONG).show()
     }
 
     private fun getQrCode(text: String): Bitmap {
