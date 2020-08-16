@@ -385,19 +385,20 @@ class MainActivity : UriResultActivity() {
                         text = txt
                         visibility = View.VISIBLE
                     }
-                    val qrcode = getQrCode(txt)
-                    runOnUiThread {
-                        findViewById<ImageView>(R.id.qrcodeImageView).apply {
-                            visibility = View.VISIBLE
-                            setImageBitmap(qrcode)
-                        }
-                    }
                 }
                 findViewById<FloatingActionButton>(R.id.floating_action_button).show()
                 val delta = blockcount - blockheight
                 findViewById<TextView>(R.id.statusText).text = if (delta > 0) "Syncing blocks -${delta}" else ""
             }
 
+            // Generate qrcode
+            val qrcode = getQrCode(txt)
+            runOnUiThread {
+                findViewById<ImageView>(R.id.qrcodeImageView).apply {
+                    visibility = View.VISIBLE
+                    setImageBitmap(qrcode)
+                }
+            }
         } catch (e: Exception) {
             log.info("---" + e.localizedMessage + "---")
             runOnUiThread {
