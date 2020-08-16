@@ -1,11 +1,14 @@
 package com.lvaccaro.lamp
 
+import android.app.Activity
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Color
 import android.os.Bundle
+import android.view.Menu
+import android.view.MenuItem
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.google.zxing.WriterException
@@ -13,6 +16,7 @@ import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel
 import com.google.zxing.qrcode.encoder.Encoder
 import kotlinx.android.synthetic.main.activity_invoice.*
 import org.jetbrains.anko.doAsync
+import org.json.JSONObject
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -20,6 +24,7 @@ import java.util.*
 class InvoiceActivity : AppCompatActivity() {
 
     private val cli = LightningCli()
+    private var decoded: JSONObject? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -46,10 +51,34 @@ class InvoiceActivity : AppCompatActivity() {
         doAsync { waitInvoice(label) }
     }
 
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        menuInflater.inflate(R.menu.menu_invoice, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            android.R.id.home -> {
+                onBackPressed()
+                return true
+            }
+            R.id.action_info -> {
+                val bundle = Bundle()
+                bundle.putString("title", "Invoice information")
+                bundle.putString("data", decoded?.toString())
+                val fragment = RecyclerViewFragment()
+                fragment.arguments = bundle
+                fragment.show(supportFragmentManager, "RecyclerViewFragment")
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
+    }
 
     private fun decodeInvoice(bolt11: String) {
         val res = cli.exec(this, arrayOf("decodepay", bolt11), true)
             .toJSONObject()
+        decoded = res
         val amountMsat = res["amount_msat"] as String
         val created_at = res["created_at"] as Int
         val expiry = res["expiry"] as Int
@@ -81,7 +110,6 @@ class InvoiceActivity : AppCompatActivity() {
             }
         }
     }
-
 
     private fun copyToClipboard(key: String, text: String) {
         val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
