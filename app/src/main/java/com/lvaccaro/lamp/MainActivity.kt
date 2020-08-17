@@ -372,7 +372,7 @@ class MainActivity : UriResultActivity() {
 
     private fun powerOff() {
         powerImageView.off()
-        powerImageView.visibility = View.VISIBLE
+        //powerImageView.visibility = View.VISIBLE
         timer?.cancel()
         findViewById<TextView>(R.id.statusText).text = "Offline. Rub the lamp to turn on."
         findViewById<ImageView>(R.id.qrcodeImageView).visibility = View.GONE
@@ -385,7 +385,7 @@ class MainActivity : UriResultActivity() {
 
     private fun powerOn() {
         powerImageView.on()
-        powerImageView.visibility = View.GONE
+        //powerImageView.visibility = View.GONE
         viewOnRunning.visibility = View.VISIBLE
         findViewById<ImageView>(R.id.arrowImageView).visibility = View.VISIBLE
         findViewById<TextView>(R.id.textViewQr).visibility = View.VISIBLE
@@ -438,7 +438,7 @@ class MainActivity : UriResultActivity() {
                         visibility = View.VISIBLE
                     }
                 }
-                powerImageView.visibility = View.GONE
+                //powerImageView.visibility = View.GONE
                 findViewById<FloatingActionButton>(R.id.floating_action_button).show()
                 val delta = blockcount - blockheight
                 findViewById<TextView>(R.id.statusText).text =
@@ -747,6 +747,20 @@ class MainActivity : UriResultActivity() {
         showMessageOnToast("Copied to clipboard")
     }
 
+    private fun shoutOffUI(){
+        if(!isLightningRunning()) return
+        runOnUiThread{
+            powerOff()
+        }
+    }
+
+    private fun runOnUI(){
+        if(isLightningRunning()) return
+        runOnUiThread {
+            powerOn()
+        }
+    }
+
     private fun registerLocalReceiver(notificationReceiver: NotificationReceiver) {
         val localBroadcastManager = LocalBroadcastManager.getInstance(this)
         val intentFilter = IntentFilter()
@@ -777,8 +791,7 @@ class MainActivity : UriResultActivity() {
                     intent
                 )
                 LampKeys.NODE_NOTIFICATION_SHUTDOWN -> {
-                    mainActivity.powerOff()
-                    mainActivity.recreate()
+                    mainActivity.shoutOffUI()
                 }
             }
         }
