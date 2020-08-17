@@ -65,7 +65,7 @@ open class UriResultActivity() : AppCompatActivity() {
                 message = "Connected to node"
             }
             runOnUiThread {
-                showToastMessage(
+                showMessageOnToast(
                     message,
                     Toast.LENGTH_LONG
                 )
@@ -86,7 +86,7 @@ open class UriResultActivity() : AppCompatActivity() {
         } catch (ex: Exception) {
             //FIXME: This have sense?
             val answer = JSONObject(ex.localizedMessage)
-            showToastMessage(answer[LampKeys.MESSAGE_JSON_KEY].toString(), Toast.LENGTH_LONG)
+            showMessageOnToast(answer[LampKeys.MESSAGE_JSON_KEY].toString(), Toast.LENGTH_LONG)
             throw CLightningException(ex.cause)
         }
     }
@@ -102,7 +102,7 @@ open class UriResultActivity() : AppCompatActivity() {
                     cli.exec(this, arrayOf("pay", bolt11), true)
                         .toJSONObject()
                     runOnUiThread {
-                        showToastMessage("Invoice paid", Toast.LENGTH_LONG)
+                        showMessageOnToast("Invoice paid", Toast.LENGTH_LONG)
                     }
                 } catch (e: Exception) {
                     runOnUiThread {
@@ -139,7 +139,7 @@ open class UriResultActivity() : AppCompatActivity() {
         val address = param?.get(LampKeys.ADDRESS_KEY) ?: ""
         val networkCheck = Validator.isCorrectNetwork(cli, this.applicationContext, address)
         if(networkCheck != null){
-            showToastMessage(networkCheck, Toast.LENGTH_LONG)
+            showMessageOnToast(networkCheck, Toast.LENGTH_LONG)
             return
         }
         var amount = ""
@@ -154,15 +154,19 @@ open class UriResultActivity() : AppCompatActivity() {
         bottomSheetDialog.show(supportFragmentManager, "WithdrawFragment")
     }
 
-    protected fun showToastMessage(message: String, duration: Int = Toast.LENGTH_LONG) {
+    protected fun showMessageOnToast(message: String, duration: Int = Toast.LENGTH_LONG) {
         if(message.isEmpty()) return
-        Toast.makeText(
-            this, message,
-            duration
-        ).show()
+        runOnUiThread{
+            Toast.makeText(
+                this, message,
+                duration
+            ).show()
+        }
     }
 
-    protected fun showSnackBar(message: String, duration: Int = Snackbar.LENGTH_LONG){
-        Snackbar.make(findViewById(android.R.id.content), message, duration).show()
+    protected fun showMessageOnSnackBar(message: String, duration: Int = Snackbar.LENGTH_LONG){
+        runOnUiThread{
+            Snackbar.make(findViewById(android.R.id.content), message, duration).show()
+        }
     }
 }

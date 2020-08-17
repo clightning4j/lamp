@@ -30,7 +30,6 @@ import com.google.zxing.qrcode.encoder.Encoder
 import com.lvaccaro.lamp.Channels.ChannelsActivity
 import com.lvaccaro.lamp.Services.LightningService
 import com.lvaccaro.lamp.Services.TorService
-import org.jetbrains.anko.contentView
 import org.jetbrains.anko.doAsync
 import org.json.JSONArray
 import org.json.JSONObject
@@ -250,13 +249,9 @@ class MainActivity : UriResultActivity() {
             val result = data?.getStringExtra("text")
             if (result != null) {
                 doAsync { parse(result) }
-            } else {
-                Snackbar.make(
-                    findViewById(android.R.id.content),
-                    "Scan failed",
-                    Snackbar.LENGTH_LONG
-                ).show()
+                return
             }
+            showMessageOnSnackBar("Scan failed")
         } else {
             super.onActivityResult(requestCode, resultCode, data)
         }
@@ -403,18 +398,10 @@ class MainActivity : UriResultActivity() {
             runOnUiThread {
                 stopLightningService()
                 stopTorService()
-                Snackbar.make(
-                    findViewById(android.R.id.content),
-                    e.localizedMessage,
-                    Snackbar.LENGTH_LONG
-                ).show()
                 powerOff()
             }
+            this.showMessageOnSnackBar(e.localizedMessage)
         }
-    }
-
-    private fun showSnackBarMessage(message: String, duration: Int = Snackbar.LENGTH_LONG){
-        Snackbar.make(this.contentView?.rootView!!, message, duration).show()
     }
 
     fun getQrCode(text: String): Bitmap {
@@ -578,12 +565,8 @@ class MainActivity : UriResultActivity() {
                 }
                 // wait tor to be bootstrapped
                 if (!waitTorBootstrap()) {
+                    showMessageOnSnackBar("Tor start failed")
                     runOnUiThread {
-                        Snackbar.make(
-                            findViewById(android.R.id.content),
-                            "Tor start failed",
-                            Snackbar.LENGTH_LONG
-                        ).show()
                         Log.d(TAG, "******** Tor run failed ********")
                         stopTorService()
                         powerOff()
@@ -598,12 +581,8 @@ class MainActivity : UriResultActivity() {
                 startLightning() }
             // wait lightning to be bootstrapped
             if (!waitLightningBootstrap()) {
+                showMessageOnToast("Lightning start failed")
                 runOnUiThread {
-                    Snackbar.make(
-                        findViewById(android.R.id.content),
-                        "Lightning start failed",
-                        Snackbar.LENGTH_LONG
-                    ).show()
                     Log.d(TAG, "******** Lightning run failed ********")
                     stopLightningService()
                     powerOff()
@@ -614,15 +593,9 @@ class MainActivity : UriResultActivity() {
                 getInfo()
                 runOnUiThread { powerOn() }
             } catch (e: Exception) {
-                stop()
                 log.info("---" + e.localizedMessage + "---")
-                runOnUiThread {
-                    Snackbar.make(
-                        findViewById(android.R.id.content),
-                        e.localizedMessage,
-                        Snackbar.LENGTH_LONG
-                    ).show()
-                }
+                showMessageOnSnackBar(e.localizedMessage)
+                stop()
             }
         }
     }
@@ -657,7 +630,7 @@ class MainActivity : UriResultActivity() {
             val res = LightningCli().exec(this, arrayOf("stop"))
             log.info("---" + res.toString() + "---")
         } catch (e: Exception) {
-            showSnackBar("Error: ${e.localizedMessage}", Snackbar.LENGTH_LONG)
+            showMessageOnSnackBar("Error: ${e.localizedMessage}", Snackbar.LENGTH_LONG)
             log.warning(e.localizedMessage)
             e.printStackTrace()
         }
@@ -707,6 +680,6 @@ class MainActivity : UriResultActivity() {
         val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
         val clip: ClipData = ClipData.newPlainText(key, text)
         clipboard.primaryClip = clip
-        Toast.makeText(this, "Copied to clipboard", Toast.LENGTH_LONG).show()
+        showMessageOnToast("Copied to clipboard")
     }
 }
