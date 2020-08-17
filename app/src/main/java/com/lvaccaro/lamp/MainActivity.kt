@@ -355,11 +355,8 @@ class MainActivity : UriResultActivity() {
                 LightningCli().exec(this@MainActivity, arrayOf("getinfo"), true).toJSONObject()
             val id = res["id"] as String
             val addresses = res["address"] as JSONArray
-            // the node have an address?
+            // the node has an address? if not hide the UI node info
             var public = addresses.length() != 0
-            if (!public)
-                showSnackBarMessage("Node not exposed with the public network")
-
             val alias = res["alias"] as String
             var txt = ""
             if(public){
@@ -392,11 +389,13 @@ class MainActivity : UriResultActivity() {
             }
 
             // Generate qrcode
-            val qrcode = getQrCode(txt)
-            runOnUiThread {
-                findViewById<ImageView>(R.id.qrcodeImageView).apply {
-                    visibility = View.VISIBLE
-                    setImageBitmap(qrcode)
+            if(public){
+                val qrcode = getQrCode(txt)
+                runOnUiThread {
+                    findViewById<ImageView>(R.id.qrcodeImageView).apply {
+                        visibility = View.VISIBLE
+                        setImageBitmap(qrcode)
+                    }
                 }
             }
         } catch (e: Exception) {
