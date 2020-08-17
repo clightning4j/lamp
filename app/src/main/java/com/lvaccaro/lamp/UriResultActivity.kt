@@ -38,8 +38,11 @@ open class UriResultActivity() : AppCompatActivity() {
                 val result = Validator.doParseBitcoinURL(text)
                 runOnUiThread { showWithdraw(result) }
             } else if (isBoltPayment) {
-                Log.d(TAG, "*** Bolt payment")
-                resultCommand = runCommandCLightning(LampKeys.DECODEPAY_COMMAND, arrayOf(text))
+                Log.d(TAG, "*** Bolt11 payment")
+                //The line below is if the text contains the lightning URL
+                //such as: lightning:bolt11, in this cases the method getBolt11 return only bolt11
+                val bolt11 = Validator.getBolt11(text)
+                resultCommand = runCommandCLightning(LampKeys.DECODEPAY_COMMAND, arrayOf(bolt11))
                 runOnUiThread { showDecodePay(text, resultCommand.toString()) }
             } else if (isURINodeConnect) {
                 Log.d(TAG, "*** Node URI connect ${text}")
