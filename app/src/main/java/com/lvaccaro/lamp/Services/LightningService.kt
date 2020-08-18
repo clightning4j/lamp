@@ -42,7 +42,7 @@ class LightningService : IntentService("LightningService") {
 
         val sharedPref = PreferenceManager.getDefaultSharedPreferences(applicationContext)
         val network = sharedPref.getString("network", "testnet").toString()
-        val logLevel = sharedPref.getString("log-level", "io").toString()
+        val logLevel = sharedPref.getString("log-level", "debug").toString()
         val rpcuser = sharedPref.getString("bitcoin-rpcuser", "").toString()
         val rpcpassword = sharedPref.getString("bitcoin-rpcpassword", "").toString()
         val rpcconnect = sharedPref.getString("bitcoin-rpcconnect", "127.0.0.1").toString()
