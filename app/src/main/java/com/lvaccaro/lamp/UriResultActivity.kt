@@ -38,12 +38,9 @@ open class UriResultActivity() : AppCompatActivity() {
                 val result = Validator.doParseBitcoinURL(text)
                 runOnUiThread { showWithdraw(result) }
             } else if (isBoltPayment) {
-                Log.d(TAG, "*** Bolt11 payment")
-                //The line below is if the text contains the lightning URL
-                //such as: lightning:bolt11, in this cases the method getBolt11 return only bolt11
+                Log.d(TAG, "*** Bolt payment")
                 val bolt11 = Validator.getBolt11(text)
-                resultCommand = runCommandCLightning(LampKeys.DECODEPAY_COMMAND, arrayOf(bolt11))
-                runOnUiThread { showDecodePay(text, resultCommand.toString()) }
+                runOnUiThread { showDecodePay(bolt11) }
             } else if (isURINodeConnect) {
                 Log.d(TAG, "*** Node URI connect ${text}")
                 resultCommand = runCommandCLightning(LampKeys.CONNECT_COMMAND, arrayOf(text))
@@ -94,30 +91,12 @@ open class UriResultActivity() : AppCompatActivity() {
         }
     }
 
-    private fun showDecodePay(bolt11: String, decoded: String) {
-        AlertDialog.Builder(this)
-            .setTitle("decodepay")
-            .setMessage(decoded.toString())
-            .setCancelable(true)
-            .setPositiveButton("pay") { _, _ ->
-                // Pay invoice
-                try {
-                    cli.exec(this, arrayOf("pay", bolt11), true)
-                        .toJSONObject()
-                    runOnUiThread {
-                        showMessageOnToast("Invoice paid", Toast.LENGTH_LONG)
-                    }
-                } catch (e: Exception) {
-                    runOnUiThread {
-                        AlertDialog.Builder(this)
-                            .setTitle("Error")
-                            .setMessage(e.localizedMessage)
-                            .show()
-                    }
-                }
-            }
-            .setNegativeButton("cancel") { _, _ -> }
-            .show()
+    private fun showDecodePay(bolt11: String) {
+        val bundle = Bundle()
+        bundle.putString("bolt11", bolt11)
+        val fragment = DecodedInvoiceFragment()
+        fragment.arguments = bundle
+        fragment.show(supportFragmentManager, "DecodedInvoiceFragment")
     }
 
     private fun showConnect(id: String) {
