@@ -10,13 +10,15 @@ import androidx.appcompat.app.AppCompatActivity
 
 import kotlinx.android.synthetic.main.activity_log.*
 import org.jetbrains.anko.doAsync
-import java.io.BufferedReader
 import java.io.File
-import java.lang.Exception
+import java.io.RandomAccessFile
+import java.lang.StringBuilder
 
 class LogActivity : AppCompatActivity() {
 
-    var daemon = "lightningd"
+    private var daemon = "lightningd"
+    private val maxBufferToLoad = 200
+    private var sizeBuffer = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -52,9 +54,9 @@ class LogActivity : AppCompatActivity() {
         }
     }
 
-    fun readLog() {
+    private fun readLog() {
         title = "Log $daemon"
-        val logFile = File(rootDir(),"$daemon.log")
+        val logFile = File(rootDir(), "$daemon.log")
         if (!logFile.exists()) {
             Toast.makeText(this, "No log file found", Toast.LENGTH_LONG).show()
             return
@@ -63,28 +65,41 @@ class LogActivity : AppCompatActivity() {
         et.movementMethod = ScrollingMovementMethod()
         et.isVerticalScrollBarEnabled = true
         et.setText("")
-
-        read(logFile.bufferedReader(), et)
-    }
-
-    fun read(logReader: BufferedReader, et: EditText) {
-        var text = "."
-        while (!text.isEmpty()) {
-            text = read100(logReader)
-            et.append(text)
+        doAsync {
+            runOnUiThread {
+                Toast.makeText(this@LogActivity, "Loading", Toast.LENGTH_SHORT).show()
+            }
+            val randomAccessFile = RandomAccessFile(logFile, "r")
+            read(randomAccessFile, et)
         }
     }
 
-    fun read100(logReader: BufferedReader): String {
-        val sb = StringBuilder()
-        for (i in 0..100) {
-            try {
-                val line = logReader.readLine() ?: break
-                sb.append(line)
-            } catch (e: Exception) {
-                break
+    private fun read(randomAccessFile: RandomAccessFile, et: EditText){
+        //Set the position at the end of the file
+        val fileSize = randomAccessFile.length() -1
+        randomAccessFile.seek(fileSize)
+        //The maximum dimension of this object is one line
+        val lineBuilder = StringBuilder()
+        //This contains the each line of the logger, the line of the logger are fixed
+        //to the propriety *maxBufferToLoad*
+        val logBuilder = StringBuilder()
+        for(pointer in fileSize downTo 1){
+            randomAccessFile.seek(pointer)
+            val character = randomAccessFile.read().toChar()
+            lineBuilder.append(character)
+            if(character.equals('\n', false)){
+                sizeBuffer++
+                logBuilder.append(lineBuilder.reverse().toString())
+                lineBuilder.clear()
+                if(sizeBuffer == maxBufferToLoad) break
             }
         }
-        return sb.toString()
+        val lines = logBuilder.toString().split("\n").reversed()
+        lines.forEach {
+            runOnUiThread {
+                if(it.trim().isNotEmpty())
+                    et.append(it.plus("\n"))
+            }
+        }
     }
 }
