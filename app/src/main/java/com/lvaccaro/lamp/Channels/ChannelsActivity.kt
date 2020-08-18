@@ -9,6 +9,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.lvaccaro.lamp.DecodedInvoiceFragment
 import com.lvaccaro.lamp.LightningCli
 import com.lvaccaro.lamp.R
 import com.lvaccaro.lamp.toJSONObject
@@ -19,7 +20,7 @@ import org.json.JSONObject
 import java.lang.Exception
 import kotlin.collections.ArrayList
 
-typealias ChannelClickListener = (View, JSONObject) -> Unit
+typealias ChannelClickListener = (JSONObject) -> Unit
 
 class ChannelAdapter(val list: ArrayList<JSONObject>,
                      private val onClickListener: ChannelClickListener
@@ -35,7 +36,7 @@ class ChannelAdapter(val list: ArrayList<JSONObject>,
         val item: JSONObject = list[position]
         holder.bind(item)
         holder.itemView.setOnClickListener { view ->
-            onClickListener(view, item)
+            onClickListener(item)
         }
     }
 
@@ -74,40 +75,18 @@ class ChannelsActivity : AppCompatActivity() {
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.adapter = ChannelAdapter(
             ArrayList<JSONObject>(),
-            this::dialogChannel
+            this::showChannel
         )
 
         doAsync { refresh() }
     }
 
-    fun dialogChannel(view: View, channel: JSONObject) {
-        val cid = channel.getString("channel_id")
-        AlertDialog.Builder(this)
-            .setTitle("Close channel")
-            .setMessage("CID: ${cid}")
-            .setPositiveButton("close") { dialog, which -> doAsync { close(cid) }}
-            .setNegativeButton("cancel") { dialog, which -> }
-            .setCancelable(false)
-            .show()
-    }
-
-    fun close(cid: String) {
-        try {
-            val res = LightningCli().exec(
-                this@ChannelsActivity,
-                arrayOf("close", cid),
-                true
-            ).toJSONObject()
-            refresh()
-        } catch (e: Exception) {
-            runOnUiThread {
-                Toast.makeText(
-                    this@ChannelsActivity,
-                    "Channel closed",
-                    Toast.LENGTH_LONG
-                ).show()
-            }
-        }
+    fun showChannel(channel: JSONObject) {
+        val bundle = Bundle()
+        bundle.putString("channel", channel.toString())
+        val fragment = ChannelFragment()
+        fragment.arguments = bundle
+        fragment.show(supportFragmentManager, "ChannelFragment")
     }
 
     fun refresh() {
