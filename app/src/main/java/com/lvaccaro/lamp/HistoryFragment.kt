@@ -10,15 +10,16 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import org.jetbrains.anko.doAsync
 import org.json.JSONArray
+import org.json.JSONObject
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.ArrayList
 
 
-data class Item(val amount: Int, val time: Int, val label: String, val incoming: Boolean) {}
-
-class ListAdapter(val list: ArrayList<Item>)
+class ListAdapter(val list: JSONArray)
     : RecyclerView.Adapter<ItemViewHolder>() {
+
+    var onItemClick: ((JSONObject) -> Unit)? = null
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ItemViewHolder {
         val inflater = LayoutInflater.from(parent.context)
@@ -26,11 +27,18 @@ class ListAdapter(val list: ArrayList<Item>)
     }
 
     override fun onBindViewHolder(holder: ItemViewHolder, position: Int) {
-        val item: Item = list[position]
-        holder.bind(item)
+        val json = list.getJSONObject(position)
+        val type = json["type"] as String
+        if (type == "payment")
+            holder.payment(json)
+        else
+            holder.invoice(json)
+        holder.itemView.setOnClickListener {
+            onItemClick?.invoke(json)
+        }
     }
 
-    override fun getItemCount(): Int = list.size
+    override fun getItemCount(): Int = list.length()
 
 }
 class ItemViewHolder(inflater: LayoutInflater, parent: ViewGroup) :
@@ -45,11 +53,25 @@ class ItemViewHolder(inflater: LayoutInflater, parent: ViewGroup) :
         mLabelView = itemView.findViewById(R.id.label)
     }
 
-    fun bind(item: Item) {
-        val date = Date(item.time * 1000L)
-        mAmountView?.text = String.format("%s %dmsat", if (item.incoming) "+" else "-", item.amount)
+    fun invoice(invoice: JSONObject) {
+        val paidAt = invoice["paid_at"] as Int
+        val msatoshi = invoice["msatoshi"] as Int
+        val label = invoice["label"] as String
+        bind(msatoshi, paidAt, label, true)
+    }
+
+    fun payment(payment: JSONObject) {
+        val createdAt = payment["created_at"] as Int
+        val msatoshi = payment["msatoshi"] as Int
+        val id = payment["id"] as Int
+        bind(msatoshi, createdAt, "Payment ID ${id.toString()}", true)
+    }
+
+    fun bind(msatoshi: Int, paidAt: Int, label: String, incoming: Boolean) {
+        val date = Date(paidAt * 1000L)
+        mAmountView?.text = String.format("%s %dmsat", if (incoming) "+" else "-", msatoshi)
         mDateView?.text = SimpleDateFormat("dd MMM yyyy, HH:mm:ss").format(date)
-        mLabelView?.text = item.label
+        mLabelView?.text = label
     }
 }
 
@@ -61,54 +83,45 @@ class HistoryFragment: BottomSheetDialogFragment() {
         savedInstanceState: Bundle?
     ): View? {
         val view = inflater.inflate(R.layout.fragment_history, container, false)
-
-        var recyclerView = view.findViewById<RecyclerView>(R.id.recycler_view)
+        val recyclerView = view.findViewById<RecyclerView>(R.id.recycler_view)
         recyclerView.layoutManager = LinearLayoutManager(context)
-        recyclerView.adapter = ListAdapter(ArrayList<Item>())
 
         doAsync {
-            val list = getInvoices() + getPayments()
-            activity!!.runOnUiThread {
-                val adapter = recyclerView.adapter as ListAdapter
-                adapter.list.clear()
-                adapter.list.addAll(list)
-                adapter.notifyDataSetChanged()
+            val list = getData()
+            activity?.runOnUiThread {
+                val adapter = ListAdapter(list)
+                recyclerView.adapter = adapter
+                adapter.onItemClick = { json ->
+                    val bundle = Bundle()
+                    bundle.putString("title", json.getString("type"))
+                    bundle.putString("data", json.toString())
+                    val fragment = RecyclerViewFragment()
+                    fragment.arguments = bundle
+                    fragment.show(activity!!.supportFragmentManager, "RecyclerViewFragment")
+                }
             }
         }
         return view
     }
 
-    fun getInvoices(): List<Item> {
-        val res = LightningCli().exec(context!!, arrayOf("listinvoices"), true).toJSONObject()
-        val invoicesJson = res["invoices"] as JSONArray
-        val invoices = ArrayList<Item>()
-        for (i in 0..invoicesJson.length()-1) {
-            val invoice = invoicesJson.getJSONObject(i)
-            val status = invoice["status"] as String
-            if (status.equals("paid")) {
-                val paidAt = invoice["paid_at"] as Int
-                val msatoshi = invoice["msatoshi"] as Int
-                val label = invoice["label"] as String
-                invoices.add(Item(msatoshi, paidAt, label, true))
-            }
-        }
-        return invoices
-    }
+    fun getData(): JSONArray {
+        val listinvoices = LightningCli().exec(context!!, arrayOf("listinvoices"), true).toJSONObject()
+        val listsendpays = LightningCli().exec(context!!, arrayOf("listsendpays"), true).toJSONObject()
 
-    fun getPayments(): List<Item> {
-        val res = LightningCli().exec(context!!, arrayOf("listsendpays"), true).toJSONObject()
-        val paymentsJson = res["payments"] as JSONArray
-        val payments = ArrayList<Item>()
-        for (i in 0..paymentsJson.length()-1) {
-            val payment = paymentsJson.getJSONObject(i)
-            val status = payment["status"] as String
-            if (status.equals("complete")) {
-                val createdAt = payment["created_at"] as Int
-                val msatoshi = payment["msatoshi"] as Int
-                val id = payment["id"] as Int
-                payments.add(Item(msatoshi, createdAt, "Payment ID ${id.toString()}", false))
-            }
+        val invoices = listinvoices["invoices"] as JSONArray
+        val payments = listsendpays["payments"] as JSONArray
+
+        val output = JSONArray()
+        for (i in 0 until invoices.length()) {
+            val invoice = invoices.getJSONObject(i)
+            if (invoice.getString("status") == "paid")
+                output.put(invoice.put("type", "invoice"))
         }
-        return payments
+        for (i in 0 until payments.length()) {
+            val payment = payments.getJSONObject(i)
+            if (payment.getString("status") == "complete")
+                output.put(payment.put("type", "payment"))
+        }
+        return output
     }
 }
