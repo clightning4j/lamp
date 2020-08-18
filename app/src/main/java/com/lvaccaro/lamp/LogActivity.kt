@@ -5,11 +5,15 @@ import android.text.method.ScrollingMovementMethod
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
 import android.widget.EditText
+import android.widget.ProgressBar
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 
 import kotlinx.android.synthetic.main.activity_log.*
+import kotlinx.android.synthetic.main.list_channel.*
+import kotlinx.android.synthetic.main.list_channel.view.*
 import org.jetbrains.anko.doAsync
 import java.io.File
 import java.io.RandomAccessFile
@@ -25,11 +29,16 @@ class LogActivity : AppCompatActivity() {
     private val maxBufferToLoad = 200
     private var sizeBuffer = 0
 
+    //UI component
+    private lateinit var progressBar: ProgressBar
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_log)
         setSupportActionBar(toolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        progressBar = findViewById(R.id.loading_status)
+        progressBar.max = maxBufferToLoad
     }
 
     override fun onResume() {
@@ -80,6 +89,7 @@ class LogActivity : AppCompatActivity() {
     }
 
     private fun read(randomAccessFile: RandomAccessFile, et: EditText) {
+        progressBar.visibility = View.VISIBLE
         Log.d(TAG, "Start to read the file with RandomAccessFile")
         //Set the position at the end of the file
         val fileSize = randomAccessFile.length() - 1
@@ -97,6 +107,9 @@ class LogActivity : AppCompatActivity() {
                 sizeBuffer++
                 logBuilder.append(lineBuilder.reverse().toString())
                 lineBuilder.clear()
+                runOnUiThread {
+                    this.progressBar.progress = sizeBuffer
+                }
                 if (sizeBuffer == maxBufferToLoad) break
             }
         }
@@ -106,8 +119,8 @@ class LogActivity : AppCompatActivity() {
             lines.forEach {
                 if (it.trim().isNotEmpty() && it.length < 400)
                     et.append(it.plus("\n"))
-                Thread.sleep(50)
             }
+            progressBar.visibility = View.GONE
         }
     }
 }
