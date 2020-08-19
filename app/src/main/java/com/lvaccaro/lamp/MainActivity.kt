@@ -118,6 +118,9 @@ class MainActivity : UriResultActivity() {
         notificationReceiver = NotificationReceiver(this)
         registerLocalReceiver(notificationReceiver)
 
+        notificationReceiver = NotificationReceiver(this)
+        registerLocalReceiver(notificationReceiver)
+
         val addressTextView = findViewById<TextView>(R.id.textViewQr)
         addressTextView.setOnClickListener {
             copyToClipboard(
@@ -334,7 +337,7 @@ class MainActivity : UriResultActivity() {
         viewOnRunning.findViewById<TextView>(R.id.value_balance_text).text =
             fundInChannels["to_us"].toString()
         val message: String? = intent?.extras?.get("message")?.toString()
-        showMessageOnSnackBar(message ?: "Balance update")
+        showMessageOnToast(message ?: "Balance update")
     }
 
     private fun isServiceRunning(name: String): Boolean {
