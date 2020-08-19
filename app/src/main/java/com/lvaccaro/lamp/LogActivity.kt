@@ -82,6 +82,7 @@ class LogActivity : AppCompatActivity() {
         doAsync {
             runOnUiThread {
                 Toast.makeText(this@LogActivity, "Loading", Toast.LENGTH_SHORT).show()
+                progressBar.visibility = View.VISIBLE
             }
             val randomAccessFile = RandomAccessFile(logFile, "r")
             read(randomAccessFile, et)
@@ -89,7 +90,6 @@ class LogActivity : AppCompatActivity() {
     }
 
     private fun read(randomAccessFile: RandomAccessFile, et: EditText) {
-        progressBar.visibility = View.VISIBLE
         Log.d(TAG, "Start to read the file with RandomAccessFile")
         //Set the position at the end of the file
         val fileSize = randomAccessFile.length() - 1
