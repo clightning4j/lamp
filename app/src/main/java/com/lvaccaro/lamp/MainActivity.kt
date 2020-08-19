@@ -12,6 +12,7 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Environment
+import android.os.PersistableBundle
 import android.util.Log
 import android.view.Gravity
 import android.view.Menu
@@ -113,7 +114,7 @@ class MainActivity : UriResultActivity() {
         val arrowImageView = findViewById<ImageView>(R.id.arrowImageView)
         arrowImageView.setOnClickListener { this.onHistoryClick() }
         viewOnRunning = findViewById(R.id.content_main_status_on)
-
+        restoreBalanceValue(savedInstanceState)
         notificationReceiver = NotificationReceiver(this)
         registerLocalReceiver(notificationReceiver)
 
@@ -155,7 +156,7 @@ class MainActivity : UriResultActivity() {
         }
 
         viewOnRunning.findViewById<MaterialButton>(R.id.button_send).setOnClickListener {
-            startActivity(Intent(this,  PayViewActivity::class.java))
+            startActivity(Intent(this, PayViewActivity::class.java))
         }
 
         if (Intent.ACTION_VIEW == intent.action) {
@@ -291,6 +292,32 @@ class MainActivity : UriResultActivity() {
         }
     }
 
+    override fun onSaveInstanceState(outState: Bundle?, outPersistentState: PersistableBundle?) {
+        super.onSaveInstanceState(outState, outPersistentState)
+        Log.d(TAG, "onSaveInstanceState called")
+        val balanceOffChain = viewOnRunning.findViewById<TextView>(R.id.off_chain).text.toString()
+        val balanceOnChain = viewOnRunning.findViewById<TextView>(R.id.on_chain).text.toString()
+        val balanceOurChain =
+            viewOnRunning.findViewById<TextView>(R.id.value_balance_text).text.toString()
+        outState?.putString(LampKeys.OFF_CHAIN_BALANCE, balanceOffChain)
+        outState?.putString(LampKeys.ON_CHAIN_BALANCE, balanceOnChain)
+        outState?.putString(LampKeys.OUR_CHAIN_BALANCE, balanceOurChain)
+    }
+
+    //FIXME(vincenzopalazzo) we don't need this with the actual implementation of UI
+    //because inside the one create I notify the receive to update the fund label
+    //but I add this in cases we will make change
+    private fun restoreBalanceValue(savedInstanceState: Bundle?) {
+        viewOnRunning.findViewById<TextView>(R.id.off_chain).text =
+            savedInstanceState?.getString(LampKeys.OFF_CHAIN_BALANCE) ?: "Unavaible"
+
+        viewOnRunning.findViewById<TextView>(R.id.on_chain).text =
+            savedInstanceState?.getString(LampKeys.ON_CHAIN_BALANCE) ?: "Unavaible"
+
+        viewOnRunning.findViewById<TextView>(R.id.value_balance_text).text =
+            savedInstanceState?.getString(LampKeys.OUR_CHAIN_BALANCE) ?: "Unavaible"
+    }
+
     //Update View method
     /**
      * This method is called inside the brodcast receiver
@@ -307,7 +334,7 @@ class MainActivity : UriResultActivity() {
         viewOnRunning.findViewById<TextView>(R.id.value_balance_text).text =
             fundInChannels["to_us"].toString()
         val message: String? = intent?.extras?.get("message")?.toString()
-        showToastMessage(message ?: "Balance update")
+        showMessageOnSnackBar(message ?: "Balance update")
     }
 
     private fun isServiceRunning(name: String): Boolean {
@@ -414,7 +441,7 @@ class MainActivity : UriResultActivity() {
             var public = addresses.length() != 0
             val alias = res["alias"] as String
             var txt = ""
-            if(public){
+            if (public) {
                 val address = addresses[0] as JSONObject
                 txt = id + "@" + address.getString("address")
             }
@@ -431,7 +458,7 @@ class MainActivity : UriResultActivity() {
             runOnUiThread {
                 title = alias
                 powerImageView.on()
-                if(public){
+                if (public) {
                     findViewById<ImageView>(R.id.arrowImageView).visibility = View.VISIBLE
                     findViewById<TextView>(R.id.textViewQr).apply {
                         text = txt
@@ -747,15 +774,15 @@ class MainActivity : UriResultActivity() {
         showMessageOnToast("Copied to clipboard")
     }
 
-    private fun shoutOffUI(){
-        if(!isLightningRunning()) return
-        runOnUiThread{
+    private fun shoutOffUI() {
+        if (!isLightningRunning()) return
+        runOnUiThread {
             powerOff()
         }
     }
 
-    private fun runOnUI(){
-        if(isLightningRunning()) return
+    private fun runOnUI() {
+        if (isLightningRunning()) return
         runOnUiThread {
             powerOn()
         }
