@@ -58,7 +58,7 @@ class Validator {
 
         fun doParseBitcoinURL(url: String): HashMap<String, String> {
             val result = HashMap<String, String>()
-            if(url.trim().isEmpty()) return result
+            if (url.trim().isEmpty()) return result
             //In this cases the url contains the follow patter
             //bitcoin:ADDRESS?amount=VALUE
             var tokenizer = StringTokenizer(url.trim().replace("%20", " "), ":")
@@ -67,13 +67,13 @@ class Validator {
                 //The variable tmp will contain all trash (not util) information
                 var tmp = tokenizer.nextToken()
                 Log.d(TAG, "**** Bitcoin protocol: ${tmp} *********")
-                if(!isProtocolPrefix(tmp)) return result;
+                if (!isProtocolPrefix(tmp) || !isBitcoinProtocol(tmp)) return result
                 val queryString = tokenizer.nextToken()
                 Log.d(TAG, "**** bitcoin URI: ${queryString} *********")
                 // Reassign the tokenizer variable a new token object
                 tokenizer = StringTokenizer(queryString, "?")
                 // Match with the pattern STRING?STRING
-                when(tokenizer.countTokens()){
+                when (tokenizer.countTokens()) {
                     1 -> {
                         var address = tokenizer.nextToken()
                         Log.d(TAG, "******** Address inside URL ${address} ********")
@@ -87,10 +87,10 @@ class Validator {
                         tmp = tokenizer.nextToken()
                         Log.d(TAG, "******** Parameters inside URL ${tmp} ********")
                         tokenizer = StringTokenizer(tmp, "&")
-                        while (tokenizer.hasMoreTokens()){
+                        while (tokenizer.hasMoreTokens()) {
                             val parameter = tokenizer.nextToken()
                             Log.d(TAG, "Parameter ${parameter}")
-                            if(!parseParameter(parameter, result)) break
+                            if (!parseParameter(parameter, result)) break
                         }
                     }
                 }
@@ -98,12 +98,38 @@ class Validator {
             return result
         }
 
-        private fun isProtocolPrefix(protocol: String?): Boolean {
-            return protocol.equals("bitcoin", false) ||
-                    protocol.equals("lightning", false)
+
+        private fun doParseLightningURL(url: String): String {
+            var result: String = ""
+            if (url.trim().isEmpty()) return result
+            //In this cases the url contains the follow patter
+            //LIGHTNING:bolt11
+            var tokenizer = StringTokenizer(url.trim().replace("%20", " "), ":")
+            // Match with the pattern STRING:STRING
+            if (tokenizer.countTokens() == 2) {
+                //The variable tmp will contain all trash (not util) information
+                var tmp = tokenizer.nextToken()
+                Log.d(TAG, "**** lightning protocol: ${tmp} *********")
+                if (!isProtocolPrefix(tmp) && !isLightningProtocol(tmp)) return result
+                result = tokenizer.nextToken()
+                Log.d(TAG, "**** BOLT11 : ${result} *********")
+            }
+            return result
         }
 
-        private fun parseParameter(uri: String, result: HashMap<String, String>): Boolean{
+        private fun isLightningProtocol(protocol: String?): Boolean {
+            return protocol.equals("lightning", false)
+        }
+
+        private fun isBitcoinProtocol(protocol: String?): Boolean {
+            return protocol.equals("bitcoin", false)
+        }
+
+        private fun isProtocolPrefix(protocol: String?): Boolean {
+            return isBitcoinProtocol(protocol) || isLightningProtocol(protocol)
+        }
+
+        private fun parseParameter(uri: String, result: HashMap<String, String>): Boolean {
             val tokes = StringTokenizer(uri, "=")
             if (tokes.countTokens() == 2) {
                 val key = tokes.nextToken()
@@ -118,9 +144,11 @@ class Validator {
 
         fun isCorrectNetwork(cli: LightningCli, context: Context, address: String): String? {
             try {
-                val rpcResult = cli.exec(context, arrayOf("txprepare", address, "1000"), true).toJSONObject()
+                val rpcResult =
+                    cli.exec(context, arrayOf("txprepare", address, "1000"), true).toJSONObject()
                 //release the input to see the correct balance inside the output
-                cli.exec(context, arrayOf("txdiscard", rpcResult["txid"].toString()), true).toJSONObject()
+                cli.exec(context, arrayOf("txdiscard", rpcResult["txid"].toString()), true)
+                    .toJSONObject()
                 return null //Address correct
             } catch (ex: Exception) {
                 //not enough bitcoin to create the transaction but the address was correct
@@ -132,19 +160,28 @@ class Validator {
             }
         }
 
-        fun isBolt11(string: String): Boolean {
+        fun isBolt11(string: String): Boolean{
+            val isValid = getBolt11(string)
+            return isValid.trim().isNotEmpty()
+        }
+
+        fun getBolt11(string: String): String {
             // These variable (step and len) are used to check the type of invoice
             // I need this variable because the prifix from (mainet, testnet) to regtest
             // have different length.
             // This function check the format bolt11 mensioned inside the bolt11.
             // other sanity check will do from lightningd daemon.
+            var bolt11 = string
+            if (isURL(bolt11)) {
+                bolt11 = doParseLightningURL(string)
+            }
             var step = 2
             var len = 6
-            if(string.startsWith("lnbcrt")){
+            if (bolt11.startsWith("lnbcrt")) {
                 step = 4
-                len = 7;
+                len = 7
             }
-            val startString = string.subSequence(0, len)
+            val startString = bolt11.subSequence(0, len)
             Log.d(TAG, "First subsequences is ${startString}")
             val lnNetwork = startString.subSequence(0, step)
             Log.d(TAG, "Network tag ${lnNetwork}")
@@ -156,18 +193,25 @@ class Validator {
             //val timestampIsNum = timestamp.matches("-?\\d+(\\.\\d+)?".toRegex()) NOT HUMAN READBLE
             var timestampIsNum = true
             timestamp.forEach find@{ charatter ->
-                if (charatter.isLetter()){
+                if (charatter.isLetter()) {
                     timestampIsNum = false
                     return@find
                 }
             }
             Log.d(TAG, "Timestamp is ${timestamp}")
             Log.d(TAG, "The timestamp contains all numbers? ${timestampIsNum}")
-            return isPrefix("ln", lnNetwork) &&
-                    (isPrefix("bc", network)
-                            || isPrefix("tb", network))
-                      && timestampIsNum
+            val isBolt11Valid = isPrefix("ln", lnNetwork) && (isPrefix("bc", network)
+                    || isPrefix("tb", network)) && timestampIsNum
+            if(isBolt11Valid){
+                return bolt11
+            }
+            return ""
         }
+
+        private fun isURL(url: String): Boolean {
+            return url.contains("bitcoin:") || url.contains("lightning:")
+        }
+
 
         private fun isPrefix(prefix: String, result: CharSequence): Boolean {
             return prefix.equals(result)

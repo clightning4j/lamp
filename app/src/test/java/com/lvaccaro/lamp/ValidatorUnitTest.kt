@@ -2,6 +2,7 @@ package com.lvaccaro.lamp
 
 import com.lvaccaro.lamp.util.LampKeys
 import com.lvaccaro.lamp.util.Validator
+import junit.framework.TestCase
 import org.junit.Test
 
 import org.junit.Assert.*
@@ -65,6 +66,32 @@ class ValidatorUnitTest {
         assertEquals("50", resultParsingFive[LampKeys.AMOUNT_KEY])
         assertEquals("Luke-Jr", resultParsingFive[LampKeys.LABEL_KEY])
         assertEquals("Donation for project xyz", resultParsingFive[LampKeys.MESSAGE_KEY]?.trim())
+    }
+
+    @Test
+    fun validateLightningURL_testOne() {
+        val bolt11 =
+            """
+            lnbc2500u1pvjluezpp5qqqsyqcyq5rqwzqfqqqsyqcyq5rqwzqfqqqsyqcyq5rqwzqfqypqdpquwpc4curk03c9
+            wlrswe78q4eyqc7d8d0xqzpuyk0sg5g70me25alkluzd2x62aysf2pyy8edtjeevuv4p2d5p76r4zkmneet7
+            uvyakky2zr4cusd45tftc9c5fh0nnqpnl2jfll544esqchsrny
+            """.trimIndent().trim()
+        val result =
+            Validator.doParseBitcoinURL("lightning:".plus(bolt11))
+        TestCase.assertTrue(result.isEmpty())
+    }
+
+    @Test
+    fun validateLightningURL_testTwo() {
+        val bolt11 =
+            """
+            lnbc2500u1pvjluezpp5qqqsyqcyq5rqwzqfqqqsyqcyq5rqwzqfqqqsyqcyq5rqwzqfqypqdpquwpc4curk03c9
+            wlrswe78q4eyqc7d8d0xqzpuyk0sg5g70me25alkluzd2x62aysf2pyy8edtjeevuv4p2d5p76r4zkmneet7
+            uvyakky2zr4cusd45tftc9c5fh0nnqpnl2jfll544esqchsrny
+            """.trimIndent().trim()
+        val result =
+            Validator.getBolt11("lightning:".plus(bolt11))
+        TestCase.assertTrue(result.equals(bolt11, false))
     }
 
     @Test
@@ -140,8 +167,8 @@ class ValidatorUnitTest {
             5kgetjypeh2ursdae8g6twvus8g6rfwvs8qun0dfjkxaq8rkx3yf5tcsyz3d73gafnh3cax9rn
             449d9p5uxz9ezhhypd0elx87sjle52x86fux2ypatgddc6k63n7erqz25le42c4u4ecky03ylcqca784w
             """.trimIndent().trim()
-        val result = Validator.isBolt11(bolt11)
-        assertTrue(result)
+        val result = Validator.getBolt11(bolt11)
+        assertTrue(result.equals(bolt11))
     }
 
     @Test
@@ -152,23 +179,23 @@ class ValidatorUnitTest {
             wlrswe78q4eyqc7d8d0xqzpuyk0sg5g70me25alkluzd2x62aysf2pyy8edtjeevuv4p2d5p76r4zkmneet7
             uvyakky2zr4cusd45tftc9c5fh0nnqpnl2jfll544esqchsrny
             """.trimIndent().trim()
-        val result = Validator.isBolt11(bolt11)
-        assertTrue(result)
+        val result = Validator.getBolt11(bolt11)
+        assertTrue(result.equals(bolt11))
     }
 
     @Test
     fun isBolt11_testThree() {
         val bolt11 = "bcrt1q7ezrtfqx2w4wg6vmlsk9uaxqeuxgpewdn09zc8"
-        val result = Validator.isBolt11(bolt11)
-        assertFalse(result)
+        val result = Validator.getBolt11(bolt11)
+        assertFalse(result.equals(bolt11))
     }
 
     @Test
     fun isBolt11_testFour() {
         val bolt11 =
             "0360dca2f35336d303643a7fb172ba6185b9086aa1fbd6063a1447050f2dda0f87@127.0.0.1:9735"
-        val result = Validator.isBolt11(bolt11)
-        assertFalse(result)
+        val result = Validator.getBolt11(bolt11)
+        assertFalse(result.equals(bolt11))
     }
 
     @Test
@@ -179,8 +206,8 @@ class ValidatorUnitTest {
             5kgetjypeh2ursdae8g6twvus8g6rfwvs8qun0dfjkxaq8rkx3yf5tcsyz3d73gafnh3cax9rn
             449d9p5uxz9ezhhypd0elx87sjle52x86fux2ypatgddc6k63n7erqz25le42c4u4ecky03ylcqca784w
             """.trimIndent().trim()
-        val result = Validator.isBolt11(bolt11)
-        assertFalse(result)
+        val result = Validator.getBolt11(bolt11)
+        assertFalse(result.equals(bolt11))
     }
 
     @Test
