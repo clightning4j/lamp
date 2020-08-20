@@ -18,8 +18,7 @@ import java.lang.Exception
 
 class DecodedInvoiceFragment : BottomSheetDialogFragment() {
 
-    val cli = LightningCli()
-    lateinit var bolt11: String
+    private val cli = LightningCli()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -27,7 +26,7 @@ class DecodedInvoiceFragment : BottomSheetDialogFragment() {
         savedInstanceState: Bundle?
     ): View? {
         val view = inflater.inflate(R.layout.fragment_decoded_invoice, container, false)
-        bolt11 =  arguments?.getString("bolt11") ?: ""
+        val bolt11 =  arguments?.getString("bolt11") ?: ""
 
         val recyclerView = view.findViewById<RecyclerView>(R.id.recycler_view)
         recyclerView.layoutManager = LinearLayoutManager(context)
@@ -55,7 +54,7 @@ class DecodedInvoiceFragment : BottomSheetDialogFragment() {
         return view
     }
 
-    fun pay(bolt11: String) {
+    private fun pay(bolt11: String) {
         // Pay invoice
         val context = activity!!
         try {

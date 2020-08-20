@@ -104,7 +104,7 @@ class HistoryFragment: BottomSheetDialogFragment() {
         return view
     }
 
-    fun getData(): JSONArray {
+    private fun getData(): JSONArray {
         val listinvoices = LightningCli().exec(context!!, arrayOf("listinvoices"), true).toJSONObject()
         val listsendpays = LightningCli().exec(context!!, arrayOf("listsendpays"), true).toJSONObject()
 

@@ -5,11 +5,9 @@ import android.view.*
 import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.lvaccaro.lamp.DecodedInvoiceFragment
 import com.lvaccaro.lamp.LightningCli
 import com.lvaccaro.lamp.R
 import com.lvaccaro.lamp.toJSONObject
@@ -35,9 +33,7 @@ class ChannelAdapter(val list: ArrayList<JSONObject>,
     override fun onBindViewHolder(holder: ChannelViewHolder, position: Int) {
         val item: JSONObject = list[position]
         holder.bind(item)
-        holder.itemView.setOnClickListener { view ->
-            onClickListener(item)
-        }
+        holder.itemView.setOnClickListener { onClickListener(item) }
     }
 
     override fun getItemCount(): Int = list.size
@@ -81,7 +77,7 @@ class ChannelsActivity : AppCompatActivity() {
         doAsync { refresh() }
     }
 
-    fun showChannel(channel: JSONObject) {
+    private fun showChannel(channel: JSONObject) {
         val bundle = Bundle()
         bundle.putString("channel", channel.toString())
         val fragment = ChannelFragment()
@@ -89,7 +85,7 @@ class ChannelsActivity : AppCompatActivity() {
         fragment.show(supportFragmentManager, "ChannelFragment")
     }
 
-    fun refresh() {
+    private fun refresh() {
         try {
             val res = LightningCli().exec(
                 this@ChannelsActivity,
@@ -114,9 +110,11 @@ class ChannelsActivity : AppCompatActivity() {
                 findViewById<TextView>(R.id.total_text).text = "${total} sat in channels"
                 val recyclerView = findViewById<RecyclerView>(R.id.recycler_view)
                 val adapter = recyclerView.adapter as ChannelAdapter
-                adapter.list.clear()
-                adapter.list.addAll(channels)
-                adapter.notifyDataSetChanged()
+                adapter.apply {
+                    list.clear()
+                    list.addAll(channels)
+                    notifyDataSetChanged()
+                }
             }
         } catch (e: Exception) {
             runOnUiThread {

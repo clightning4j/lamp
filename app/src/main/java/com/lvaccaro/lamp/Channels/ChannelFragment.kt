@@ -21,8 +21,6 @@ import java.lang.Exception
 
 class ChannelFragment : BottomSheetDialogFragment() {
 
-    val cli = LightningCli()
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -31,22 +29,25 @@ class ChannelFragment : BottomSheetDialogFragment() {
         val view = inflater.inflate(R.layout.fragment_channel, container, false)
         val data =  arguments?.getString("channel") ?: ""
         val channel = JSONObject(data)
-        val cid = channel.getString("channel_id")
 
         val recyclerView = view.findViewById<RecyclerView>(R.id.recycler_view)
-        recyclerView.layoutManager = LinearLayoutManager(context)
-        recyclerView.adapter = HashMapAdapter(HashMapAdapter.from(channel))
+        recyclerView.apply {
+            layoutManager = LinearLayoutManager(context)
+            adapter = HashMapAdapter(HashMapAdapter.from(channel))
+        }
 
         val closeButton = view.findViewById<Button>(R.id.close_button)
-        closeButton.isEnabled = channel.getString("state") == "CHANNELD_NORMAL"
-        closeButton.setOnClickListener { doAsync { close(cid) } }
+        closeButton.apply {
+            isEnabled = channel.getString("state") == "CHANNELD_NORMAL"
+            setOnClickListener { doAsync { close(channel.getString("channel_id")) } }
+        }
         return view
     }
 
-    fun close(cid: String) {
+    private fun close(cid: String) {
         val context = activity!!
         try {
-            val res = LightningCli().exec(
+            LightningCli().exec(
                 context,
                 arrayOf("close", cid),
                 true

@@ -23,10 +23,11 @@ class RecyclerViewFragment : BottomSheetDialogFragment() {
         val title =  arguments?.getString("title")
         val data =  arguments?.getString("data")
         val recyclerView = view.findViewById<RecyclerView>(R.id.recycler_view)
-        recyclerView.layoutManager = LinearLayoutManager(context)
-        recyclerView.adapter = HashMapAdapter(HashMapAdapter.from(JSONObject(data)))
+        recyclerView.apply {
+            layoutManager = LinearLayoutManager(context)
+            adapter = HashMapAdapter(HashMapAdapter.from(JSONObject(data)))
+        }
         view.findViewById<TextView>(R.id.title).text = title
-
         return view
     }
 
