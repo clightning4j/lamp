@@ -2,27 +2,43 @@ package com.lvaccaro.lamp
 
 import android.os.Bundle
 import android.text.method.ScrollingMovementMethod
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
 import android.widget.EditText
+import android.widget.ProgressBar
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 
 import kotlinx.android.synthetic.main.activity_log.*
+import kotlinx.android.synthetic.main.list_channel.*
+import kotlinx.android.synthetic.main.list_channel.view.*
 import org.jetbrains.anko.doAsync
-import java.io.BufferedReader
 import java.io.File
-import java.lang.Exception
+import java.io.RandomAccessFile
+import java.lang.StringBuilder
 
 class LogActivity : AppCompatActivity() {
 
-    var daemon = "lightningd"
+    companion object {
+        val TAG = LogActivity::class.java.canonicalName
+    }
+
+    private var daemon = "lightningd"
+    private val maxBufferToLoad = 200
+    private var sizeBuffer = 0
+
+    //UI component
+    private lateinit var progressBar: ProgressBar
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_log)
         setSupportActionBar(toolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        progressBar = findViewById(R.id.loading_status)
+        progressBar.max = maxBufferToLoad
     }
 
     override fun onResume() {
@@ -52,9 +68,9 @@ class LogActivity : AppCompatActivity() {
         }
     }
 
-    fun readLog() {
+    private fun readLog() {
         title = "Log $daemon"
-        val logFile = File(rootDir(),"$daemon.log")
+        val logFile = File(rootDir(), "$daemon.log")
         if (!logFile.exists()) {
             Toast.makeText(this, "No log file found", Toast.LENGTH_LONG).show()
             return
@@ -63,28 +79,48 @@ class LogActivity : AppCompatActivity() {
         et.movementMethod = ScrollingMovementMethod()
         et.isVerticalScrollBarEnabled = true
         et.setText("")
-
-        read(logFile.bufferedReader(), et)
-    }
-
-    fun read(logReader: BufferedReader, et: EditText) {
-        var text = "."
-        while (!text.isEmpty()) {
-            text = read100(logReader)
-            et.append(text)
+        doAsync {
+            runOnUiThread {
+                Toast.makeText(this@LogActivity, "Loading", Toast.LENGTH_SHORT).show()
+                progressBar.visibility = View.VISIBLE
+            }
+            val randomAccessFile = RandomAccessFile(logFile, "r")
+            read(randomAccessFile, et)
         }
     }
 
-    fun read100(logReader: BufferedReader): String {
-        val sb = StringBuilder()
-        for (i in 0..100) {
-            try {
-                val line = logReader.readLine() ?: break
-                sb.append(line)
-            } catch (e: Exception) {
-                break
+    private fun read(randomAccessFile: RandomAccessFile, et: EditText) {
+        Log.d(TAG, "Start to read the file with RandomAccessFile")
+        //Set the position at the end of the file
+        val fileSize = randomAccessFile.length() - 1
+        randomAccessFile.seek(fileSize)
+        //The maximum dimension of this object is one line
+        val lineBuilder = StringBuilder()
+        //This contains the each line of the logger, the line of the logger are fixed
+        //to the propriety *maxBufferToLoad*
+        val logBuilder = StringBuilder()
+        for (pointer in fileSize downTo 1) {
+            randomAccessFile.seek(pointer)
+            val character = randomAccessFile.read().toChar()
+            lineBuilder.append(character)
+            if (character.equals('\n', false)) {
+                sizeBuffer++
+                logBuilder.append(lineBuilder.reverse().toString())
+                lineBuilder.clear()
+                runOnUiThread {
+                    this.progressBar.progress = sizeBuffer
+                }
+                if (sizeBuffer == maxBufferToLoad) break
             }
         }
-        return sb.toString()
+        Log.d(TAG, "Print lines to EditText")
+        val lines = logBuilder.toString().split("\n").reversed()
+        runOnUiThread {
+            lines.forEach {
+                if (it.trim().isNotEmpty() && it.length < 400)
+                    et.append(it.plus("\n"))
+            }
+            progressBar.visibility = View.GONE
+        }
     }
 }
