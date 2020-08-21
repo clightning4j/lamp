@@ -1,7 +1,7 @@
 package com.lvaccaro.lamp
 
-import com.lvaccaro.lamp.util.LampKeys
-import com.lvaccaro.lamp.util.Validator
+import com.lvaccaro.lamp.utils.LampKeys
+import com.lvaccaro.lamp.utils.Validator
 import junit.framework.TestCase
 import org.junit.Test
 

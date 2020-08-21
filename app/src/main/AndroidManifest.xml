@@ -19,7 +19,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".view.pay.PayViewActivity"
+            android:name=".activities.PayViewActivity"
             android:label="@string/title_activity_pay_view"
             android:parentActivityName=".MainActivity"
             android:theme="@style/AppTheme.NoActionBar">
@@ -29,7 +29,7 @@
         </activity>
 
         <activity
-            android:name=".Channels.ChannelsActivity"
+            android:name=".activities.ChannelsActivity"
             android:label="@string/id_channels"
             android:parentActivityName=".MainActivity"
             android:theme="@style/AppTheme.NoActionBar">
@@ -38,7 +38,7 @@
                 android:value="com.lvaccaro.lamp.MainActivity" />
         </activity>
         <activity
-            android:name=".InvoiceActivity"
+            android:name=".activities.InvoiceActivity"
             android:label="@string/id_invoice"
             android:parentActivityName=".MainActivity">
             <meta-data
@@ -46,7 +46,7 @@
                 android:value="com.lvaccaro.lamp.MainActivity" />
         </activity>
         <activity
-            android:name=".LogActivity"
+            android:name=".activities.LogActivity"
             android:label="@string/id_log"
             android:parentActivityName=".MainActivity"
             android:theme="@style/AppTheme.NoActionBar">
@@ -55,7 +55,7 @@
                 android:value="com.lvaccaro.lamp.MainActivity" />
         </activity>
         <activity
-            android:name=".SettingsActivity"
+            android:name=".activities.SettingsActivity"
             android:label="@string/id_settings"
             android:parentActivityName=".MainActivity">
             <meta-data
@@ -63,7 +63,7 @@
                 android:value="com.lvaccaro.lamp.MainActivity" />
         </activity>
         <activity
-            android:name=".ScanActivity"
+            android:name=".activities.ScanActivity"
             android:label="@string/id_scan"
             android:parentActivityName=".MainActivity">
             <meta-data
@@ -71,7 +71,7 @@
                 android:value="com.lvaccaro.lamp.MainActivity" />
         </activity>
         <activity
-            android:name=".ConsoleActivity"
+            android:name=".activities.ConsoleActivity"
             android:label="@string/id_console"
             android:parentActivityName=".MainActivity">
             <meta-data
@@ -103,10 +103,10 @@
         </activity>
 
         <service
-            android:name=".Services.LightningService"
+            android:name=".services.LightningService"
             android:exported="false" />
         <service
-            android:name=".Services.TorService"
+            android:name=".services.TorService"
             android:exported="false" />
     </application>
 

@@ -3,7 +3,7 @@ package com.lvaccaro.lamp
 import android.content.Context
 import android.os.Build
 import androidx.preference.PreferenceManager
-import com.lvaccaro.lamp.Services.LightningService
+import com.lvaccaro.lamp.services.LightningService
 import org.json.JSONObject
 import java.io.File
 import java.io.InputStream

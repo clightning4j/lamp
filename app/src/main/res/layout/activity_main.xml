@@ -12,7 +12,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <com.lvaccaro.lamp.PowerImageView
+        <com.lvaccaro.lamp.views.PowerImageView
             android:id="@+id/powerImageView"
             android:layout_width="65dp"
             android:layout_height="90dp"

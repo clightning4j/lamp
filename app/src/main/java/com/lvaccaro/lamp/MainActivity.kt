@@ -31,17 +31,20 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.zxing.WriterException
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel
 import com.google.zxing.qrcode.encoder.Encoder
-import com.lvaccaro.lamp.Channels.ChannelsActivity
-import com.lvaccaro.lamp.Services.LightningService
-import com.lvaccaro.lamp.Services.TorService
-import com.lvaccaro.lamp.util.SimulatorPlugin
-import com.lvaccaro.lamp.util.LampKeys
-import com.lvaccaro.lamp.view.pay.PayViewActivity
+import com.lvaccaro.lamp.activities.*
+import com.lvaccaro.lamp.fragments.HistoryFragment
+import com.lvaccaro.lamp.fragments.InvoiceBuildFragment
+import com.lvaccaro.lamp.fragments.WithdrawFragment
+import com.lvaccaro.lamp.services.LightningService
+import com.lvaccaro.lamp.services.TorService
+import com.lvaccaro.lamp.views.PowerImageView
+import com.lvaccaro.lamp.utils.SimulatorPlugin
+import com.lvaccaro.lamp.utils.LampKeys
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream
 import org.apache.commons.compress.compressors.xz.XZCompressorInputStream
 import org.apache.commons.compress.utils.IOUtils
-import com.lvaccaro.lamp.util.UI
+import com.lvaccaro.lamp.utils.UI
 import org.jetbrains.anko.doAsync
 import org.json.JSONArray
 import org.json.JSONObject
@@ -153,7 +156,8 @@ class MainActivity : UriResultActivity() {
         }
 
         viewOnRunning.findViewById<MaterialButton>(R.id.button_receive).setOnClickListener {
-            val bottomSheetDialog = InvoiceBuildFragment()
+            val bottomSheetDialog =
+                InvoiceBuildFragment()
             bottomSheetDialog.show(supportFragmentManager, "Custom Bottom Sheet")
         }
 
@@ -252,7 +256,8 @@ class MainActivity : UriResultActivity() {
                 true
             }
             R.id.action_invoice -> {
-                val bottomSheetDialog = InvoiceBuildFragment()
+                val bottomSheetDialog =
+                    InvoiceBuildFragment()
                 bottomSheetDialog.show(supportFragmentManager, "Custom Bottom Sheet")
                 true
             }
@@ -261,7 +266,8 @@ class MainActivity : UriResultActivity() {
                 true
             }
             R.id.action_withdraw -> {
-                val bottomSheetDialog = WithdrawFragment()
+                val bottomSheetDialog =
+                    WithdrawFragment()
                 bottomSheetDialog.show(supportFragmentManager, "WithdrawFragment")
                 true
             }
@@ -358,7 +364,8 @@ class MainActivity : UriResultActivity() {
     }
 
     private fun onHistoryClick() {
-        HistoryFragment().show(getSupportFragmentManager(), "History dialog")
+        HistoryFragment()
+            .show(getSupportFragmentManager(), "History dialog")
     }
 
     private fun onPowerClick() {
