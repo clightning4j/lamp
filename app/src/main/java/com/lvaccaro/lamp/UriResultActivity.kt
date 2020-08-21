@@ -145,10 +145,4 @@ open class UriResultActivity() : AppCompatActivity() {
             ).show()
         }
     }
-
-    protected fun showMessageOnSnackBar(message: String, duration: Int = Snackbar.LENGTH_LONG){
-        runOnUiThread{
-            Snackbar.make(findViewById(android.R.id.content), message, duration).show()
-        }
-    }
 }

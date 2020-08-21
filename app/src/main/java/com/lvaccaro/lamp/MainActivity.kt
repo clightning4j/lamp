@@ -21,7 +21,6 @@ import android.view.View
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
-import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.core.app.ActivityCompat
 import androidx.core.net.toUri
@@ -29,7 +28,6 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.preference.PreferenceManager
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.floatingactionbutton.FloatingActionButton
-import com.google.android.material.snackbar.Snackbar
 import com.google.zxing.WriterException
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel
 import com.google.zxing.qrcode.encoder.Encoder
@@ -44,7 +42,6 @@ import org.apache.commons.compress.archivers.tar.TarArchiveInputStream
 import org.apache.commons.compress.compressors.xz.XZCompressorInputStream
 import org.apache.commons.compress.utils.IOUtils
 import com.lvaccaro.lamp.util.UI
-import org.jetbrains.anko.contentView
 import org.jetbrains.anko.doAsync
 import org.json.JSONArray
 import org.json.JSONObject
@@ -291,7 +288,7 @@ class MainActivity : UriResultActivity() {
                 doAsync { parse(result) }
                 return
             }
-            showMessageOnSnackBar("Scan failed")
+            UI.snackBar(this, "Scan failed")
         } else {
             super.onActivityResult(requestCode, resultCode, data)
         }
@@ -493,8 +490,8 @@ class MainActivity : UriResultActivity() {
                 stopLightningService()
                 stopTorService()
                 powerOff()
+                UI.snackBar(this, e.localizedMessage)
             }
-            this.showMessageOnSnackBar(e.localizedMessage)
         }
     }
 
@@ -660,11 +657,11 @@ class MainActivity : UriResultActivity() {
                 }
                 // wait tor to be bootstrapped
                 if (!waitTorBootstrap()) {
-                    showMessageOnSnackBar("Tor start failed")
                     runOnUiThread {
                         Log.d(TAG, "******** Tor run failed ********")
                         stopTorService()
                         powerOff()
+                        UI.snackBar(this@MainActivity, "Tor start failed")
                     }
                     return@doAsync
                 }
@@ -690,8 +687,8 @@ class MainActivity : UriResultActivity() {
                 runOnUiThread { powerOn() }
             } catch (e: Exception) {
                 log.info("---" + e.localizedMessage + "---")
-                showMessageOnSnackBar(e.localizedMessage)
                 stop()
+                runOnUiThread { UI.snackBar(this@MainActivity, e.localizedMessage) }
             }
         }
     }
@@ -726,7 +723,7 @@ class MainActivity : UriResultActivity() {
             val res = LightningCli().exec(this, arrayOf("stop"))
             log.info("---" + res.toString() + "---")
         } catch (e: Exception) {
-            showMessageOnSnackBar("Error: ${e.localizedMessage}", Snackbar.LENGTH_LONG)
+            runOnUiThread { UI.snackBar(this, "Error: ${e.localizedMessage}") }
             log.warning(e.localizedMessage)
             e.printStackTrace()
         }

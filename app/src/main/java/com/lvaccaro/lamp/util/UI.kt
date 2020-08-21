@@ -4,6 +4,8 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+import com.google.android.material.snackbar.Snackbar
 
 class UI {
 
@@ -13,6 +15,10 @@ class UI {
             val clip: ClipData = ClipData.newPlainText(key, text)
             clipboard.setPrimaryClip(clip)
             Toast.makeText(context, "Copied to clipboard", Toast.LENGTH_LONG).show()
+        }
+
+        fun snackBar(context: AppCompatActivity, message: String, duration: Int = Snackbar.LENGTH_LONG){
+            Snackbar.make(context.findViewById(android.R.id.content), message, duration).show()
         }
     }
 
