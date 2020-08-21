@@ -772,13 +772,6 @@ class MainActivity : UriResultActivity() {
         }
     }
 
-    private fun copyToClipboard(key: String, text: String) {
-        val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-        val clip: ClipData = ClipData.newPlainText(key, text)
-        clipboard.primaryClip = clip
-        showMessageOnToast("Copied to clipboard")
-    }
-
     private fun shoutOffUI() {
         if (!isLightningRunning()) return
         runOnUiThread {
