@@ -69,7 +69,6 @@ class MainActivity : UriResultActivity() {
     private lateinit var powerImageView: PowerImageView
     private lateinit var viewOnRunning: View
     private var timer: Timer? = null
-    private lateinit var notificationReceiver: NotificationReceiver
 
     companion object {
         val RELEASE = "release_clightning_0.9.0"
@@ -116,11 +115,8 @@ class MainActivity : UriResultActivity() {
         arrowImageView.setOnClickListener { this.onHistoryClick() }
         viewOnRunning = findViewById(R.id.content_main_status_on)
         restoreBalanceValue(savedInstanceState)
-        notificationReceiver = NotificationReceiver(this)
-        registerLocalReceiver(notificationReceiver)
 
-        notificationReceiver = NotificationReceiver(this)
-        registerLocalReceiver(notificationReceiver)
+        registerLocalReceiver()
 
         val addressTextView = findViewById<TextView>(R.id.textViewQr)
         addressTextView.setOnClickListener {
@@ -776,21 +772,7 @@ class MainActivity : UriResultActivity() {
         }
     }
 
-    private fun shoutOffUI() {
-        if (!isLightningRunning()) return
-        runOnUiThread {
-            powerOff()
-        }
-    }
-
-    private fun runOnUI() {
-        if (isLightningRunning()) return
-        runOnUiThread {
-            powerOn()
-        }
-    }
-
-    private fun registerLocalReceiver(notificationReceiver: NotificationReceiver) {
+    private fun registerLocalReceiver() {
         val localBroadcastManager = LocalBroadcastManager.getInstance(this)
         val intentFilter = IntentFilter()
         intentFilter.addAction(LampKeys.NODE_NOTIFICATION_SHUTDOWN)
@@ -803,24 +785,18 @@ class MainActivity : UriResultActivity() {
         LocalBroadcastManager.getInstance(applicationContext).sendBroadcast(intent)
     }
 
-    class NotificationReceiver(val mainActivity: MainActivity) : BroadcastReceiver() {
-
-        companion object {
-            val TAG = NotificationReceiver::class.java.canonicalName
-        }
-
+    private val notificationReceiver = object : BroadcastReceiver() {
         // I can create a mediator that I can use to call all method inside the
         //lightning-cli and return a json if the answer i ok or I throw an execeptions
 
         override fun onReceive(context: Context?, intent: Intent?) {
             Log.d(TAG, "onReceive action ${intent?.action}")
             when (intent?.action) {
-                LampKeys.NODE_NOTIFICATION_FUNDCHANNEL -> mainActivity.updateBalanceView(
-                    context,
-                    intent
-                )
-                LampKeys.NODE_NOTIFICATION_SHUTDOWN -> {
-                    mainActivity.shoutOffUI()
+                LampKeys.NODE_NOTIFICATION_FUNDCHANNEL -> runOnUiThread {
+                    updateBalanceView(context, intent)
+                }
+                LampKeys.NODE_NOTIFICATION_SHUTDOWN ->  runOnUiThread {
+                    powerOff()
                 }
             }
         }
