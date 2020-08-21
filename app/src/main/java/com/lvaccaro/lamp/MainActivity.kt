@@ -37,21 +37,15 @@ import com.lvaccaro.lamp.fragments.InvoiceBuildFragment
 import com.lvaccaro.lamp.fragments.WithdrawFragment
 import com.lvaccaro.lamp.services.LightningService
 import com.lvaccaro.lamp.services.TorService
+import com.lvaccaro.lamp.utils.Archive
 import com.lvaccaro.lamp.views.PowerImageView
 import com.lvaccaro.lamp.utils.SimulatorPlugin
 import com.lvaccaro.lamp.utils.LampKeys
-import org.apache.commons.compress.archivers.tar.TarArchiveEntry
-import org.apache.commons.compress.archivers.tar.TarArchiveInputStream
-import org.apache.commons.compress.compressors.xz.XZCompressorInputStream
-import org.apache.commons.compress.utils.IOUtils
 import com.lvaccaro.lamp.utils.UI
 import org.jetbrains.anko.doAsync
 import org.json.JSONArray
 import org.json.JSONObject
-import java.io.BufferedInputStream
 import java.io.File
-import java.io.FileInputStream
-import java.io.FileOutputStream
 import java.util.*
 import java.util.logging.Logger
 import kotlin.concurrent.schedule
@@ -389,7 +383,7 @@ class MainActivity : UriResultActivity() {
                 "Package already downloaded. Uncompressing..."
             powerImageView.animating()
             doAsync {
-                uncompress(tarFile, rootDir())
+                Archive().uncompressXZ(tarFile, rootDir())
                 runOnUiThread {
                     powerOff()
                 }
@@ -528,7 +522,7 @@ class MainActivity : UriResultActivity() {
             }
             val tarFile = File(dir(), tarFilename())
             doAsync {
-                uncompress(tarFile, rootDir())
+                Archive().uncompressXZ(tarFile, rootDir())
                 tarFile.delete()
                 runOnUiThread { powerOff() }
             }
@@ -554,47 +548,6 @@ class MainActivity : UriResultActivity() {
         requestCert.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE)
         requestCert.setDestinationUri(fileCert.toUri())
         downloadCertID = downloadmanager.enqueue(requestCert)
-    }
-
-    //FIXME(vincenzopalazzo) Maybe is better make this operation with a different class?
-    private fun uncompress(inputFile: File, outputDir: File) {
-        if (!outputDir.exists()) {
-            outputDir.mkdir()
-        }
-        val pluginsDir = File(outputDir, "plugins")
-        if (!pluginsDir.exists()) {
-            pluginsDir.mkdir()
-        }
-        val input = TarArchiveInputStream(
-            BufferedInputStream(
-                XZCompressorInputStream(
-                    BufferedInputStream(FileInputStream(inputFile))
-                )
-            )
-        )
-        var counter = 0
-        var entry = input.nextEntry
-        while (entry != null) {
-
-            val name = entry.name
-            Log.d(TAG, "Extracting $name")
-            val f = File(outputDir, name)
-
-            var out = FileOutputStream(f)
-            try {
-                IOUtils.copy(input, out)
-            } finally {
-                IOUtils.closeQuietly(out)
-            }
-
-            val mode = (entry as TarArchiveEntry).mode
-            //noinspection ResultOfMethodCallIgnored
-            f.setExecutable(true, mode and 1 == 0)
-            entry = input.nextEntry
-            counter++
-        }
-        IOUtils.closeQuietly(input)
-        inputFile.delete()
     }
 
     private fun waitTorBootstrap(): Boolean {
