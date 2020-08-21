@@ -52,6 +52,7 @@ class LightningService : IntentService("LightningService") {
         var bindaddr = sharedPref.getString("bind-addr", "").toString()
         var addr = sharedPref.getString("addr", "").toString()
         val alias = sharedPref.getString("alias", "").toString()
+        val ignoreFeeLimits = sharedPref.getBoolean("ignore-fee-limits", false)
 
         var options = arrayListOf<String>(
             String.format("%s/%s", binaryDir.canonicalPath, daemon),
@@ -59,6 +60,7 @@ class LightningService : IntentService("LightningService") {
             String.format("--log-level=%s", logLevel),
             String.format("--lightning-dir=%s", lightningDir.path),
             String.format("--plugin-dir=%s", File(binaryDir.path , "plugins").path),
+            String.format("--ignoreFeeLimits=%b", ignoreFeeLimits),
             // 10 days to catch a cheating attempt
             String.format("--watchtime-blocks=%s", 10 * 24 * 6))
 

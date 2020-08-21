@@ -24,6 +24,12 @@
             app:title="@string/id_log_level"
             app:useSimpleSummaryProvider="true" />
 
+        <SwitchPreference
+            app:key="ignore-fee-limits"
+            app:title="Ignore fee limits"
+            app:summary="Allow nodes which establish channels to us to set any fee they want"
+            app:useSimpleSummaryProvider="true" />
+
     </PreferenceCategory>
 
     <PreferenceCategory app:title="@string/id_network_options">
