@@ -32,6 +32,17 @@
 
     </PreferenceCategory>
 
+    <PreferenceCategory app:title="@string/id_lamp_settings">
+
+        <SwitchPreference
+            app:key="autostart"
+            app:title="@string/id_autostart"
+            app:defaultValue="true"
+            app:summary="@string/id_run_lightning_on_Lamp_startup"
+            app:useSimpleSummaryProvider="true" />
+
+    </PreferenceCategory>
+
     <PreferenceCategory app:title="@string/id_network_options">
 
         <SwitchPreference

@@ -63,6 +63,7 @@ class MainActivity : UriResultActivity() {
     private lateinit var powerImageView: PowerImageView
     private lateinit var viewOnRunning: View
     private var timer: Timer? = null
+    private var isFirstStart = true
 
     companion object {
         val RELEASE = "release_clightning_0.9.0"
@@ -170,9 +171,15 @@ class MainActivity : UriResultActivity() {
                 "Rub the lamp to download ${RELEASE} binaries."
             return
         }
+
         if (!isLightningRunning()) {
             findViewById<TextView>(R.id.statusText).text =
                 "Offline. Rub the lamp to start."
+
+            val sharedPref = PreferenceManager.getDefaultSharedPreferences(applicationContext)
+            if (isFirstStart && sharedPref.getBoolean("autostart", true))
+                start()
+            isFirstStart = false
             return
         }
         viewOnRunning.visibility = View.VISIBLE
