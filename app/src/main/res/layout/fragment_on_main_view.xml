@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView
+    android:id="@+id/scroll_view"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_below="@+id/statusText"
+    android:layout_centerInParent="true"
+    android:layout_height="match_parent"
+    android:layout_width="match_parent"
+    android:fillViewport="true">
+
+    <RelativeLayout
+        android:id="@+id/on_main_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/fund_in_channel_card"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_marginStart="25dp"
+            android:layout_marginTop="30dp"
+            android:layout_marginEnd="25dp"
+            android:checkable="false"
+            android:clickable="false"
+            android:elevation="10dp"
+            android:focusable="false"
+            android:theme="@style/Theme.MaterialComponents.Light"
+            app:cardCornerRadius="10dp"
+            app:strokeColor="@color/cardview_light_background"
+            app:strokeWidth="3dp">
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <ImageView
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:layout_alignParentStart="true"
+                    android:layout_marginLeft="29dp"
+                    android:layout_marginTop="15dp"
+                    android:src="@drawable/ic_baseline_account_balance_24" />
+
+                <TextView
+                    android:id="@+id/value_balance_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentTop="true"
+                    android:layout_centerInParent="true"
+                    android:layout_marginEnd="15dp"
+                    android:padding="5dp"
+                    android:text="0"
+                    android:textSize="28dp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/valute_text_view"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignBaseline="@+id/value_balance_text"
+                    android:layout_centerInParent="true"
+                    android:layout_toEndOf="@+id/value_balance_text"
+                    android:text="msat"
+                    android:textSize="20dp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/on_chain"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/value_balance_text"
+                    android:layout_centerInParent="true"
+                    android:layout_marginEnd="15dp"
+                    android:padding="5dp"
+                    android:text="0"
+                    android:textSize="18dp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignBaseline="@+id/on_chain"
+                    android:layout_centerInParent="true"
+                    android:layout_toEndOf="@+id/on_chain"
+                    android:text="msat"
+                    android:textSize="15dp"
+                    android:textStyle="bold" />
+
+
+                <ImageView
+                    android:id="@+id/icon_lightning"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:layout_below="@+id/valute_text_view"
+                    android:layout_alignParentStart="true"
+                    android:layout_marginLeft="29dp"
+                    android:layout_marginTop="13dp"
+                    android:src="@drawable/ic_lightning" />
+
+                <TextView
+                    android:id="@+id/off_chain"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/on_chain"
+                    android:layout_centerInParent="true"
+                    android:layout_marginEnd="15dp"
+                    android:padding="5dp"
+                    android:text="0"
+                    android:textSize="18dp"
+                    android:textStyle="bold" />
+
+                <ImageView
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:layout_below="@+id/icon_lightning"
+                    android:layout_alignParentStart="true"
+                    android:layout_marginLeft="29dp"
+                    android:layout_marginTop="13dp"
+                    android:src="@drawable/ic_blockchain" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignBaseline="@+id/off_chain"
+                    android:layout_centerInParent="true"
+                    android:layout_toEndOf="@+id/off_chain"
+                    android:text="msat"
+                    android:textSize="15dp"
+                    android:textStyle="bold" />
+
+            </RelativeLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/button_send"
+            style="@style/Widget.MaterialComponents.Button.TextButton.Icon"
+            android:layout_width="150dp"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/fund_in_channel_card"
+            android:layout_alignParentStart="true"
+            android:layout_marginStart="15dp"
+            android:padding="18dp"
+            android:text="Send"
+            android:textColor="@color/colorPrimary"
+            app:strokeColor="@color/cardview_light_background"
+            app:strokeWidth="1dp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/button_receive"
+            style="@style/Widget.MaterialComponents.Button.TextButton.Icon"
+            android:layout_width="150dp"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/fund_in_channel_card"
+            android:layout_alignParentEnd="true"
+            android:layout_marginEnd="15dp"
+            android:padding="18dp"
+            android:text="receive"
+            android:textColor="@color/colorPrimary"
+            app:strokeColor="@color/cardview_light_background"
+            app:strokeWidth="1dp" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_below="@+id/button_send"
+            android:layout_gravity="bottom"
+            android:layout_marginBottom="16dp"
+            android:foregroundGravity="bottom"
+            android:gravity="bottom"
+            android:orientation="horizontal"
+            android:padding="16dp">
+
+            <ImageView
+                android:id="@+id/qrcodeImageView"
+                android:layout_width="100dp"
+                android:layout_height="100dp"/>
+
+            <TextView
+                android:id="@+id/textViewQr"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_weight="1"
+                android:textSize="12sp" />
+        </LinearLayout>
+    </RelativeLayout>
+</ScrollView>
