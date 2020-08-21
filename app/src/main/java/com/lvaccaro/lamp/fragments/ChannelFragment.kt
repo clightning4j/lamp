@@ -6,7 +6,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.Toast
-import androidx.appcompat.app.AlertDialog
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
@@ -14,6 +13,7 @@ import com.lvaccaro.lamp.LightningCli
 import com.lvaccaro.lamp.R
 import com.lvaccaro.lamp.toJSONObject
 import com.lvaccaro.lamp.adapters.HashMapAdapter
+import com.lvaccaro.lamp.utils.UI
 import org.jetbrains.anko.doAsync
 import org.json.JSONObject
 import java.lang.Exception
@@ -59,10 +59,7 @@ class ChannelFragment : BottomSheetDialogFragment() {
             }
         } catch (e: Exception) {
             context.runOnUiThread {
-                AlertDialog.Builder(context)
-                    .setTitle("Error")
-                    .setMessage(e.localizedMessage)
-                    .show()
+                UI.textAlertDialog(context, "Error", e.localizedMessage)
             }
         }
     }

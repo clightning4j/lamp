@@ -6,13 +6,13 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.Toast
-import androidx.appcompat.app.AlertDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.google.android.material.switchmaterial.SwitchMaterial
 import com.google.android.material.textfield.TextInputEditText
 import com.lvaccaro.lamp.LightningCli
 import com.lvaccaro.lamp.R
 import com.lvaccaro.lamp.toJSONObject
+import com.lvaccaro.lamp.utils.UI
 import org.jetbrains.anko.doAsync
 import java.lang.Exception
 
@@ -59,16 +59,8 @@ class FundChannelFragment: BottomSheetDialogFragment() {
             }
         } catch (e: Exception) {
             activity?.runOnUiThread {
-                showWarning(e.localizedMessage)
+                UI.textAlertDialog(context!!, "Warning", e.localizedMessage)
             }
         }
-    }
-
-    fun showWarning(message: String) {
-        AlertDialog.Builder(context!!)
-            .setTitle(R.string.id_warning)
-            .setMessage(message)
-            .setPositiveButton(android.R.string.ok) { dialog, which -> }
-            .show()
     }
 }
