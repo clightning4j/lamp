@@ -4,6 +4,7 @@ import android.content.Context
 import android.os.FileObserver
 import android.util.Log
 import com.lvaccaro.lamp.handlers.IEventHandler
+import com.lvaccaro.lamp.handlers.NewBlockHandler
 import com.lvaccaro.lamp.handlers.NewChannelPayment
 import com.lvaccaro.lamp.handlers.ShutdownNode
 import java.io.File
@@ -55,7 +56,7 @@ class LogObserver(val context: Context, val path: String, val nameFile: String) 
 
     fun initHandler() {
         actionHandler = ArrayList<IEventHandler>()
-        actionHandler.addAll(arrayOf(NewChannelPayment(), ShutdownNode()))
+        actionHandler.addAll(arrayOf(NewChannelPayment(), ShutdownNode(), NewBlockHandler()))
     }
 
     override fun onEvent(event: Int, file: String?) {

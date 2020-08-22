@@ -35,6 +35,7 @@ import com.lvaccaro.lamp.activities.*
 import com.lvaccaro.lamp.fragments.HistoryFragment
 import com.lvaccaro.lamp.fragments.InvoiceBuildFragment
 import com.lvaccaro.lamp.fragments.WithdrawFragment
+import com.lvaccaro.lamp.handlers.NewBlockHandler
 import com.lvaccaro.lamp.handlers.NewChannelPayment
 import com.lvaccaro.lamp.handlers.ShutdownNode
 import com.lvaccaro.lamp.services.LightningService
@@ -48,9 +49,7 @@ import org.jetbrains.anko.doAsync
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.File
-import java.util.*
 import java.util.logging.Logger
-import kotlin.concurrent.schedule
 
 
 class MainActivity : UriResultActivity() {
@@ -61,10 +60,10 @@ class MainActivity : UriResultActivity() {
     private val log = Logger.getLogger(MainActivity::class.java.name)
     private var downloadID = 0L
     private var downloadCertID = 0L
+    private var blockcount = 0
     private lateinit var downloadmanager: DownloadManager
     private lateinit var powerImageView: PowerImageView
     private lateinit var viewOnRunning: View
-    private var timer: Timer? = null
     private var isFirstStart = true
 
     companion object {
@@ -189,11 +188,6 @@ class MainActivity : UriResultActivity() {
             getInfo()
             runIntent(NewChannelPayment.NOTIFICATION)
         }
-    }
-
-    override fun onPause() {
-        super.onPause()
-        timer?.cancel()
     }
 
     override fun onDestroy() {
@@ -408,7 +402,6 @@ class MainActivity : UriResultActivity() {
     private fun powerOff() {
         powerImageView.off()
         //powerImageView.visibility = View.VISIBLE
-        timer?.cancel()
         findViewById<TextView>(R.id.statusText).text = "Offline. Rub the lamp to turn on."
         findViewById<ImageView>(R.id.qrcodeImageView).visibility = View.GONE
         findViewById<TextView>(R.id.textViewQr).visibility = View.GONE
@@ -440,7 +433,8 @@ class MainActivity : UriResultActivity() {
         try {
             val resChainInfo =
                 LightningCli().exec(this@MainActivity, arrayOf("getchaininfo"), true).toJSONObject()
-            val blockcount = resChainInfo["blockcount"] as Int
+            blockcount = resChainInfo["blockcount"] as Int
+
             val res =
                 LightningCli().exec(this@MainActivity, arrayOf("getinfo"), true).toJSONObject()
             val id = res["id"] as String
@@ -454,14 +448,6 @@ class MainActivity : UriResultActivity() {
                 txt = id + "@" + address.getString("address")
             }
             val blockheight = res["blockheight"] as Int
-            // instantiate timer to monitor block syncing progress
-            timer?.cancel()
-            if (blockcount > blockheight) {
-                timer = Timer()
-                timer!!.schedule(5 * 1000) {
-                    doAsync { getInfo() }
-                }
-            }
 
             runOnUiThread {
                 title = alias
@@ -476,8 +462,7 @@ class MainActivity : UriResultActivity() {
                 //powerImageView.visibility = View.GONE
                 findViewById<FloatingActionButton>(R.id.floating_action_button).show()
                 val delta = blockcount - blockheight
-                findViewById<TextView>(R.id.statusText).text =
-                    if (delta > 0) "Syncing blocks -${delta}" else ""
+                findViewById<TextView>(R.id.statusText).text = if (delta > 0) "Syncing blocks -${delta}" else ""
             }
 
             // Generate qrcode
@@ -739,6 +724,7 @@ class MainActivity : UriResultActivity() {
         val intentFilter = IntentFilter()
         intentFilter.addAction(ShutdownNode.NOTIFICATION)
         intentFilter.addAction(NewChannelPayment.NOTIFICATION)
+        intentFilter.addAction(NewBlockHandler.NOTIFICATION)
         localBroadcastManager.registerReceiver(notificationReceiver, intentFilter)
     }
 
@@ -759,6 +745,11 @@ class MainActivity : UriResultActivity() {
                 }
                 ShutdownNode.NOTIFICATION ->  runOnUiThread {
                     powerOff()
+                }
+                NewBlockHandler.NOTIFICATION ->  runOnUiThread {
+                    val blockheight = intent.getIntExtra("height", 0)
+                    val delta = blockcount - blockheight
+                    findViewById<TextView>(R.id.statusText).text = if (delta > 0) "Syncing blocks -${delta}" else ""
                 }
             }
         }
