@@ -55,8 +55,7 @@ class LogObserver(val context: Context, val path: String, val nameFile: String) 
 
     fun initHandler() {
         actionHandler = ArrayList<IEventHandler>()
-        actionHandler.add(NewChannelPayment(LampKeys.NODE_NOTIFICATION_FUNDCHANNEL))
-        actionHandler.add(ShutdownNode(LampKeys.NODE_NOTIFICATION_SHUTDOWN))
+        actionHandler.addAll(arrayOf(NewChannelPayment(), ShutdownNode()))
     }
 
     override fun onEvent(event: Int, file: String?) {

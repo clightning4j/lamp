@@ -5,18 +5,19 @@ import android.content.Intent
 import android.util.Log
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 
-class ShutdownNode(val actionName: String): IEventHandler{
+class ShutdownNode: IEventHandler {
 
     companion object{
         val TAG = ShutdownNode.javaClass.canonicalName
-        val PATTERN = "UNUSUAL lightningd: JSON-RPC shutdown"
+        val NOTIFICATION: String = "SHUTDOWN_NODE_NOTIFICATION"
+        val PATTERN = "lightningd: JSON-RPC shutdown"
     }
 
     override fun doReceive(context: Context, information: String) {
         if(information.contains(PATTERN)){
-            Log.e(NewChannelPayment.TAG, "****** Action received ${actionName} ******")
+            Log.d(NewChannelPayment.TAG, "****** Action received ${NOTIFICATION} ******")
             val intent = Intent()
-            intent.action = actionName
+            intent.action = NOTIFICATION
             intent.putExtra("message", "Shutdown")
             LocalBroadcastManager.getInstance(context).sendBroadcast(intent)
         }

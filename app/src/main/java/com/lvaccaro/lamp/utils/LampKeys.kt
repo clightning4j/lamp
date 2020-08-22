@@ -11,11 +11,6 @@ class LampKeys {
         val CONNECT_COMMAND = "connect"
         val MESSAGE_JSON_KEY = "message"
 
-
-        //Key notification
-        val NODE_NOTIFICATION_SHUTDOWN: String = "SHUTDOWN_NODE_NOTIFICATION"
-        val NODE_NOTIFICATION_FUNDCHANNEL: String = "NODE_NOTIFICATION_FUNDCHANNEL"
-
         //UI save state
         const val OFF_CHAIN_BALANCE = "OFF_CHAIN_BALANCE"
         const val ON_CHAIN_BALANCE = "ON_CHAIN_BALANCE"

@@ -35,6 +35,8 @@ import com.lvaccaro.lamp.activities.*
 import com.lvaccaro.lamp.fragments.HistoryFragment
 import com.lvaccaro.lamp.fragments.InvoiceBuildFragment
 import com.lvaccaro.lamp.fragments.WithdrawFragment
+import com.lvaccaro.lamp.handlers.NewChannelPayment
+import com.lvaccaro.lamp.handlers.ShutdownNode
 import com.lvaccaro.lamp.services.LightningService
 import com.lvaccaro.lamp.services.TorService
 import com.lvaccaro.lamp.utils.Archive
@@ -185,7 +187,7 @@ class MainActivity : UriResultActivity() {
         viewOnRunning.visibility = View.VISIBLE
         doAsync {
             getInfo()
-            runIntent(LampKeys.NODE_NOTIFICATION_FUNDCHANNEL)
+            runIntent(NewChannelPayment.NOTIFICATION)
         }
     }
 
@@ -431,7 +433,7 @@ class MainActivity : UriResultActivity() {
         //findViewById<TextView>(R.id.textViewQr).visibility = View.VISIBLE
         findViewById<FloatingActionButton>(R.id.floating_action_button).show()
         invalidateOptionsMenu()
-        runIntent(LampKeys.NODE_NOTIFICATION_FUNDCHANNEL)
+        runIntent(NewChannelPayment.NOTIFICATION)
     }
 
     private fun getInfo() {
@@ -735,8 +737,8 @@ class MainActivity : UriResultActivity() {
     private fun registerLocalReceiver() {
         val localBroadcastManager = LocalBroadcastManager.getInstance(this)
         val intentFilter = IntentFilter()
-        intentFilter.addAction(LampKeys.NODE_NOTIFICATION_SHUTDOWN)
-        intentFilter.addAction(LampKeys.NODE_NOTIFICATION_FUNDCHANNEL)
+        intentFilter.addAction(ShutdownNode.NOTIFICATION)
+        intentFilter.addAction(NewChannelPayment.NOTIFICATION)
         localBroadcastManager.registerReceiver(notificationReceiver, intentFilter)
     }
 
@@ -752,10 +754,10 @@ class MainActivity : UriResultActivity() {
         override fun onReceive(context: Context?, intent: Intent?) {
             Log.d(TAG, "onReceive action ${intent?.action}")
             when (intent?.action) {
-                LampKeys.NODE_NOTIFICATION_FUNDCHANNEL -> runOnUiThread {
+                NewChannelPayment.NOTIFICATION -> runOnUiThread {
                     updateBalanceView(context, intent)
                 }
-                LampKeys.NODE_NOTIFICATION_SHUTDOWN ->  runOnUiThread {
+                ShutdownNode.NOTIFICATION ->  runOnUiThread {
                     powerOff()
                 }
             }
