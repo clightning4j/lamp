@@ -1,5 +1,7 @@
 package com.lvaccaro.lamp.activities
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.text.method.ScrollingMovementMethod
 import android.util.Log
@@ -12,12 +14,11 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.lvaccaro.lamp.R
 import com.lvaccaro.lamp.rootDir
-
+import com.lvaccaro.lamp.utils.UI
 import kotlinx.android.synthetic.main.activity_log.*
 import org.jetbrains.anko.doAsync
 import java.io.File
 import java.io.RandomAccessFile
-import java.lang.StringBuilder
 
 class LogActivity : AppCompatActivity() {
 
@@ -30,6 +31,7 @@ class LogActivity : AppCompatActivity() {
     private var sizeBuffer = 0
 
     //UI component
+    private lateinit var editText: EditText
     private lateinit var progressBar: ProgressBar
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -37,15 +39,20 @@ class LogActivity : AppCompatActivity() {
         setContentView(R.layout.activity_log)
         setSupportActionBar(toolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        editText = findViewById(R.id.edit_text_container_log)
+        editText.apply {
+            movementMethod = ScrollingMovementMethod()
+            isVerticalScrollBarEnabled = true
+        }
         progressBar = findViewById(R.id.loading_status)
         progressBar.max = maxBufferToLoad
-    }
-
-    override fun onResume() {
-        super.onResume()
         readLog()
     }
 
+    override fun onRestart() {
+        super.onRestart()
+        readLog()
+    }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.menu_log, menu)
@@ -64,7 +71,50 @@ class LogActivity : AppCompatActivity() {
                 readLog()
                 true
             }
+            R.id.action_share_log -> {
+                shareLogByIntent()
+                true
+            }
             else -> super.onOptionsItemSelected(item)
+        }
+    }
+
+    private fun shareLogByIntent(){
+        doAsync {
+            val emailIntent = Intent(Intent.ACTION_SENDTO).apply {
+                data = Uri.parse("mailto:")
+                val addresses = arrayOf("vincenzopalazzodev@gmail.com")
+                putExtra(Intent.EXTRA_EMAIL, addresses)
+                putExtra(Intent.EXTRA_SUBJECT, "Lamp Log")
+                val logFile = File(rootDir(), "$daemon.log")
+                if (!logFile.exists()) {
+                    runOnUiThread{
+                        UI.showMessageOnToast(applicationContext, "No log file found")
+                    }
+                    return@doAsync
+                }
+                val body = StringBuilder()
+                body.append("PERSONAL TEXT").append("\n\n\n")
+                body.append("------- LOG $daemon.log CONTENT ----------").append("\n")
+                val lines = logFile.readLines()
+                val totSize = lines.size
+                var startLine = 0
+                if(totSize > 450){
+                    startLine = totSize - 200
+                }
+                for(at in startLine..totSize - 1){
+                    val line = lines[at]
+                    body.append(line).append("\n")
+                }
+                putExtra(Intent.EXTRA_TEXT, body.toString())
+            }
+            if (emailIntent.resolveActivity(packageManager) != null) {
+                startActivity(Intent.createChooser(emailIntent, "Send email..."))
+                return@doAsync
+            }
+            runOnUiThread{
+                UI.showMessageOnToast(applicationContext, "Intent resolving error")
+            }
         }
     }
 
@@ -72,20 +122,17 @@ class LogActivity : AppCompatActivity() {
         title = "Log $daemon"
         val logFile = File(rootDir(), "$daemon.log")
         if (!logFile.exists()) {
-            Toast.makeText(this, "No log file found", Toast.LENGTH_LONG).show()
+            UI.showMessageOnToast(this, "No log file found")
             return
         }
-        val et = findViewById<EditText>(R.id.editText)
-        et.movementMethod = ScrollingMovementMethod()
-        et.isVerticalScrollBarEnabled = true
-        et.setText("")
+        editText.setText("")
         doAsync {
             runOnUiThread {
                 Toast.makeText(this@LogActivity, "Loading", Toast.LENGTH_SHORT).show()
                 progressBar.visibility = View.VISIBLE
             }
             val randomAccessFile = RandomAccessFile(logFile, "r")
-            read(randomAccessFile, et)
+            read(randomAccessFile, editText)
         }
     }
 

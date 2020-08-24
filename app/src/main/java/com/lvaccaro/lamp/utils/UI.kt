@@ -11,6 +11,7 @@ import com.google.android.material.snackbar.Snackbar
 class UI {
 
     companion object {
+
         fun copyToClipboard(context: Context, key: String, text: String) {
             val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
             val clip: ClipData = ClipData.newPlainText(key, text)
@@ -20,6 +21,10 @@ class UI {
 
         fun snackBar(context: AppCompatActivity, message: String, duration: Int = Snackbar.LENGTH_LONG){
             Snackbar.make(context.findViewById(android.R.id.content), message, duration).show()
+        }
+
+        fun showMessageOnToast(context: Context, message: String, duration: Int = Toast.LENGTH_SHORT){
+            Toast.makeText(context, message, duration).show()
         }
 
         fun textAlertDialog(context: Context, title: String, message: String) {

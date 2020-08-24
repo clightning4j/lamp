@@ -9,30 +9,30 @@ import com.lvaccaro.lamp.LightningCli
 import com.lvaccaro.lamp.R
 import com.lvaccaro.lamp.toText
 
-import kotlinx.android.synthetic.main.activity_log.*
 import java.lang.Exception
 
 class ConsoleActivity : AppCompatActivity() {
 
-    lateinit var text: EditText
+    private lateinit var editTextResult: EditText
+    private lateinit var editTextCmd: EditText
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_console)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
-        val editText = findViewById<EditText>(R.id.editText)
-        text = findViewById<EditText>(R.id.text)
+        editTextCmd = findViewById(R.id.edit_text_console_message)
+        editTextResult = findViewById(R.id.edit_text_result_command)
 
         findViewById<ImageButton>(R.id.send).setOnClickListener {
-            val text = editText.text.toString()
-            if (text != "") {
-                if(text.equals("clean", true)){
+            val textContent = editTextCmd.text.toString()
+            if (textContent != "") {
+                if(textContent.equals("clean", true)){
                     //Command to clean console
-                    this.text.setText("")
-                    this.editText.setText("")
+                    editTextResult.setText("")
+                    editTextCmd.setText("")
                 }else{
-                    CommandTask().execute(text)
+                    CommandTask().execute(textContent)
                 }
             }
         }
@@ -43,7 +43,7 @@ class ConsoleActivity : AppCompatActivity() {
         lateinit var params: String
         override fun onPreExecute() {
             super.onPreExecute()
-            editText.setText("")
+            editTextCmd.setText("")
         }
 
         override fun doInBackground(vararg params: String): String {
@@ -60,9 +60,9 @@ class ConsoleActivity : AppCompatActivity() {
 
         override fun onPostExecute(result: String?) {
             super.onPostExecute(result)
-            text.append("$ lightning-cli $params\n")
-            text.append(result ?: "")
-            text.append("\n")
+            editTextResult.append("$ lightning-cli $params\n")
+            editTextResult.append(result ?: "")
+            editTextResult.append("\n")
         }
     }
 }
