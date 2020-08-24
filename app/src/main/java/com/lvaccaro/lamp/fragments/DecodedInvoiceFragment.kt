@@ -59,7 +59,7 @@ class DecodedInvoiceFragment : BottomSheetDialogFragment() {
         // Pay invoice
         val context = activity!!
         try {
-            cli.exec(context, arrayOf("pay", bolt11), true)
+           cli.exec(context, arrayOf("pay", bolt11), true)
                 .toJSONObject()
             context.runOnUiThread {
                 Toast.makeText(context, "Invoice paid", Toast.LENGTH_LONG).show()

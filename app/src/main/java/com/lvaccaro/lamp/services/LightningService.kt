@@ -60,7 +60,7 @@ class LightningService : IntentService("LightningService") {
             String.format("--log-level=%s", logLevel),
             String.format("--lightning-dir=%s", lightningDir.path),
             String.format("--plugin-dir=%s", File(binaryDir.path , "plugins").path),
-            String.format("--ignoreFeeLimits=%b", ignoreFeeLimits),
+            String.format("--ignore-fee-limits=%b", ignoreFeeLimits),
             // 10 days to catch a cheating attempt
             String.format("--watchtime-blocks=%s", 10 * 24 * 6))
 
@@ -102,6 +102,7 @@ class LightningService : IntentService("LightningService") {
 
         if (proxy.isNotEmpty()) {
             options.add(String.format("--proxy=%s", proxy))
+            options.add("--always-use-proxy=true")
         }
         if (announceaddr.isNotEmpty()) {
             options.add(String.format("--announce-addr=%s", announceaddr))
