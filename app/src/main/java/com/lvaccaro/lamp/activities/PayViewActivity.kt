@@ -12,8 +12,11 @@ import com.google.android.material.textfield.TextInputEditText
 import com.lvaccaro.lamp.LightningCli
 import com.lvaccaro.lamp.R
 import com.lvaccaro.lamp.toJSONObject
+import com.lvaccaro.lamp.utils.UI
 import com.lvaccaro.lamp.utils.Validator
+import kotlinx.android.synthetic.main.activity_main.*
 import org.jetbrains.anko.contentView
+import org.jetbrains.anko.doAsync
 import org.json.JSONObject
 import java.lang.Exception
 
@@ -32,25 +35,38 @@ class PayViewActivity : AppCompatActivity() {
         setContentView(R.layout.activity_pay_view)
         editText = findViewById(R.id.content_text)
         this.findViewById<MaterialButton>(R.id.pay_button).setOnClickListener {
-            val text = editText.text.toString()
-            try {
-                if (text.isNotEmpty() && Validator.isBolt11(text)) {
-                    cli.exec(this, arrayOf("pay", text)) // 0.9.0 Have some problem with the pay command
-                    showSnackBarMessage("Payed invoice")
+            doAsync {
+                var displayMessage = ""
+                try{
+                    val text = editText.text.toString()
+                    if (text.isNotEmpty() && Validator.isBolt11(text)) {
+                        cli.exec(applicationContext, arrayOf("pay", text)) // 0.9.0 Have some problem with the pay command
+                        displayMessage = "Payed invoice"
+                    }
+                } catch (ex: Exception) {
+                    val errorMessage = JSONObject(ex.localizedMessage)
+                    displayMessage = errorMessage["message"].toString()
+                }finally {
+                    if(displayMessage.isNotEmpty()){
+                        runOnUiThread{
+                            UI.snackBar(this@PayViewActivity, displayMessage)
+                        }
+                    }
+
                 }
-            } catch (ex: Exception) {
-                val errorMessage = JSONObject(ex.localizedMessage)
-                showSnackBarMessage(errorMessage["message"].toString())
             }
+
         }
 
         this.findViewById<MaterialButton>(R.id.copy_button).setOnClickListener {
             val text = copyFromClipboard()
-            if(text.isNotEmpty() && Validator.isBolt11(text)){
+            if (text.isNotEmpty() && Validator.isBolt11(text)) {
                 val decodePay = cli.exec(this, arrayOf("decodepay", text), true).toJSONObject()
-                findViewById<TextView>(R.id.amount_edit_text).setText(decodePay["msatoshi"].toString() ?: "0")
-            }else if(!Validator.isBolt11(text)){
-                showSnackBarMessage("Text not valid")
+                findViewById<TextView>(R.id.amount_edit_text).setText(
+                    decodePay["msatoshi"].toString() ?: "0"
+                )
+            } else if (!Validator.isBolt11(text)) {
+                UI.snackBar(this, "Text not valid")
             }
         }
     }
@@ -67,9 +83,5 @@ class PayViewActivity : AppCompatActivity() {
             return editText.text.toString()
         }
         return ""
-    }
-
-    private fun showSnackBarMessage(message: String, duration: Int = Snackbar.LENGTH_LONG) {
-        Snackbar.make(contentView?.rootView!!, message, duration).show()
     }
 }
