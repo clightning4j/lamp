@@ -5,6 +5,7 @@ import android.app.Activity
 import android.app.ActivityManager
 import android.app.DownloadManager
 import android.content.*
+import android.content.pm.ActivityInfo
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.Color
@@ -67,6 +68,8 @@ class MainActivity : UriResultActivity() {
     private lateinit var downloadmanager: DownloadManager
     private lateinit var powerImageView: PowerImageView
     private lateinit var viewOnRunning: View
+    private lateinit var settingMenuItem: MenuItem
+    private lateinit var logMenuItem: MenuItem
     private var isFirstStart = true
     private var nodeReady = false
 
@@ -107,6 +110,8 @@ class MainActivity : UriResultActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LOCKED)
+
         setContentView(R.layout.activity_main)
 
         powerImageView = findViewById(R.id.powerImageView)
@@ -160,7 +165,7 @@ class MainActivity : UriResultActivity() {
         }
 
         if (Intent.ACTION_VIEW == intent.action) {
-            if (arrayListOf<String>("bitcoin", "lightning").contains(intent.data.scheme)) {
+            if (arrayListOf("bitcoin", "lightning").contains(intent.data.scheme)) {
                 val text = intent.data.toString().split(":").last()
                 parse(text)
             }
@@ -215,11 +220,15 @@ class MainActivity : UriResultActivity() {
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         // Inflate the menu; this adds items to the action bar if it is present.
         menuInflater.inflate(R.menu.menu, menu)
+        settingMenuItem = menu.findItem(R.id.action_settings)
+        logMenuItem = menu.findItem(R.id.action_log)
         return true
     }
 
     override fun onPrepareOptionsMenu(menu: Menu?): Boolean {
+        var running = true
         if (!isLightningRunning()) {
+            running = false
             menu?.apply {
                 removeItem(R.id.action_console)
                 removeItem(R.id.action_invoice)
@@ -229,6 +238,7 @@ class MainActivity : UriResultActivity() {
                 removeItem(R.id.action_stop)
             }
         }
+        this.setEnableMenuItems(running)
         return super.onPrepareOptionsMenu(menu)
     }
 
@@ -311,8 +321,12 @@ class MainActivity : UriResultActivity() {
     override fun onRestoreInstanceState(savedInstanceState: Bundle?) {
         super.onRestoreInstanceState(savedInstanceState)
         this.restoreBalanceValue(savedInstanceState)
-        if (isLightningRunning())
-            powerImageView.on()
+    }
+
+    private fun setEnableMenuItems(enable: Boolean){
+        Log.d(TAG, "Enable menu items: $enable")
+        settingMenuItem.isEnabled = enable
+        logMenuItem.isEnabled = enable
     }
 
     //FIXME(vincenzopalazzo) we don't need this with the actual implementation of UI
