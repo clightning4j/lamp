@@ -40,6 +40,7 @@ import com.lvaccaro.lamp.handlers.BrokenStatus
 import com.lvaccaro.lamp.handlers.NewBlockHandler
 import com.lvaccaro.lamp.handlers.NewChannelPayment
 import com.lvaccaro.lamp.handlers.ShutdownNode
+import com.lvaccaro.lamp.handlers.StartNode
 import com.lvaccaro.lamp.services.LightningService
 import com.lvaccaro.lamp.services.TorService
 import com.lvaccaro.lamp.utils.Archive
@@ -67,6 +68,7 @@ class MainActivity : UriResultActivity() {
     private lateinit var powerImageView: PowerImageView
     private lateinit var viewOnRunning: View
     private var isFirstStart = true
+    private var nodeReady = false
 
     companion object {
         val RELEASE = "release_clightning_0.9.1"
@@ -112,7 +114,6 @@ class MainActivity : UriResultActivity() {
         val arrowImageView = findViewById<ImageView>(R.id.arrowImageView)
         arrowImageView.setOnClickListener { this.onHistoryClick() }
         viewOnRunning = findViewById(R.id.content_main_status_on)
-        restoreBalanceValue(savedInstanceState)
 
         registerLocalReceiver()
 
@@ -134,19 +135,17 @@ class MainActivity : UriResultActivity() {
         downloadmanager = getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
         registerReceiver(onDownloadReceiver, IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE))
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (checkSelfPermission(android.Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED ||
-                checkSelfPermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED
-            ) {
-                ActivityCompat.requestPermissions(
-                    this,
-                    arrayOf(
-                        Manifest.permission.READ_EXTERNAL_STORAGE,
-                        Manifest.permission.WRITE_EXTERNAL_STORAGE
-                    ),
-                    WRITE_REQUEST_CODE
-                )
-            }
+        if (checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED ||
+            checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED
+        ) {
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(
+                    Manifest.permission.READ_EXTERNAL_STORAGE,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE
+                ),
+                WRITE_REQUEST_CODE
+            )
         }
 
         viewOnRunning.findViewById<MaterialButton>(R.id.button_receive).setOnClickListener {
@@ -296,6 +295,7 @@ class MainActivity : UriResultActivity() {
         }
     }
 
+
     override fun onSaveInstanceState(outState: Bundle?, outPersistentState: PersistableBundle?) {
         super.onSaveInstanceState(outState, outPersistentState)
         Log.d(TAG, "onSaveInstanceState called")
@@ -306,6 +306,13 @@ class MainActivity : UriResultActivity() {
         outState?.putString(LampKeys.OFF_CHAIN_BALANCE, balanceOffChain)
         outState?.putString(LampKeys.ON_CHAIN_BALANCE, balanceOnChain)
         outState?.putString(LampKeys.OUR_CHAIN_BALANCE, balanceOurChain)
+    }
+
+    override fun onRestoreInstanceState(savedInstanceState: Bundle?) {
+        super.onRestoreInstanceState(savedInstanceState)
+        this.restoreBalanceValue(savedInstanceState)
+        if (isLightningRunning())
+            powerImageView.on()
     }
 
     //FIXME(vincenzopalazzo) we don't need this with the actual implementation of UI
@@ -351,7 +358,7 @@ class MainActivity : UriResultActivity() {
     }
 
     private fun isLightningRunning(): Boolean {
-        return isServiceRunning(LightningService::class.java.canonicalName)
+        return isServiceRunning(LightningService::class.java.canonicalName) && nodeReady
     }
 
     private fun isTorRunning(): Boolean {
@@ -415,7 +422,6 @@ class MainActivity : UriResultActivity() {
 
     private fun powerOn() {
         powerImageView.on()
-        //powerImageView.visibility = View.GONE
         viewOnRunning.visibility = View.VISIBLE
         findViewById<ImageView>(R.id.arrowImageView).visibility = View.VISIBLE
         findViewById<TextView>(R.id.textViewQr).visibility = View.VISIBLE
@@ -423,9 +429,9 @@ class MainActivity : UriResultActivity() {
         //These component are set visible inside the command getinfo
         //I removed it because now if the node has not expose with a binding address
         //this value are not util, However this information are util for the people in the same network.
-
         //findViewById<ImageView>(R.id.arrowImageView).visibility = View.VISIBLE
         //findViewById<TextView>(R.id.textViewQr).visibility = View.VISIBLE
+
         findViewById<FloatingActionButton>(R.id.floating_action_button).show()
         invalidateOptionsMenu()
         runIntent(NewChannelPayment.NOTIFICATION)
@@ -464,7 +470,8 @@ class MainActivity : UriResultActivity() {
                 //powerImageView.visibility = View.GONE
                 findViewById<FloatingActionButton>(R.id.floating_action_button).show()
                 val delta = blockcount - blockheight
-                findViewById<TextView>(R.id.statusText).text = if (delta > 0) "Syncing blocks -${delta}" else ""
+                findViewById<TextView>(R.id.statusText).text =
+                    if (delta > 0) "Syncing blocks -${delta}" else ""
             }
 
             // Generate qrcode
@@ -728,6 +735,7 @@ class MainActivity : UriResultActivity() {
         intentFilter.addAction(NewChannelPayment.NOTIFICATION)
         intentFilter.addAction(NewBlockHandler.NOTIFICATION)
         intentFilter.addAction(BrokenStatus.NOTIFICATION)
+        intentFilter.addAction(StartNode.NOTIFICATION)
         localBroadcastManager.registerReceiver(notificationReceiver, intentFilter)
     }
 
@@ -746,19 +754,25 @@ class MainActivity : UriResultActivity() {
                 NewChannelPayment.NOTIFICATION -> runOnUiThread {
                     updateBalanceView(context, intent)
                 }
-                ShutdownNode.NOTIFICATION ->  runOnUiThread {
+                ShutdownNode.NOTIFICATION -> runOnUiThread {
                     powerOff()
                 }
-                NewBlockHandler.NOTIFICATION ->  runOnUiThread {
+                NewBlockHandler.NOTIFICATION -> runOnUiThread {
                     val blockheight = intent.getIntExtra("height", 0)
                     val delta = blockcount - blockheight
-                    findViewById<TextView>(R.id.statusText).text = if (delta > 0) "Syncing blocks -${delta}" else ""
+                    findViewById<TextView>(R.id.statusText).text =
+                        if (delta > 0) "Syncing blocks -${delta}" else ""
                 }
                 BrokenStatus.NOTIFICATION -> runOnUiThread{
                     val message = intent.getStringExtra("message")
                     UI.snackBar(this@MainActivity, message)
                     powerOff()
                     stopTorService()
+                }
+                StartNode.NOTIFICATION -> runOnUiThread {
+                    Log.d(TAG, "************ NODE READY *************")
+                    nodeReady = true
+                    powerOn()
                 }
             }
         }

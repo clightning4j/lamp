@@ -25,13 +25,16 @@ import java.io.LineNumberReader
  * Pattern log: DEBUG plugin-esplora: sendrawtx exit 0
  *
  * ---- Shutdown node with command close----
- * Pattern log: 2020-08-03T15:38:38.812Z UNUSUAL lightningd: JSON-RPC shutdown
+ * Pattern log: UNUSUAL lightningd: JSON-RPC shutdown
  *
  * ------ Node receive transaction to blockchain ----
  * Pattern log: No debug log
  *
  * ---- Node receive a lightning payment (keysend, pay)
  * Pattern log:
+ *
+ * ---- Node startup
+ * Pattern log: INFO lightningd: Server started with public key
  *
  * ---- Node crash
  * Pattern log: **BROKEN**
@@ -55,23 +58,21 @@ class LogObserver(val context: Context, val path: String, val nameFile: String) 
     private var lineNumberReader: LineNumberReader? = null
 
 
-    fun initHandler() {
+    private fun initHandler() {
         actionHandler = ArrayList<IEventHandler>()
         actionHandler.addAll(
             arrayOf(
-                NewChannelPayment(),
-                ShutdownNode(),
-                NewBlockHandler(),
-                BrokenStatus()
+                NewChannelPayment(), ShutdownNode(),
+                NewBlockHandler(), StartNode()
             )
         )
     }
 
     override fun onEvent(event: Int, file: String?) {
         if(file == null) return
-        if (file?.equals(nameFile)) {
+        if (file == nameFile) {
             when (event) {
-                FileObserver.MODIFY -> readNewLines()
+                MODIFY -> readNewLines()
             }
         }
     }
