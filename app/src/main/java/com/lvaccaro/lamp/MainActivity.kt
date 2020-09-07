@@ -22,6 +22,7 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.net.toUri
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
@@ -35,6 +36,7 @@ import com.lvaccaro.lamp.activities.*
 import com.lvaccaro.lamp.fragments.HistoryFragment
 import com.lvaccaro.lamp.fragments.InvoiceBuildFragment
 import com.lvaccaro.lamp.fragments.WithdrawFragment
+import com.lvaccaro.lamp.handlers.BrokenStatus
 import com.lvaccaro.lamp.handlers.NewBlockHandler
 import com.lvaccaro.lamp.handlers.NewChannelPayment
 import com.lvaccaro.lamp.handlers.ShutdownNode
@@ -725,6 +727,7 @@ class MainActivity : UriResultActivity() {
         intentFilter.addAction(ShutdownNode.NOTIFICATION)
         intentFilter.addAction(NewChannelPayment.NOTIFICATION)
         intentFilter.addAction(NewBlockHandler.NOTIFICATION)
+        intentFilter.addAction(BrokenStatus.NOTIFICATION)
         localBroadcastManager.registerReceiver(notificationReceiver, intentFilter)
     }
 
@@ -750,6 +753,11 @@ class MainActivity : UriResultActivity() {
                     val blockheight = intent.getIntExtra("height", 0)
                     val delta = blockcount - blockheight
                     findViewById<TextView>(R.id.statusText).text = if (delta > 0) "Syncing blocks -${delta}" else ""
+                }
+                BrokenStatus.NOTIFICATION -> runOnUiThread{
+                    val message = intent.getStringExtra("message")
+                    UI.snackBar(this@MainActivity, message)
+                    powerOff()
                 }
             }
         }

@@ -3,10 +3,7 @@ package com.lvaccaro.lamp.utils
 import android.content.Context
 import android.os.FileObserver
 import android.util.Log
-import com.lvaccaro.lamp.handlers.IEventHandler
-import com.lvaccaro.lamp.handlers.NewBlockHandler
-import com.lvaccaro.lamp.handlers.NewChannelPayment
-import com.lvaccaro.lamp.handlers.ShutdownNode
+import com.lvaccaro.lamp.handlers.*
 import java.io.File
 import java.io.LineNumberReader
 
@@ -36,6 +33,10 @@ import java.io.LineNumberReader
  * ---- Node receive a lightning payment (keysend, pay)
  * Pattern log:
  *
+ * ---- Node crash
+ * Pattern log: **BROKEN**
+ *
+ *
  * @author https://github.com/vincenzopalazzo
  */
 class LogObserver(val context: Context, val path: String, val nameFile: String) : FileObserver(path) {
@@ -56,7 +57,14 @@ class LogObserver(val context: Context, val path: String, val nameFile: String) 
 
     fun initHandler() {
         actionHandler = ArrayList<IEventHandler>()
-        actionHandler.addAll(arrayOf(NewChannelPayment(), ShutdownNode(), NewBlockHandler()))
+        actionHandler.addAll(
+            arrayOf(
+                NewChannelPayment(),
+                ShutdownNode(),
+                NewBlockHandler(),
+                BrokenStatus()
+            )
+        )
     }
 
     override fun onEvent(event: Int, file: String?) {
