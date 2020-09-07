@@ -193,7 +193,7 @@ class MainActivity : UriResultActivity() {
         viewOnRunning.visibility = View.VISIBLE
         doAsync {
             getInfo()
-            runIntent(NewChannelPayment.NOTIFICATION)
+            UI.runIntent(applicationContext, NewChannelPayment.NOTIFICATION)
         }
     }
 
@@ -225,11 +225,9 @@ class MainActivity : UriResultActivity() {
         return true
     }
 
-    override fun onPrepareOptionsMenu(menu: Menu?): Boolean {
-        var running = true
+    override fun onPrepareOptionsMenu(menu: Menu): Boolean {
         if (!isLightningRunning()) {
-            running = false
-            menu?.apply {
+            menu.apply {
                 removeItem(R.id.action_console)
                 removeItem(R.id.action_invoice)
                 removeItem(R.id.action_channels)
@@ -238,7 +236,6 @@ class MainActivity : UriResultActivity() {
                 removeItem(R.id.action_stop)
             }
         }
-        this.setEnableMenuItems(running)
         return super.onPrepareOptionsMenu(menu)
     }
 
@@ -249,10 +246,18 @@ class MainActivity : UriResultActivity() {
                 true
             }
             R.id.action_settings -> {
+                if((isLightningRunning() || isTorRunning()) && !nodeReady){
+                    UI.showMessageOnToast(this, "Node not ready yet")
+                    return false
+                } // node are bootstrapping
                 startActivityForResult(Intent(this, SettingsActivity::class.java), 100)
                 true
             }
             R.id.action_log -> {
+                if((isLightningRunning() || isTorRunning()) && !nodeReady){
+                    UI.showMessageOnToast(this, "Node not ready yet")
+                    return false
+                } // node are bootstrapping
                 startActivityForResult(Intent(this, LogActivity::class.java), 100)
                 true
             }
@@ -299,7 +304,7 @@ class MainActivity : UriResultActivity() {
                 doAsync { parse(result) }
                 return
             }
-            UI.snackBar(this, "Scan failed")
+            UI.showMessageOnSnackBar(this, "Scan failed")
         } else {
             super.onActivityResult(requestCode, resultCode, data)
         }
@@ -321,12 +326,6 @@ class MainActivity : UriResultActivity() {
     override fun onRestoreInstanceState(savedInstanceState: Bundle?) {
         super.onRestoreInstanceState(savedInstanceState)
         this.restoreBalanceValue(savedInstanceState)
-    }
-
-    private fun setEnableMenuItems(enable: Boolean){
-        Log.d(TAG, "Enable menu items: $enable")
-        settingMenuItem.isEnabled = enable
-        logMenuItem.isEnabled = enable
     }
 
     //FIXME(vincenzopalazzo) we don't need this with the actual implementation of UI
@@ -372,7 +371,7 @@ class MainActivity : UriResultActivity() {
     }
 
     private fun isLightningRunning(): Boolean {
-        return isServiceRunning(LightningService::class.java.canonicalName) && nodeReady
+        return isServiceRunning(LightningService::class.java.canonicalName)
     }
 
     private fun isTorRunning(): Boolean {
@@ -447,8 +446,8 @@ class MainActivity : UriResultActivity() {
         //findViewById<TextView>(R.id.textViewQr).visibility = View.VISIBLE
 
         findViewById<FloatingActionButton>(R.id.floating_action_button).show()
+        UI.runIntent(applicationContext, NewChannelPayment.NOTIFICATION)
         invalidateOptionsMenu()
-        runIntent(NewChannelPayment.NOTIFICATION)
     }
 
     private fun getInfo() {
@@ -462,7 +461,7 @@ class MainActivity : UriResultActivity() {
             val id = res["id"] as String
             val addresses = res["address"] as JSONArray
             // the node has an address? if not hide the UI node info
-            var public = addresses.length() != 0
+            val public = addresses.length() != 0
             val alias = res["alias"] as String
             var txt = ""
             if (public) {
@@ -504,7 +503,7 @@ class MainActivity : UriResultActivity() {
                 stopLightningService()
                 stopTorService()
                 powerOff()
-                UI.snackBar(this, e.localizedMessage)
+                UI.showMessageOnSnackBar(this, e.localizedMessage)
             }
         }
     }
@@ -614,12 +613,13 @@ class MainActivity : UriResultActivity() {
         val torEnabled = sharedPref.getBoolean("enabled-tor", true)
 
         // clear log files
-        val torLogFile = File(rootDir(), "tor.log")
-        val lightningLogFile = File(rootDir(), "lightningd.log")
-        torLogFile.delete()
-        lightningLogFile.delete()
+        File(rootDir(), "tor.log").delete()
+        File(rootDir(), "lightningd.log").delete()
 
-        powerImageView.animating()
+        runOnUiThread {
+            powerImageView.animating()
+        }
+
         doAsync {
             if (torEnabled) {
                 // start service on main thread
@@ -634,7 +634,7 @@ class MainActivity : UriResultActivity() {
                         Log.d(TAG, "******** Tor run failed ********")
                         stopTorService()
                         powerOff()
-                        UI.snackBar(this@MainActivity, "Tor start failed")
+                        UI.showMessageOnSnackBar(this@MainActivity, "Tor start failed")
                     }
                     return@doAsync
                 }
@@ -647,7 +647,7 @@ class MainActivity : UriResultActivity() {
             }
             // wait lightning to be bootstrapped
             if (!waitLightningBootstrap()) {
-                showMessageOnToast("Lightning start failed")
+                UI.showMessageOnToast(applicationContext, "Lightning start failed")
                 runOnUiThread {
                     Log.d(TAG, "******** Lightning run failed ********")
                     stopLightningService()
@@ -657,11 +657,11 @@ class MainActivity : UriResultActivity() {
             }
             try {
                 getInfo()
-                runOnUiThread { powerOn() }
+                //runOnUiThread { powerOn() }
             } catch (e: Exception) {
                 log.info("---" + e.localizedMessage + "---")
                 stop()
-                runOnUiThread { UI.snackBar(this@MainActivity, e.localizedMessage) }
+                runOnUiThread { UI.showMessageOnSnackBar(this@MainActivity, e.localizedMessage) }
             }
         }
     }
@@ -696,15 +696,12 @@ class MainActivity : UriResultActivity() {
             val res = LightningCli().exec(this, arrayOf("stop"))
             log.info("---" + res.toString() + "---")
         } catch (e: Exception) {
-            runOnUiThread { UI.snackBar(this, "Error: ${e.localizedMessage}") }
+            runOnUiThread { UI.showMessageOnSnackBar(this, "Error: ${e.localizedMessage}") }
             log.warning(e.localizedMessage)
             e.printStackTrace()
         }
-        runOnUiThread {
-            stopLightningService()
-            stopTorService()
-            powerOff()
-        }
+        stopLightningService()
+        stopTorService()
     }
 
     private fun generateNewAddress() {
@@ -753,11 +750,6 @@ class MainActivity : UriResultActivity() {
         localBroadcastManager.registerReceiver(notificationReceiver, intentFilter)
     }
 
-    private fun runIntent(key: String) {
-        val intent = Intent(key)
-        LocalBroadcastManager.getInstance(applicationContext).sendBroadcast(intent)
-    }
-
     private val notificationReceiver = object : BroadcastReceiver() {
         // I can create a mediator that I can use to call all method inside the
         //lightning-cli and return a json if the answer i ok or I throw an execeptions
@@ -769,6 +761,7 @@ class MainActivity : UriResultActivity() {
                     updateBalanceView(context, intent)
                 }
                 ShutdownNode.NOTIFICATION -> runOnUiThread {
+                    nodeReady = false
                     powerOff()
                 }
                 NewBlockHandler.NOTIFICATION -> runOnUiThread {

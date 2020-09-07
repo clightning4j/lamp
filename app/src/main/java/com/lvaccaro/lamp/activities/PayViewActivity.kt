@@ -49,13 +49,12 @@ class PayViewActivity : AppCompatActivity() {
                 }finally {
                     if(displayMessage.isNotEmpty()){
                         runOnUiThread{
-                            UI.snackBar(this@PayViewActivity, displayMessage)
+                            UI.showMessageOnSnackBar(this@PayViewActivity, displayMessage)
                         }
                     }
 
                 }
             }
-
         }
 
         this.findViewById<MaterialButton>(R.id.copy_button).setOnClickListener {
@@ -66,7 +65,7 @@ class PayViewActivity : AppCompatActivity() {
                     decodePay["msatoshi"].toString() ?: "0"
                 )
             } else if (!Validator.isBolt11(text)) {
-                UI.snackBar(this, "Text not valid")
+                UI.showMessageOnSnackBar(this, "Text not valid")
             }
         }
     }
