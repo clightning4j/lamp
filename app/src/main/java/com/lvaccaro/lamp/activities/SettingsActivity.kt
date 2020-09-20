@@ -47,14 +47,20 @@ class SettingsActivity : AppCompatActivity() {
         override fun onPreferenceTreeClick(preference: Preference?): Boolean {
             return when (preference?.key) {
                 "clearlogs" -> {
-                    var resultOperation = File(activity?.rootDir(), "lightningd.log").delete() &&
-                            File(activity?.rootDir(), "tor.log").delete()
+                    val resultOperation = File(activity?.rootDir(), "lightningd.log").deleteRecursively() &&
+                            File(activity?.rootDir(), "tor.log").deleteRecursively()
 
-                    if(resultOperation){
+                    File(activity?.rootDir(), ".lightning").listFiles()
+                        .filter { it.name.matches("crash.log.*".toRegex()) }
+                        .map { it.delete() }
+                    File(activity?.rootDir(), ".lightning/bitcoin").listFiles()
+                        .filter { it.name.matches("crash.log.*".toRegex()) }
+                        .map { it.delete() }
+
+                    if(resultOperation)
                         showToast("Erased logs", Toast.LENGTH_LONG)
-                    }else{
+                    else
                         showToast("Error during Erasing logs", Toast.LENGTH_LONG)
-                    }
                     return resultOperation
                 }
                 "cleardata" -> {
