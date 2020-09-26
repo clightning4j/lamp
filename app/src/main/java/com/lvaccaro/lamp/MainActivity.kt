@@ -758,6 +758,7 @@ class MainActivity : UriResultActivity() {
                     val message = intent.getStringExtra("message")
                     UI.snackBar(this@MainActivity, message)
                     powerOff()
+                    stopTorService()
                 }
             }
         }
