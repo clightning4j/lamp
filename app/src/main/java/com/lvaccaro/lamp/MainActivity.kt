@@ -69,7 +69,7 @@ class MainActivity : UriResultActivity() {
     private var isFirstStart = true
 
     companion object {
-        val RELEASE = "release_clightning_0.9.0"
+        val RELEASE = "release_clightning_0.9.1"
 
         fun arch(): String {
             var abi: String?
