@@ -1,7 +1,6 @@
 package com.lvaccaro.lamp.activities
 
 import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import android.text.method.ScrollingMovementMethod
 import android.util.Log
@@ -81,11 +80,8 @@ class LogActivity : AppCompatActivity() {
 
     private fun shareLogByIntent(){
         doAsync {
-            val emailIntent = Intent(Intent.ACTION_SENDTO).apply {
-                data = Uri.parse("mailto:")
-                val addresses = arrayOf("vincenzopalazzodev@gmail.com")
-                putExtra(Intent.EXTRA_EMAIL, addresses)
-                putExtra(Intent.EXTRA_SUBJECT, "Lamp Log")
+            val shareIntent = Intent(Intent.ACTION_SEND).apply {
+                type = "text/plain"
                 val logFile = File(rootDir(), "$daemon.log")
                 if (!logFile.exists()) {
                     runOnUiThread{
@@ -94,22 +90,16 @@ class LogActivity : AppCompatActivity() {
                     return@doAsync
                 }
                 val body = StringBuilder()
-                body.append("PERSONAL TEXT").append("\n\n\n")
                 body.append("------- LOG $daemon.log CONTENT ----------").append("\n")
                 val lines = logFile.readLines()
-                val totSize = lines.size
-                var startLine = 0
-                if(totSize > 450){
-                    startLine = totSize - 200
-                }
-                for(at in startLine..totSize - 1){
+                for(at in (lines.size - 200) until (lines.size - 1)){
                     val line = lines[at]
                     body.append(line).append("\n")
                 }
                 putExtra(Intent.EXTRA_TEXT, body.toString())
             }
-            if (emailIntent.resolveActivity(packageManager) != null) {
-                startActivity(Intent.createChooser(emailIntent, "Send email..."))
+            if (shareIntent.resolveActivity(packageManager) != null) {
+                startActivity(Intent.createChooser(shareIntent, null))
                 return@doAsync
             }
             runOnUiThread{
