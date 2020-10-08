@@ -321,11 +321,8 @@ class MainActivity : UriResultActivity() {
             savedInstanceState?.getString(LampKeys.OUR_CHAIN_BALANCE) ?: "Unavaible"
     }
 
-    //Update View method
-    /**
-     * This method is called inside the brodcast receiver
-     */
     fun updateBalanceView(context: Context?, intent: Intent?) {
+        if (!isLightningRunning()) return
         val listFunds = cli.exec(context!!, arrayOf("listfunds"), true).toJSONObject()
         val listpeers = cli.exec(context!!, arrayOf("listpeers"), true).toJSONObject()
         val balance = SimulatorPlugin.funds(listFunds)
