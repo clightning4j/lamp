@@ -48,8 +48,8 @@ class LogActivity : AppCompatActivity() {
         readLog()
     }
 
-    override fun onRestart() {
-        super.onRestart()
+    override fun onResume() {
+        super.onResume()
         readLog()
     }
 
@@ -92,7 +92,10 @@ class LogActivity : AppCompatActivity() {
                 val body = StringBuilder()
                 body.append("------- LOG $daemon.log CONTENT ----------").append("\n")
                 val lines = logFile.readLines()
-                for(at in (lines.size - 200) until (lines.size - 1)){
+                val sizeNow = lines.size
+                var difference = 0
+                if(sizeNow > 450) sizeNow - 200
+                for(at in difference until (sizeNow - 1)){
                     val line = lines[at]
                     body.append(line).append("\n")
                 }
