@@ -7,7 +7,7 @@
 
 > This is an experimenting lightning wallet. Use it on testnet or only with amounts you can afford to lose on mainnet.
 
-Touch the lamp to download and run c-lightning from cross-compilated binaries for Android are available [here](https://github.com/lvaccaro/lightning_ndk/releases) or in alternative from source of [bitcoin_ndk project](https://github.com/lvaccaro/lightning_ndk/tree/lightning).
+Touch the lamp to download and run c-lightning from cross-compiled binaries for Android are available [here](https://github.com/lvaccaro/lightning_ndk/releases) or in alternative from source of [bitcoin_ndk project](https://github.com/lvaccaro/lightning_ndk/tree/lightning).
 
 ![screenshot1](doc/img/Screen2.png)
 ![screenshot2](doc/img/Screen1.png)
