@@ -84,18 +84,11 @@ class SettingsActivity : AppCompatActivity() {
                         MainActivity.tarFilename()
                     ).delete()
                     File(downloadDir, "cacert.pem").delete()
-                    val resultOperation = File(dir, "lightningd").delete() &&
-                    File(dir, "lightning-cli").delete() &&
-                    File(dir, "lightning_channeld").delete() &&
-                    File(dir, "lightning_closingd").delete() &&
-                    File(dir, "lightning_connectd").delete() &&
-                    File(dir, "lightning_onchaind").delete() &&
-                    File(dir, "lightning_openingd").delete() &&
-                    File(dir, "lightning_gossipd").delete() &&
-                    File(dir, "lightning_hsmd").delete() &&
+                    val resultOperation = File(dir, "cli").deleteRecursively() &&
+                    File(dir, "lightningd").deleteRecursively() &&
+                    File(dir, "plugins").deleteRecursively() &&
                     File(dir, "bitcoin-cli").delete() &&
                     File(dir, "bitcoind").delete() &&
-                    File(dir, "plugins").deleteRecursively() &&
                     File(dir, "tor").delete()
 
                     if(resultOperation){

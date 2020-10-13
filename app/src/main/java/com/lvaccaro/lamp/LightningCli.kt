@@ -22,7 +22,7 @@ class LightningCli {
         val network = sharedPref.getString("network", "testnet").toString()
 
         val args = arrayOf(
-            String.format("%s/%s", binaryDir.canonicalPath, command),
+            String.format("%s/cli/%s", binaryDir.canonicalPath, command),
             String.format("--network=%s", network),
             String.format("--lightning-dir=%s", lightningDir.path),
             String.format("--%s", if (json == true) "json" else "raw" ))

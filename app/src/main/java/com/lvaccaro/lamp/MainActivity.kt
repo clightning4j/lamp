@@ -169,7 +169,7 @@ class MainActivity : UriResultActivity() {
 
     override fun onResume() {
         super.onResume()
-        if (!File(rootDir(), "lightning-cli").exists()) {
+        if (!File(rootDir(), "cli/lightning-cli").exists()) {
             findViewById<TextView>(R.id.statusText).text =
                 "Rub the lamp to download ${RELEASE} binaries."
             return
@@ -375,7 +375,7 @@ class MainActivity : UriResultActivity() {
             return
         }
 
-        val isLightningReady = File(rootDir(), "lightning-cli").exists()
+        val isLightningReady = File(rootDir(), "cli/lightning-cli").exists()
         if (isLightningReady) {
             // turn on
             start()

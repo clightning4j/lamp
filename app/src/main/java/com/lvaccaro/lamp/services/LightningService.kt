@@ -55,7 +55,7 @@ class LightningService : IntentService("LightningService") {
         val ignoreFeeLimits = sharedPref.getBoolean("ignore-fee-limits", false)
 
         var options = arrayListOf<String>(
-            String.format("%s/%s", binaryDir.canonicalPath, daemon),
+            String.format("%s/lightningd/%s", binaryDir.canonicalPath, daemon),
             String.format("--network=%s", network),
             String.format("--log-level=%s", logLevel),
             String.format("--lightning-dir=%s", lightningDir.path),
