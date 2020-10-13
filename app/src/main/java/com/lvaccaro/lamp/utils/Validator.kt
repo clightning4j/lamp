@@ -167,7 +167,7 @@ class Validator {
 
         fun getBolt11(string: String): String {
             // These variable (step and len) are used to check the type of invoice
-            // I need this variable because the prifix from (mainet, testnet) to regtest
+            // I need this variable because the prefix from (mainet, testnet) to regtest
             // have different length.
             // This function check the format bolt11 mensioned inside the bolt11.
             // other sanity check will do from lightningd daemon.
