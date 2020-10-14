@@ -141,6 +141,7 @@ class ChannelsActivity : AppCompatActivity() {
                 val bottomSheetDialog =
                     FundChannelFragment()
                 bottomSheetDialog.show(supportFragmentManager, "Fund channel")
+                bottomSheetDialog.dismiss()
                 true
             }
             else -> super.onOptionsItemSelected(item)
