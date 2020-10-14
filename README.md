@@ -51,6 +51,10 @@ On Lamp settings, enable proxy using orbot localhost gateway:
 
 Read the following instructions at [Tor on clightning](https://lightning.readthedocs.io/TOR.html) to setup address on different network scenario.
 
+## Building
+
+ * [in Linux using cmdline tools](doc/cmdline-tools-setup.md)
+
 ## References
 
 - [ABCore](https://github.com/greenaddress/abcore) Android Bitcoin Core wallet
