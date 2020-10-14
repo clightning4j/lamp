@@ -56,6 +56,7 @@ class FundChannelFragment: BottomSheetDialogFragment() {
                     "Channel funded",
                     Toast.LENGTH_LONG
                 ).show()
+                dismiss()
             }
         } catch (e: Exception) {
             activity?.runOnUiThread {

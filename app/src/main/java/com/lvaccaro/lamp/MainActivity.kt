@@ -153,6 +153,7 @@ class MainActivity : UriResultActivity() {
             val bottomSheetDialog =
                 InvoiceBuildFragment()
             bottomSheetDialog.show(supportFragmentManager, "Custom Bottom Sheet")
+
         }
 
         viewOnRunning.findViewById<MaterialButton>(R.id.button_send).setOnClickListener {
@@ -334,7 +335,9 @@ class MainActivity : UriResultActivity() {
         viewOnRunning.findViewById<TextView>(R.id.value_balance_text).text =
             fundInChannels["to_us"].toString()
         val message: String? = intent?.extras?.get("message")?.toString()
-        showMessageOnToast(message ?: "Balance update")
+        if (message != null && message.isNotEmpty()) {
+            showMessageOnToast(message)
+        }
     }
 
     private fun isServiceRunning(name: String): Boolean {

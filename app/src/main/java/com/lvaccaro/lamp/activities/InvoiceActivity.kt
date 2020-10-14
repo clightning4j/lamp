@@ -10,9 +10,9 @@ import androidx.appcompat.app.AppCompatActivity
 import com.google.zxing.WriterException
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel
 import com.google.zxing.qrcode.encoder.Encoder
-import com.lvaccaro.lamp.fragments.RecyclerViewFragment
 import com.lvaccaro.lamp.LightningCli
 import com.lvaccaro.lamp.R
+import com.lvaccaro.lamp.fragments.RecyclerViewFragment
 import com.lvaccaro.lamp.toJSONObject
 import com.lvaccaro.lamp.utils.UI
 import kotlinx.android.synthetic.main.activity_invoice.*

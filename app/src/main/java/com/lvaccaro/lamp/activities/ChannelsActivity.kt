@@ -69,10 +69,10 @@ class ChannelsActivity : AppCompatActivity() {
         setContentView(R.layout.activity_channels)
         setSupportActionBar(toolbar)
 
-        recyclerView = findViewById<RecyclerView>(R.id.recycler_view)
+        recyclerView = findViewById(R.id.recycler_view)
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.adapter = ChannelAdapter(
-            ArrayList<JSONObject>(),
+            ArrayList(),
             this::showChannel
         )
 
@@ -141,7 +141,6 @@ class ChannelsActivity : AppCompatActivity() {
                 val bottomSheetDialog =
                     FundChannelFragment()
                 bottomSheetDialog.show(supportFragmentManager, "Fund channel")
-                bottomSheetDialog.dismiss()
                 true
             }
             else -> super.onOptionsItemSelected(item)
