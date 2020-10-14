@@ -13,13 +13,11 @@ import java.io.FileOutputStream
 class Archive {
 
     fun uncompressXZ(inputFile: File, outputDir: File) {
-        if (!outputDir.exists()) {
-            outputDir.mkdir()
-        }
-        val pluginsDir = File(outputDir, "plugins")
-        if (!pluginsDir.exists()) {
-            pluginsDir.mkdir()
-        }
+        mkdir(outputDir)
+        mkdir(File(outputDir, "plugins"))
+        mkdir(File(outputDir, "lightningd"))
+        mkdir(File(outputDir, "cli"))
+
         val input = TarArchiveInputStream(
             BufferedInputStream(
                 XZCompressorInputStream(
@@ -49,5 +47,11 @@ class Archive {
         }
         IOUtils.closeQuietly(input)
         inputFile.delete()
+    }
+
+    fun mkdir(dir: File) {
+        if (!dir.exists()) {
+            dir.mkdir()
+        }
     }
 }
