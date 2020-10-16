@@ -51,6 +51,7 @@ class InvoiceBuildFragment: BottomSheetDialogFragment() {
                 intent.putExtra("bolt11", res["bolt11"] as String)
                 intent.putExtra("label", label)
                 startActivity(intent)
+                dismiss()
             }
         } catch (e: Exception) {
             activity?.runOnUiThread {

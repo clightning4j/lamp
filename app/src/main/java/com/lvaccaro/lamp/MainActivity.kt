@@ -153,6 +153,7 @@ class MainActivity : UriResultActivity() {
             val bottomSheetDialog =
                 InvoiceBuildFragment()
             bottomSheetDialog.show(supportFragmentManager, "Custom Bottom Sheet")
+
         }
 
         viewOnRunning.findViewById<MaterialButton>(R.id.button_send).setOnClickListener {
@@ -321,11 +322,8 @@ class MainActivity : UriResultActivity() {
             savedInstanceState?.getString(LampKeys.OUR_CHAIN_BALANCE) ?: "Unavaible"
     }
 
-    //Update View method
-    /**
-     * This method is called inside the brodcast receiver
-     */
     fun updateBalanceView(context: Context?, intent: Intent?) {
+        if (!isLightningRunning()) return
         val listFunds = cli.exec(context!!, arrayOf("listfunds"), true).toJSONObject()
         val listpeers = cli.exec(context!!, arrayOf("listpeers"), true).toJSONObject()
         val balance = SimulatorPlugin.funds(listFunds)
@@ -337,7 +335,9 @@ class MainActivity : UriResultActivity() {
         viewOnRunning.findViewById<TextView>(R.id.value_balance_text).text =
             fundInChannels["to_us"].toString()
         val message: String? = intent?.extras?.get("message")?.toString()
-        showMessageOnToast(message ?: "Balance update")
+        if (message != null && message.isNotEmpty()) {
+            showMessageOnToast(message)
+        }
     }
 
     private fun isServiceRunning(name: String): Boolean {

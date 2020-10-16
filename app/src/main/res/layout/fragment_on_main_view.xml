@@ -90,14 +90,14 @@
 
 
                 <ImageView
-                    android:id="@+id/icon_lightning"
+                    android:id="@+id/icon_blockchain"
                     android:layout_width="20dp"
                     android:layout_height="20dp"
                     android:layout_below="@+id/valute_text_view"
                     android:layout_alignParentStart="true"
                     android:layout_marginLeft="29dp"
                     android:layout_marginTop="13dp"
-                    android:src="@drawable/ic_lightning" />
+                    android:src="@drawable/ic_blockchain" />
 
                 <TextView
                     android:id="@+id/off_chain"
@@ -114,11 +114,11 @@
                 <ImageView
                     android:layout_width="20dp"
                     android:layout_height="20dp"
-                    android:layout_below="@+id/icon_lightning"
+                    android:layout_below="@+id/icon_blockchain"
                     android:layout_alignParentStart="true"
                     android:layout_marginLeft="29dp"
                     android:layout_marginTop="13dp"
-                    android:src="@drawable/ic_blockchain" />
+                    android:src="@drawable/ic_lightning" />
 
                 <TextView
                     android:layout_width="wrap_content"
