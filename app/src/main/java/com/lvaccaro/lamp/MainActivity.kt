@@ -107,7 +107,7 @@ class MainActivity : UriResultActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        powerImageView = findViewById<PowerImageView>(R.id.powerImageView)
+        powerImageView = findViewById(R.id.powerImageView)
         powerImageView.setOnClickListener { this.onPowerClick() }
         val arrowImageView = findViewById<ImageView>(R.id.arrowImageView)
         arrowImageView.setOnClickListener { this.onHistoryClick() }

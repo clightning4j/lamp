@@ -95,7 +95,7 @@ class LogActivity : AppCompatActivity() {
                 val sizeNow = lines.size
                 var difference = 0
                 if(sizeNow > 450) sizeNow - 200
-                for(at in difference until (sizeNow - 1)){
+                for(at in difference until sizeNow){
                     val line = lines[at]
                     body.append(line).append("\n")
                 }
