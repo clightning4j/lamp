@@ -23,7 +23,6 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.net.toUri
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
@@ -44,11 +43,9 @@ import com.lvaccaro.lamp.handlers.ShutdownNode
 import com.lvaccaro.lamp.handlers.StartNode
 import com.lvaccaro.lamp.services.LightningService
 import com.lvaccaro.lamp.services.TorService
-import com.lvaccaro.lamp.utils.Archive
+import com.lvaccaro.lamp.utils.*
+import com.lvaccaro.lamp.utils.UI.copyToClipboard
 import com.lvaccaro.lamp.views.PowerImageView
-import com.lvaccaro.lamp.utils.SimulatorPlugin
-import com.lvaccaro.lamp.utils.LampKeys
-import com.lvaccaro.lamp.utils.UI
 import org.jetbrains.anko.doAsync
 import org.json.JSONArray
 import org.json.JSONObject
@@ -193,6 +190,7 @@ class MainActivity : UriResultActivity() {
         viewOnRunning.visibility = View.VISIBLE
         doAsync {
             getInfo()
+
             UI.runIntent(applicationContext, NewChannelPayment.NOTIFICATION)
         }
     }
@@ -356,7 +354,7 @@ class MainActivity : UriResultActivity() {
             fundInChannels["to_us"].toString()
         val message: String? = intent?.extras?.get("message")?.toString()
         if (message != null && message.isNotEmpty()) {
-            showMessageOnToast(message)
+            UI.showMessageOnToast(this, message)
         }
     }
 
@@ -732,7 +730,7 @@ class MainActivity : UriResultActivity() {
                 .setTitle("New address")
                 .setView(container)
                 .setPositiveButton("clipboard") { dialog, which ->
-                    UI.copyToClipboard(this, "address", address)
+                    copyToClipboard(this, "address", address)
                 }.setNegativeButton("cancel") { dialog, which -> }
                 .setCancelable(false)
                 .show()
@@ -772,7 +770,7 @@ class MainActivity : UriResultActivity() {
                 }
                 BrokenStatus.NOTIFICATION -> runOnUiThread{
                     val message = intent.getStringExtra("message")
-                    UI.snackBar(this@MainActivity, message)
+                    UI.showMessageOnSnackBar(this@MainActivity, message)
                     powerOff()
                     stopTorService()
                 }

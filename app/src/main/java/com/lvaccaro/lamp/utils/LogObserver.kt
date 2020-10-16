@@ -59,11 +59,14 @@ class LogObserver(val context: Context, val path: String, val nameFile: String) 
 
 
     private fun initHandler() {
-        actionHandler = ArrayList<IEventHandler>()
+        actionHandler = ArrayList()
         actionHandler.addAll(
             arrayOf(
-                NewChannelPayment(), ShutdownNode(),
-                NewBlockHandler(), StartNode()
+                NewChannelPayment(),
+                ShutdownNode(),
+                NewBlockHandler(),
+                StartNode(),
+                BrokenStatus()
             )
         )
     }
