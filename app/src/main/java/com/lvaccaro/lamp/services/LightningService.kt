@@ -6,6 +6,7 @@ import android.content.Intent
 import android.os.Build
 import android.os.Environment
 import android.os.FileObserver
+import android.util.Log
 import androidx.preference.PreferenceManager
 import com.lvaccaro.lamp.MainActivity
 import com.lvaccaro.lamp.R
@@ -15,6 +16,10 @@ import java.io.File
 import java.util.logging.Logger
 
 class LightningService : IntentService("LightningService") {
+
+    companion object{
+        val TAG = this.javaClass.canonicalName
+    }
 
     val log = Logger.getLogger(LightningService::class.java.name)
     var process: Process? = null
@@ -50,16 +55,24 @@ class LightningService : IntentService("LightningService") {
         var proxy = sharedPref.getString("proxy", "").toString()
         var announceaddr = sharedPref.getString("announce-addr", "").toString()
         var bindaddr = sharedPref.getString("bind-addr", "").toString()
-        var addr = sharedPref.getString("addr", "").toString()
+        val addr = sharedPref.getString("addr", "").toString()
         val alias = sharedPref.getString("alias", "").toString()
         val ignoreFeeLimits = sharedPref.getBoolean("ignore-fee-limits", false)
+        val torEnabled = sharedPref.getBoolean("enabled-tor", true)
+        val proxyEnabled = sharedPref.getBoolean("proxy-enabled", false)
 
         var options = arrayListOf<String>(
             String.format("%s/lightningd/%s", binaryDir.canonicalPath, daemon),
             String.format("--network=%s", network),
             String.format("--log-level=%s", logLevel),
             String.format("--lightning-dir=%s", lightningDir.path),
-            String.format("--plugin-dir=%s", File(binaryDir.path , "plugins").path),
+            //FIXME(vincenzopalazzo)
+            // With lightning_ndk 0.9.1 is changed a  little bit the dir structure, and I noted that
+            // lightningd doesn't avoid the plugin directory duplicate, maybe this can me managed inside the lightnind code
+            // not a lamp problem.
+            // Here happen that the data dir for lightning has the same structure that lightnind aspect in .lightnind
+            // so in this case the plugin dir is not necessary
+            //String.format("--plugin-dir=%s", File(binaryDir.canonicalPath , "plugins").path),
             String.format("--ignore-fee-limits=%b", ignoreFeeLimits),
             // 10 days to catch a cheating attempt
             String.format("--watchtime-blocks=%s", 10 * 24 * 6))
@@ -88,8 +101,7 @@ class LightningService : IntentService("LightningService") {
                 String.format("--bitcoin-rpcport=%s", rpcport),
                 String.format("--bitcoin-rpcpassword=%s", rpcpassword)))
         }
-
-        if (sharedPref.getBoolean("enabled-tor", true)) {
+        if (torEnabled) {
             // setup Tor
             proxy = "127.0.0.1:9050"
             bindaddr = "127.0.0.1:9735"
@@ -100,7 +112,8 @@ class LightningService : IntentService("LightningService") {
             options.add("--always-use-proxy=true")
         }
 
-        if (proxy.isNotEmpty()) {
+        if (proxy.isNotEmpty() && (torEnabled || proxyEnabled)) {
+            Log.d(TAG, "Not empty, it is %s".format(proxy))
             options.add(String.format("--proxy=%s", proxy))
             options.add("--always-use-proxy=true")
         }
