@@ -1,6 +1,7 @@
 package com.lvaccaro.lamp.utils
 
 class LampKeys {
+
     companion object{
         val ADDRESS_KEY = "ADDRESS_KEY"
         val AMOUNT_KEY = "amount"

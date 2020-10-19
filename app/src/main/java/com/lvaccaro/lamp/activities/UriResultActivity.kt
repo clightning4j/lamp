@@ -12,6 +12,7 @@ import com.lvaccaro.lamp.LightningCli
 import com.lvaccaro.lamp.services.CLightningException
 import com.lvaccaro.lamp.toJSONObject
 import com.lvaccaro.lamp.utils.LampKeys
+import com.lvaccaro.lamp.utils.UI
 import com.lvaccaro.lamp.utils.Validator
 import org.json.JSONObject
 import java.lang.Exception
@@ -68,10 +69,7 @@ open class UriResultActivity() : AppCompatActivity() {
                 message = "Connected to node"
             }
             runOnUiThread {
-                showMessageOnToast(
-                    message,
-                    Toast.LENGTH_LONG
-                )
+                UI.showMessageOnToast(applicationContext, message, Toast.LENGTH_LONG)
             }
         }
     }
@@ -89,7 +87,7 @@ open class UriResultActivity() : AppCompatActivity() {
         } catch (ex: Exception) {
             //FIXME: This have sense?
             val answer = JSONObject(ex.localizedMessage)
-            showMessageOnToast(answer[LampKeys.MESSAGE_JSON_KEY].toString(), Toast.LENGTH_LONG)
+            UI.showMessageOnToast(applicationContext, answer[LampKeys.MESSAGE_JSON_KEY].toString(), Toast.LENGTH_LONG)
             throw CLightningException(ex.cause)
         }
     }
@@ -125,7 +123,7 @@ open class UriResultActivity() : AppCompatActivity() {
         val address = param?.get(LampKeys.ADDRESS_KEY) ?: ""
         val networkCheck = Validator.isCorrectNetwork(cli, this.applicationContext, address)
         if(networkCheck != null){
-            showMessageOnToast(networkCheck, Toast.LENGTH_LONG)
+            UI.showMessageOnToast(applicationContext, networkCheck, Toast.LENGTH_LONG)
             return
         }
         var amount = ""
@@ -140,13 +138,4 @@ open class UriResultActivity() : AppCompatActivity() {
         bottomSheetDialog.show(supportFragmentManager, "WithdrawFragment")
     }
 
-    protected fun showMessageOnToast(message: String, duration: Int = Toast.LENGTH_LONG) {
-        if(message.isEmpty()) return
-        runOnUiThread{
-            Toast.makeText(
-                this, message,
-                duration
-            ).show()
-        }
-    }
 }

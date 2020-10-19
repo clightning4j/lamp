@@ -5,6 +5,7 @@ import android.app.Activity
 import android.app.ActivityManager
 import android.app.DownloadManager
 import android.content.*
+import android.content.pm.ActivityInfo
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.Color
@@ -22,7 +23,6 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.net.toUri
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
@@ -40,14 +40,11 @@ import com.lvaccaro.lamp.handlers.BrokenStatus
 import com.lvaccaro.lamp.handlers.NewBlockHandler
 import com.lvaccaro.lamp.handlers.NewChannelPayment
 import com.lvaccaro.lamp.handlers.ShutdownNode
-import com.lvaccaro.lamp.handlers.StartNode
 import com.lvaccaro.lamp.services.LightningService
 import com.lvaccaro.lamp.services.TorService
-import com.lvaccaro.lamp.utils.Archive
+import com.lvaccaro.lamp.utils.*
+import com.lvaccaro.lamp.utils.UI.copyToClipboard
 import com.lvaccaro.lamp.views.PowerImageView
-import com.lvaccaro.lamp.utils.SimulatorPlugin
-import com.lvaccaro.lamp.utils.LampKeys
-import com.lvaccaro.lamp.utils.UI
 import org.jetbrains.anko.doAsync
 import org.json.JSONArray
 import org.json.JSONObject
@@ -67,8 +64,9 @@ class MainActivity : UriResultActivity() {
     private lateinit var downloadmanager: DownloadManager
     private lateinit var powerImageView: PowerImageView
     private lateinit var viewOnRunning: View
+    private lateinit var settingMenuItem: MenuItem
+    private lateinit var logMenuItem: MenuItem
     private var isFirstStart = true
-    private var nodeReady = false
 
     companion object {
         val RELEASE = "release_clightning_0.9.1"
@@ -107,6 +105,8 @@ class MainActivity : UriResultActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LOCKED)
+
         setContentView(R.layout.activity_main)
 
         powerImageView = findViewById(R.id.powerImageView)
@@ -160,7 +160,7 @@ class MainActivity : UriResultActivity() {
         }
 
         if (Intent.ACTION_VIEW == intent.action) {
-            if (arrayListOf<String>("bitcoin", "lightning").contains(intent.data.scheme)) {
+            if (arrayListOf("bitcoin", "lightning").contains(intent.data.scheme)) {
                 val text = intent.data.toString().split(":").last()
                 parse(text)
             }
@@ -188,7 +188,8 @@ class MainActivity : UriResultActivity() {
         viewOnRunning.visibility = View.VISIBLE
         doAsync {
             getInfo()
-            runIntent(NewChannelPayment.NOTIFICATION)
+
+            UI.runIntent(applicationContext, NewChannelPayment.NOTIFICATION)
         }
     }
 
@@ -215,12 +216,14 @@ class MainActivity : UriResultActivity() {
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         // Inflate the menu; this adds items to the action bar if it is present.
         menuInflater.inflate(R.menu.menu, menu)
+        settingMenuItem = menu.findItem(R.id.action_settings)
+        logMenuItem = menu.findItem(R.id.action_log)
         return true
     }
 
-    override fun onPrepareOptionsMenu(menu: Menu?): Boolean {
+    override fun onPrepareOptionsMenu(menu: Menu): Boolean {
         if (!isLightningRunning()) {
-            menu?.apply {
+            menu.apply {
                 removeItem(R.id.action_console)
                 removeItem(R.id.action_invoice)
                 removeItem(R.id.action_channels)
@@ -289,7 +292,7 @@ class MainActivity : UriResultActivity() {
                 doAsync { parse(result) }
                 return
             }
-            UI.snackBar(this, "Scan failed")
+            UI.showMessageOnSnackBar(this, "Scan failed")
         } else {
             super.onActivityResult(requestCode, resultCode, data)
         }
@@ -311,8 +314,6 @@ class MainActivity : UriResultActivity() {
     override fun onRestoreInstanceState(savedInstanceState: Bundle?) {
         super.onRestoreInstanceState(savedInstanceState)
         this.restoreBalanceValue(savedInstanceState)
-        if (isLightningRunning())
-            powerImageView.on()
     }
 
     //FIXME(vincenzopalazzo) we don't need this with the actual implementation of UI
@@ -343,7 +344,7 @@ class MainActivity : UriResultActivity() {
             fundInChannels["to_us"].toString()
         val message: String? = intent?.extras?.get("message")?.toString()
         if (message != null && message.isNotEmpty()) {
-            showMessageOnToast(message)
+            UI.showMessageOnToast(this, message)
         }
     }
 
@@ -358,7 +359,7 @@ class MainActivity : UriResultActivity() {
     }
 
     private fun isLightningRunning(): Boolean {
-        return isServiceRunning(LightningService::class.java.canonicalName) && nodeReady
+        return isServiceRunning(LightningService::class.java.canonicalName)
     }
 
     private fun isTorRunning(): Boolean {
@@ -433,8 +434,8 @@ class MainActivity : UriResultActivity() {
         //findViewById<TextView>(R.id.textViewQr).visibility = View.VISIBLE
 
         findViewById<FloatingActionButton>(R.id.floating_action_button).show()
+        UI.runIntent(applicationContext, NewChannelPayment.NOTIFICATION)
         invalidateOptionsMenu()
-        runIntent(NewChannelPayment.NOTIFICATION)
     }
 
     private fun getInfo() {
@@ -448,7 +449,7 @@ class MainActivity : UriResultActivity() {
             val id = res["id"] as String
             val addresses = res["address"] as JSONArray
             // the node has an address? if not hide the UI node info
-            var public = addresses.length() != 0
+            val public = addresses.length() != 0
             val alias = res["alias"] as String
             var txt = ""
             if (public) {
@@ -490,7 +491,7 @@ class MainActivity : UriResultActivity() {
                 stopLightningService()
                 stopTorService()
                 powerOff()
-                UI.snackBar(this, e.localizedMessage)
+                UI.showMessageOnSnackBar(this, e.localizedMessage)
             }
         }
     }
@@ -600,12 +601,13 @@ class MainActivity : UriResultActivity() {
         val torEnabled = sharedPref.getBoolean("enabled-tor", true)
 
         // clear log files
-        val torLogFile = File(rootDir(), "tor.log")
-        val lightningLogFile = File(rootDir(), "lightningd.log")
-        torLogFile.delete()
-        lightningLogFile.delete()
+        File(rootDir(), "tor.log").delete()
+        File(rootDir(), "lightningd.log").delete()
 
-        powerImageView.animating()
+        runOnUiThread {
+            powerImageView.animating()
+        }
+
         doAsync {
             if (torEnabled) {
                 // start service on main thread
@@ -620,7 +622,7 @@ class MainActivity : UriResultActivity() {
                         Log.d(TAG, "******** Tor run failed ********")
                         stopTorService()
                         powerOff()
-                        UI.snackBar(this@MainActivity, "Tor start failed")
+                        UI.showMessageOnSnackBar(this@MainActivity, "Tor start failed")
                     }
                     return@doAsync
                 }
@@ -633,7 +635,7 @@ class MainActivity : UriResultActivity() {
             }
             // wait lightning to be bootstrapped
             if (!waitLightningBootstrap()) {
-                showMessageOnToast("Lightning start failed")
+                UI.showMessageOnToast(applicationContext, "Lightning start failed")
                 runOnUiThread {
                     Log.d(TAG, "******** Lightning run failed ********")
                     stopLightningService()
@@ -643,11 +645,11 @@ class MainActivity : UriResultActivity() {
             }
             try {
                 getInfo()
-                runOnUiThread { powerOn() }
+                //runOnUiThread { powerOn() }
             } catch (e: Exception) {
                 log.info("---" + e.localizedMessage + "---")
                 stop()
-                runOnUiThread { UI.snackBar(this@MainActivity, e.localizedMessage) }
+                runOnUiThread { UI.showMessageOnSnackBar(this@MainActivity, e.localizedMessage) }
             }
         }
     }
@@ -682,15 +684,12 @@ class MainActivity : UriResultActivity() {
             val res = LightningCli().exec(this, arrayOf("stop"))
             log.info("---" + res.toString() + "---")
         } catch (e: Exception) {
-            runOnUiThread { UI.snackBar(this, "Error: ${e.localizedMessage}") }
+            runOnUiThread { UI.showMessageOnSnackBar(this, "Error: ${e.localizedMessage}") }
             log.warning(e.localizedMessage)
             e.printStackTrace()
         }
-        runOnUiThread {
-            stopLightningService()
-            stopTorService()
-            powerOff()
-        }
+        stopLightningService()
+        stopTorService()
     }
 
     private fun generateNewAddress() {
@@ -721,7 +720,7 @@ class MainActivity : UriResultActivity() {
                 .setTitle("New address")
                 .setView(container)
                 .setPositiveButton("clipboard") { dialog, which ->
-                    UI.copyToClipboard(this, "address", address)
+                    copyToClipboard(this, "address", address)
                 }.setNegativeButton("cancel") { dialog, which -> }
                 .setCancelable(false)
                 .show()
@@ -735,13 +734,7 @@ class MainActivity : UriResultActivity() {
         intentFilter.addAction(NewChannelPayment.NOTIFICATION)
         intentFilter.addAction(NewBlockHandler.NOTIFICATION)
         intentFilter.addAction(BrokenStatus.NOTIFICATION)
-        intentFilter.addAction(StartNode.NOTIFICATION)
         localBroadcastManager.registerReceiver(notificationReceiver, intentFilter)
-    }
-
-    private fun runIntent(key: String) {
-        val intent = Intent(key)
-        LocalBroadcastManager.getInstance(applicationContext).sendBroadcast(intent)
     }
 
     private val notificationReceiver = object : BroadcastReceiver() {
@@ -765,14 +758,9 @@ class MainActivity : UriResultActivity() {
                 }
                 BrokenStatus.NOTIFICATION -> runOnUiThread{
                     val message = intent.getStringExtra("message")
-                    UI.snackBar(this@MainActivity, message)
+                    UI.showMessageOnSnackBar(this@MainActivity, message)
                     powerOff()
                     stopTorService()
-                }
-                StartNode.NOTIFICATION -> runOnUiThread {
-                    Log.d(TAG, "************ NODE READY *************")
-                    nodeReady = true
-                    powerOn()
                 }
             }
         }
