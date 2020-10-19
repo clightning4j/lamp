@@ -11,8 +11,6 @@ import androidx.preference.PreferenceFragmentCompat
 import com.lvaccaro.lamp.MainActivity
 import com.lvaccaro.lamp.R
 import com.lvaccaro.lamp.rootDir
-import com.lvaccaro.lamp.utils.UI
-import kotlinx.android.synthetic.main.activity_main.*
 import org.apache.commons.compress.utils.IOUtils
 import org.jetbrains.anko.doAsync
 import java.io.*
@@ -126,7 +124,7 @@ class SettingsActivity : AppCompatActivity() {
                     showToast("The change require the node restart", Toast.LENGTH_LONG)
                     true
                 }
-                "enabled-esplora" -> {
+                "enabled-esplora" ->{
                     showToast("The change require the node restart", Toast.LENGTH_LONG)
                     true
                 }
@@ -136,7 +134,7 @@ class SettingsActivity : AppCompatActivity() {
             }
         }
 
-        fun showToast(message: String, duration: Int = Toast.LENGTH_SHORT) {
+        fun showToast(message: String, duration: Int) {
             Toast.makeText(context, message, duration).show()
         }
 
