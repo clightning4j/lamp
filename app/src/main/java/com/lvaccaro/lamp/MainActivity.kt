@@ -40,7 +40,6 @@ import com.lvaccaro.lamp.handlers.BrokenStatus
 import com.lvaccaro.lamp.handlers.NewBlockHandler
 import com.lvaccaro.lamp.handlers.NewChannelPayment
 import com.lvaccaro.lamp.handlers.ShutdownNode
-import com.lvaccaro.lamp.handlers.StartNode
 import com.lvaccaro.lamp.services.LightningService
 import com.lvaccaro.lamp.services.TorService
 import com.lvaccaro.lamp.utils.*
@@ -68,7 +67,6 @@ class MainActivity : UriResultActivity() {
     private lateinit var settingMenuItem: MenuItem
     private lateinit var logMenuItem: MenuItem
     private var isFirstStart = true
-    private var nodeReady = false
 
     companion object {
         val RELEASE = "release_clightning_0.9.1"
@@ -244,18 +242,10 @@ class MainActivity : UriResultActivity() {
                 true
             }
             R.id.action_settings -> {
-                if((isLightningRunning() || isTorRunning()) && !nodeReady){
-                    UI.showMessageOnToast(this, "Node not ready yet")
-                    return false
-                } // node are bootstrapping
                 startActivityForResult(Intent(this, SettingsActivity::class.java), 100)
                 true
             }
             R.id.action_log -> {
-                if((isLightningRunning() || isTorRunning()) && !nodeReady){
-                    UI.showMessageOnToast(this, "Node not ready yet")
-                    return false
-                } // node are bootstrapping
                 startActivityForResult(Intent(this, LogActivity::class.java), 100)
                 true
             }
@@ -744,7 +734,6 @@ class MainActivity : UriResultActivity() {
         intentFilter.addAction(NewChannelPayment.NOTIFICATION)
         intentFilter.addAction(NewBlockHandler.NOTIFICATION)
         intentFilter.addAction(BrokenStatus.NOTIFICATION)
-        intentFilter.addAction(StartNode.NOTIFICATION)
         localBroadcastManager.registerReceiver(notificationReceiver, intentFilter)
     }
 
@@ -759,7 +748,6 @@ class MainActivity : UriResultActivity() {
                     updateBalanceView(context, intent)
                 }
                 ShutdownNode.NOTIFICATION -> runOnUiThread {
-                    nodeReady = false
                     powerOff()
                 }
                 NewBlockHandler.NOTIFICATION -> runOnUiThread {
@@ -773,11 +761,6 @@ class MainActivity : UriResultActivity() {
                     UI.showMessageOnSnackBar(this@MainActivity, message)
                     powerOff()
                     stopTorService()
-                }
-                StartNode.NOTIFICATION -> runOnUiThread {
-                    Log.d(TAG, "************ NODE READY *************")
-                    nodeReady = true
-                    powerOn()
                 }
             }
         }
