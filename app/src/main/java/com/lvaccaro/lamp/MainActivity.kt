@@ -43,9 +43,9 @@ import com.lvaccaro.lamp.handlers.ShutdownNode
 import com.lvaccaro.lamp.services.LightningService
 import com.lvaccaro.lamp.services.TorService
 import com.lvaccaro.lamp.utils.*
-import com.lvaccaro.lamp.utils.UI.copyToClipboard
 import com.lvaccaro.lamp.views.PowerImageView
 import org.jetbrains.anko.doAsync
+import org.jetbrains.anko.runOnUiThread
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.File
@@ -64,8 +64,6 @@ class MainActivity : UriResultActivity() {
     private lateinit var downloadmanager: DownloadManager
     private lateinit var powerImageView: PowerImageView
     private lateinit var viewOnRunning: View
-    private lateinit var settingMenuItem: MenuItem
-    private lateinit var logMenuItem: MenuItem
     private var isFirstStart = true
 
     companion object {
@@ -105,7 +103,7 @@ class MainActivity : UriResultActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LOCKED)
+        requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LOCKED
 
         setContentView(R.layout.activity_main)
 
@@ -216,8 +214,6 @@ class MainActivity : UriResultActivity() {
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         // Inflate the menu; this adds items to the action bar if it is present.
         menuInflater.inflate(R.menu.menu, menu)
-        settingMenuItem = menu.findItem(R.id.action_settings)
-        logMenuItem = menu.findItem(R.id.action_log)
         return true
     }
 
@@ -292,7 +288,7 @@ class MainActivity : UriResultActivity() {
                 doAsync { parse(result) }
                 return
             }
-            UI.showMessageOnSnackBar(this, "Scan failed")
+            runOnUiThread { UI.snackbar(this, "Scan failed") }
         } else {
             super.onActivityResult(requestCode, resultCode, data)
         }
@@ -344,7 +340,7 @@ class MainActivity : UriResultActivity() {
             fundInChannels["to_us"].toString()
         val message: String? = intent?.extras?.get("message")?.toString()
         if (message != null && message.isNotEmpty()) {
-            UI.showMessageOnToast(this, message)
+            runOnUiThread { UI.toast(this, message) }
         }
     }
 
@@ -491,7 +487,7 @@ class MainActivity : UriResultActivity() {
                 stopLightningService()
                 stopTorService()
                 powerOff()
-                UI.showMessageOnSnackBar(this, e.localizedMessage)
+                UI.snackbar(this, e.localizedMessage)
             }
         }
     }
@@ -622,7 +618,7 @@ class MainActivity : UriResultActivity() {
                         Log.d(TAG, "******** Tor run failed ********")
                         stopTorService()
                         powerOff()
-                        UI.showMessageOnSnackBar(this@MainActivity, "Tor start failed")
+                        UI.snackbar(this@MainActivity, "Tor start failed")
                     }
                     return@doAsync
                 }
@@ -635,21 +631,21 @@ class MainActivity : UriResultActivity() {
             }
             // wait lightning to be bootstrapped
             if (!waitLightningBootstrap()) {
-                UI.showMessageOnToast(applicationContext, "Lightning start failed")
                 runOnUiThread {
                     Log.d(TAG, "******** Lightning run failed ********")
                     stopLightningService()
                     powerOff()
+                    UI.toast(this@MainActivity, "Lightning start failed")
                 }
                 return@doAsync
             }
             try {
                 getInfo()
-                //runOnUiThread { powerOn() }
+                runOnUiThread { powerOn() }
             } catch (e: Exception) {
                 log.info("---" + e.localizedMessage + "---")
                 stop()
-                runOnUiThread { UI.showMessageOnSnackBar(this@MainActivity, e.localizedMessage) }
+                runOnUiThread { UI.snackbar(this@MainActivity, e.localizedMessage) }
             }
         }
     }
@@ -684,12 +680,16 @@ class MainActivity : UriResultActivity() {
             val res = LightningCli().exec(this, arrayOf("stop"))
             log.info("---" + res.toString() + "---")
         } catch (e: Exception) {
-            runOnUiThread { UI.showMessageOnSnackBar(this, "Error: ${e.localizedMessage}") }
+            runOnUiThread { UI.snackbar(this, "Error: ${e.localizedMessage}") }
             log.warning(e.localizedMessage)
             e.printStackTrace()
+        } finally {
+            runOnUiThread {
+                stopLightningService()
+                stopTorService()
+                powerOff()
+            }
         }
-        stopLightningService()
-        stopTorService()
     }
 
     private fun generateNewAddress() {
@@ -720,7 +720,7 @@ class MainActivity : UriResultActivity() {
                 .setTitle("New address")
                 .setView(container)
                 .setPositiveButton("clipboard") { dialog, which ->
-                    copyToClipboard(this, "address", address)
+                    UI.copyToClipboard(this, "address", address)
                 }.setNegativeButton("cancel") { dialog, which -> }
                 .setCancelable(false)
                 .show()
@@ -758,7 +758,7 @@ class MainActivity : UriResultActivity() {
                 }
                 BrokenStatus.NOTIFICATION -> runOnUiThread{
                     val message = intent.getStringExtra("message")
-                    UI.showMessageOnSnackBar(this@MainActivity, message)
+                    UI.snackbar(this@MainActivity, message)
                     powerOff()
                     stopTorService()
                 }

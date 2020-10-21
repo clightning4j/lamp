@@ -69,7 +69,7 @@ open class UriResultActivity() : AppCompatActivity() {
                 message = "Connected to node"
             }
             runOnUiThread {
-                UI.showMessageOnToast(applicationContext, message, Toast.LENGTH_LONG)
+                UI.toast(applicationContext, message, Toast.LENGTH_LONG)
             }
         }
     }
@@ -87,7 +87,9 @@ open class UriResultActivity() : AppCompatActivity() {
         } catch (ex: Exception) {
             //FIXME: This have sense?
             val answer = JSONObject(ex.localizedMessage)
-            UI.showMessageOnToast(applicationContext, answer[LampKeys.MESSAGE_JSON_KEY].toString(), Toast.LENGTH_LONG)
+            runOnUiThread {
+                UI.toast(applicationContext, answer[LampKeys.MESSAGE_JSON_KEY].toString(), Toast.LENGTH_LONG)
+            }
             throw CLightningException(ex.cause)
         }
     }
@@ -123,7 +125,9 @@ open class UriResultActivity() : AppCompatActivity() {
         val address = param?.get(LampKeys.ADDRESS_KEY) ?: ""
         val networkCheck = Validator.isCorrectNetwork(cli, this.applicationContext, address)
         if(networkCheck != null){
-            UI.showMessageOnToast(applicationContext, networkCheck, Toast.LENGTH_LONG)
+            runOnUiThread {
+                UI.toast(applicationContext, networkCheck, Toast.LENGTH_LONG)
+            }
             return
         }
         var amount = ""

@@ -7,15 +7,12 @@ import android.util.Log
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.button.MaterialButton
-import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.textfield.TextInputEditText
 import com.lvaccaro.lamp.LightningCli
 import com.lvaccaro.lamp.R
 import com.lvaccaro.lamp.toJSONObject
 import com.lvaccaro.lamp.utils.UI
 import com.lvaccaro.lamp.utils.Validator
-import kotlinx.android.synthetic.main.activity_main.*
-import org.jetbrains.anko.contentView
 import org.jetbrains.anko.doAsync
 import org.json.JSONObject
 import java.lang.Exception
@@ -49,7 +46,7 @@ class PayViewActivity : AppCompatActivity() {
                 }finally {
                     if(displayMessage.isNotEmpty()){
                         runOnUiThread{
-                            UI.showMessageOnSnackBar(this@PayViewActivity, displayMessage)
+                            UI.snackbar(this@PayViewActivity, displayMessage)
                         }
                     }
 
@@ -60,12 +57,15 @@ class PayViewActivity : AppCompatActivity() {
         this.findViewById<MaterialButton>(R.id.copy_button).setOnClickListener {
             val text = copyFromClipboard()
             if (text.isNotEmpty() && Validator.isBolt11(text)) {
-                val decodePay = cli.exec(this, arrayOf("decodepay", text), true).toJSONObject()
-                findViewById<TextView>(R.id.amount_edit_text).setText(
-                    decodePay["msatoshi"].toString() ?: "0"
-                )
+                doAsync {
+                    val decodePay = cli.exec(this@PayViewActivity, arrayOf("decodepay", text), true).toJSONObject()
+                    runOnUiThread {
+                        findViewById<TextView>(R.id.amount_edit_text).text =
+                            decodePay["msatoshi"].toString() ?: "0"
+                    }
+                }
             } else if (!Validator.isBolt11(text)) {
-                UI.showMessageOnSnackBar(this, "Text not valid")
+                UI.snackbar(this, "Text not valid")
             }
         }
     }
@@ -74,9 +74,7 @@ class PayViewActivity : AppCompatActivity() {
         val clipboard =
             getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
         if (clipboard.hasPrimaryClip()) {
-            Log.d(
-                TAG,
-                "Clipboard content: " + clipboard.primaryClip.getItemAt(0).text
+            Log.d(TAG,"Clipboard content: " + clipboard.primaryClip.getItemAt(0).text
             )
             editText.setText(clipboard.primaryClip.getItemAt(0).text)
             return editText.text.toString()

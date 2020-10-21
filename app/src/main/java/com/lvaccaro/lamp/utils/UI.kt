@@ -27,7 +27,7 @@ object UI {
             .show()
     }
 
-    fun showMessageOnSnackBar(
+    fun snackbar(
         context: AppCompatActivity, message: String,
         duration: Int = Snackbar.LENGTH_LONG
     ) {
@@ -35,7 +35,7 @@ object UI {
         Snackbar.make(context.findViewById(android.R.id.content), message, duration).show()
     }
 
-    fun showMessageOnToast(context: Context1, message: String, duration: Int = Toast.LENGTH_LONG) {
+    fun toast(context: Context1, message: String, duration: Int = Toast.LENGTH_LONG) {
         if (message.isEmpty()) return
         Toast.makeText(context, message, duration).show()
     }

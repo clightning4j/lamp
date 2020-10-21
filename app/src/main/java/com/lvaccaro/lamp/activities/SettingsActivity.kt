@@ -11,6 +11,7 @@ import androidx.preference.PreferenceFragmentCompat
 import com.lvaccaro.lamp.MainActivity
 import com.lvaccaro.lamp.R
 import com.lvaccaro.lamp.rootDir
+import com.lvaccaro.lamp.utils.UI
 import org.apache.commons.compress.utils.IOUtils
 import org.jetbrains.anko.doAsync
 import java.io.*
@@ -58,9 +59,9 @@ class SettingsActivity : AppCompatActivity() {
                         .map { it.delete() }
 
                     if(resultOperation)
-                        showToast("Erased logs", Toast.LENGTH_LONG)
+                        UI.toast(context!!,"Erased logs")
                     else
-                        showToast("Error during Erasing logs", Toast.LENGTH_LONG)
+                        UI.toast(context!!,"Error during Erasing logs")
                     return resultOperation
                 }
                 "cleardata" -> {
@@ -70,9 +71,9 @@ class SettingsActivity : AppCompatActivity() {
                             File(activity?.rootDir(), ".torHiddenService").deleteRecursively()
 
                     if (resultOperation) {
-                        showToast("Erased datadir", Toast.LENGTH_LONG)
+                        UI.toast(context!!,"Erased datadir")
                     } else {
-                        showToast("Error during erasing datadir", Toast.LENGTH_LONG)
+                        UI.toast(context!!,"Error during erasing datadir")
                     }
                     return resultOperation
                 }
@@ -92,15 +93,11 @@ class SettingsActivity : AppCompatActivity() {
                     File(dir, "tor").delete()
 
                     if(resultOperation){
-                        showToast(
-                            "Erased binary in: ${dir.path} and downloaded files",
-                            Toast.LENGTH_LONG
-                        )
+                        UI.toast(context!!,"Erased binary in: ${dir.path} " +
+                                "and downloaded files")
                     }else{
-                        showToast(
-                            "Error during erasing binary in: ${dir.path} and downloaded files",
-                            Toast.LENGTH_LONG
-                        )
+                        UI.toast(context!!,"Error during erasing binary in: " +
+                                "${dir.path} and downloaded files")
                     }
 
                     return resultOperation
@@ -121,21 +118,17 @@ class SettingsActivity : AppCompatActivity() {
                     true
                 }
                 "enabled-tor" -> {
-                    showToast("The change require the node restart", Toast.LENGTH_LONG)
+                    UI.toast(context!!,"The change require the node restart")
                     true
                 }
                 "enabled-esplora" ->{
-                    showToast("The change require the node restart", Toast.LENGTH_LONG)
+                    UI.toast(context!!,"The change require the node restart")
                     true
                 }
                 else -> {
                     super.onPreferenceTreeClick(preference)
                 }
             }
-        }
-
-        fun showToast(message: String, duration: Int) {
-            Toast.makeText(context, message, duration).show()
         }
 
         fun import(selected: Uri) {

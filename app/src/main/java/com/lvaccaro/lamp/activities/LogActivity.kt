@@ -78,14 +78,14 @@ class LogActivity : AppCompatActivity() {
         }
     }
 
-    private fun shareLogByIntent(){
+    private fun shareLogByIntent() {
         doAsync {
             val shareIntent = Intent(Intent.ACTION_SEND).apply {
                 type = "text/plain"
                 val logFile = File(rootDir(), "$daemon.log")
                 if (!logFile.exists()) {
-                    runOnUiThread{
-                        UI.showMessageOnToast(applicationContext, "No log file found")
+                    runOnUiThread {
+                        UI.toast(applicationContext, "No log file found")
                     }
                     return@doAsync
                 }
@@ -94,8 +94,8 @@ class LogActivity : AppCompatActivity() {
                 val lines = logFile.readLines()
                 val sizeNow = lines.size
                 var difference = 0
-                if(sizeNow > 450) sizeNow - 200
-                for(at in difference until sizeNow){
+                if (sizeNow > 450) sizeNow - 200
+                for (at in difference until sizeNow) {
                     val line = lines[at]
                     body.append(line).append("\n")
                 }
@@ -105,8 +105,8 @@ class LogActivity : AppCompatActivity() {
                 startActivity(Intent.createChooser(shareIntent, null))
                 return@doAsync
             }
-            runOnUiThread{
-                UI.showMessageOnToast(applicationContext, "Intent resolving error")
+            runOnUiThread {
+                UI.toast(applicationContext, "Intent resolving error")
             }
         }
     }
@@ -115,13 +115,13 @@ class LogActivity : AppCompatActivity() {
         title = "Log $daemon"
         val logFile = File(rootDir(), "$daemon.log")
         if (!logFile.exists()) {
-            UI.showMessageOnToast(this, "No log file found")
+            runOnUiThread { UI.toast(this@LogActivity, "No log file found") }
             return
         }
         editText.setText("")
         doAsync {
             runOnUiThread {
-                Toast.makeText(this@LogActivity, "Loading", Toast.LENGTH_SHORT).show()
+                UI.toast(this@LogActivity, "Loading", Toast.LENGTH_SHORT)
                 progressBar.visibility = View.VISIBLE
             }
             val randomAccessFile = RandomAccessFile(logFile, "r")
