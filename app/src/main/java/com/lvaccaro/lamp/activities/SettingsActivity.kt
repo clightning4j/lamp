@@ -1,5 +1,6 @@
 package com.lvaccaro.lamp.activities
 
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -11,6 +12,7 @@ import androidx.preference.PreferenceFragmentCompat
 import com.lvaccaro.lamp.MainActivity
 import com.lvaccaro.lamp.R
 import com.lvaccaro.lamp.rootDir
+import com.lvaccaro.lamp.utils.Archive
 import org.apache.commons.compress.utils.IOUtils
 import org.jetbrains.anko.doAsync
 import java.io.*
@@ -80,16 +82,10 @@ class SettingsActivity : AppCompatActivity() {
                     val dir = File(activity?.rootDir(), "")
                     val downloadDir =
                         activity?.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS)!!
-                    File(downloadDir,
-                        MainActivity.tarFilename()
-                    ).delete()
+                    Archive.delete(downloadDir)
                     File(downloadDir, "cacert.pem").delete()
-                    val resultOperation = File(dir, "cli").deleteRecursively() &&
-                    File(dir, "lightningd").deleteRecursively() &&
-                    File(dir, "plugins").deleteRecursively() &&
-                    File(dir, "bitcoin-cli").delete() &&
-                    File(dir, "bitcoind").delete() &&
-                    File(dir, "tor").delete()
+                    val resultOperation = Archive.deleteUncompressed(dir)
+                    activity?.let { it.getPreferences(Context.MODE_PRIVATE).edit().remove("RELEASE").apply() }
 
                     if(resultOperation){
                         showToast(

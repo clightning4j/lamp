@@ -64,5 +64,6 @@
     <string name="id_autostart">Autostart</string>
     <string name="id_lamp_settings">Lamp settings</string>
     <string name="id_run_lightning_on_Lamp_startup">Run lightning on Lamp startup</string>
+    <string name="id_update">Update</string>
 
 </resources>

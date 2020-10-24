@@ -22,7 +22,6 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.net.toUri
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
@@ -67,37 +66,6 @@ class MainActivity : UriResultActivity() {
     private lateinit var powerImageView: PowerImageView
     private lateinit var viewOnRunning: View
     private var isFirstStart = true
-
-    companion object {
-        val RELEASE = "release_clightning_0.9.1"
-
-        fun arch(): String {
-            var abi: String?
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                abi = Build.SUPPORTED_ABIS[0]
-            } else {
-                abi = Build.CPU_ABI
-            }
-            when (abi) {
-                "armeabi-v7a" -> return "arm-linux-androideabi"
-                "arm64-v8a" -> return "aarch64-linux-android"
-                "x86" -> return "i686-linux-android"
-                "x86_64" -> return "x86_64-linux-android"
-            }
-            throw Error("No arch found")
-        }
-
-        fun tarFilename(): String {
-            val ARCH = arch()
-            val PACKAGE = "bitcoin"
-            return "${ARCH}_${PACKAGE}.tar.xz"
-        }
-
-        fun url(): String {
-            val TAR_FILENAME = tarFilename()
-            return "https://github.com/lvaccaro/lightning_ndk/releases/download/${RELEASE}/${TAR_FILENAME}"
-        }
-    }
 
     private fun dir(): File {
         return getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS)!!
@@ -166,13 +134,36 @@ class MainActivity : UriResultActivity() {
                 parse(text)
             }
         }
+
+        // Check lightning_ndk release version
+        val release = getPreferences(Context.MODE_PRIVATE).getString("RELEASE", Archive.RELEASE)
+        if (release != Archive.RELEASE) {
+            AlertDialog.Builder(this)
+                .setTitle(R.string.id_update)
+                .setMessage("New lightning_ndk version is available: ${Archive.RELEASE}. Make a backup from Settings. Tap Update to start download.")
+                .setPositiveButton(android.R.string.cancel) { _, _ -> }
+                .setPositiveButton(R.string.id_update) { _, _ ->
+                    // Delete previous binaries
+                    val dir = File(rootDir(), "")
+                    val downloadDir = getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS)!!
+                    Archive.delete(downloadDir)
+                    Archive.deleteUncompressed(dir)
+                    // Download new binaries release
+                    findViewById<TextView>(R.id.statusText).text =
+                        "Downloading..."
+                    powerImageView.animating()
+                    download()
+                }
+                .show()
+        }
     }
 
     override fun onResume() {
         super.onResume()
+
         if (!File(rootDir(), "cli/lightning-cli").exists()) {
             findViewById<TextView>(R.id.statusText).text =
-                "Rub the lamp to download ${RELEASE} binaries."
+                "Rub the lamp to download ${Archive.RELEASE} binaries."
             return
         }
 
@@ -381,14 +372,14 @@ class MainActivity : UriResultActivity() {
             start()
             return
         }
-        val tarFile = File(dir(), tarFilename())
+        val tarFile = File(dir(), Archive.tarFilename())
         if (tarFile.exists()) {
             // Uncompress package
             findViewById<TextView>(R.id.statusText).text =
                 "Package already downloaded. Uncompressing..."
             powerImageView.animating()
             doAsync {
-                Archive().uncompressXZ(tarFile, rootDir())
+                Archive.uncompressXZ(tarFile, rootDir())
                 runOnUiThread {
                     powerOff()
                 }
@@ -513,13 +504,13 @@ class MainActivity : UriResultActivity() {
                 return
 
             runOnUiThread {
+                getPreferences(Context.MODE_PRIVATE).edit().putString("RELEASE", Archive.RELEASE).apply()
                 findViewById<TextView>(R.id.statusText).text =
                     "Download Completed. Uncompressing..."
             }
-            val tarFile = File(dir(), tarFilename())
+            val tarFile = File(dir(), Archive.tarFilename())
             doAsync {
-                Archive().uncompressXZ(tarFile, rootDir())
-                tarFile.delete()
+                Archive.uncompressXZ(tarFile, rootDir())
                 runOnUiThread { powerOff() }
             }
         }
@@ -527,8 +518,8 @@ class MainActivity : UriResultActivity() {
 
     private fun download() {
         // Download bitcoin_ndk package
-        val tarFile = File(dir(), tarFilename())
-        val request = DownloadManager.Request(Uri.parse(url()))
+        val tarFile = File(dir(), Archive.tarFilename())
+        val request = DownloadManager.Request(Uri.parse(Archive.url()))
         request.setTitle("lightning")
         request.setDescription(getString(R.string.id_downloading))
         request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE)
