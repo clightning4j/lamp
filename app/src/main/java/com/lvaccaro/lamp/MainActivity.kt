@@ -143,6 +143,8 @@ class MainActivity : UriResultActivity() {
                 .setMessage("New lightning_ndk version is available: ${Archive.RELEASE}. Make a backup from Settings. Tap Update to start download.")
                 .setPositiveButton(android.R.string.cancel) { _, _ -> }
                 .setPositiveButton(R.string.id_update) { _, _ ->
+                    // Stop node
+                    stop()
                     // Delete previous binaries
                     val dir = File(rootDir(), "")
                     val downloadDir = getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS)!!
