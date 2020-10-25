@@ -50,16 +50,18 @@ class LightningService : IntentService("LightningService") {
         var proxy = sharedPref.getString("proxy", "").toString()
         var announceaddr = sharedPref.getString("announce-addr", "").toString()
         var bindaddr = sharedPref.getString("bind-addr", "").toString()
-        var addr = sharedPref.getString("addr", "").toString()
+        val addr = sharedPref.getString("addr", "").toString()
         val alias = sharedPref.getString("alias", "").toString()
         val ignoreFeeLimits = sharedPref.getBoolean("ignore-fee-limits", false)
+        val torEnabled = sharedPref.getBoolean("enabled-tor", true)
+        val proxyEnabled = sharedPref.getBoolean("proxy-enabled", false)
 
         var options = arrayListOf<String>(
             String.format("%s/lightningd/%s", binaryDir.canonicalPath, daemon),
             String.format("--network=%s", network),
             String.format("--log-level=%s", logLevel),
             String.format("--lightning-dir=%s", lightningDir.path),
-            String.format("--plugin-dir=%s", File(binaryDir.path , "plugins").path),
+            //String.format("--plugin-dir=%s", File(binaryDir.path , "plugins").path),
             String.format("--ignore-fee-limits=%b", ignoreFeeLimits),
             // 10 days to catch a cheating attempt
             String.format("--watchtime-blocks=%s", 10 * 24 * 6))
@@ -89,7 +91,7 @@ class LightningService : IntentService("LightningService") {
                 String.format("--bitcoin-rpcpassword=%s", rpcpassword)))
         }
 
-        if (sharedPref.getBoolean("enabled-tor", true)) {
+        if (torEnabled) {
             // setup Tor
             proxy = "127.0.0.1:9050"
             bindaddr = "127.0.0.1:9735"
@@ -100,7 +102,7 @@ class LightningService : IntentService("LightningService") {
             options.add("--always-use-proxy=true")
         }
 
-        if (proxy.isNotEmpty()) {
+        if (proxy.isNotEmpty() && (torEnabled || proxyEnabled)) {
             options.add(String.format("--proxy=%s", proxy))
             options.add("--always-use-proxy=true")
         }

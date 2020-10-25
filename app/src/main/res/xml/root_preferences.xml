@@ -17,7 +17,7 @@
             app:useSimpleSummaryProvider="true" />
 
         <ListPreference
-            app:defaultValue="io"
+            app:defaultValue="debug"
             app:entries="@array/loglevels"
             app:entryValues="@array/loglevels"
             app:key="log-level"
