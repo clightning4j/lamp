@@ -34,7 +34,6 @@ class SettingsActivity : AppCompatActivity() {
             )
             .commit()
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
-
     }
 
     class SettingsFragment : PreferenceFragmentCompat() {
@@ -53,11 +52,11 @@ class SettingsActivity : AppCompatActivity() {
                             File(activity?.rootDir(), "tor.log").deleteRecursively()
 
                     File(activity?.rootDir(), ".lightning").listFiles()
-                        .filter { it.name.matches("crash.log.*".toRegex()) }
-                        .map { it.delete() }
+                        ?.filter { it.name.matches("crash.log.*".toRegex()) }
+                        ?.map { it.delete() }
                     File(activity?.rootDir(), ".lightning/bitcoin").listFiles()
-                        .filter { it.name.matches("crash.log.*".toRegex()) }
-                        .map { it.delete() }
+                        ?.filter { it.name.matches("crash.log.*".toRegex()) }
+                        ?.map { it.delete() }
 
                     if(resultOperation)
                         showToast("Erased logs", Toast.LENGTH_LONG)
