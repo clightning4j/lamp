@@ -7,7 +7,7 @@
     <RelativeLayout
         android:id="@+id/header"
         android:layout_width="match_parent"
-        android:layout_height="150dp"
+        android:layout_height="130dp"
         android:background="@color/colorPrimaryDark">
 
         <TextView
@@ -16,27 +16,13 @@
             android:layout_height="wrap_content"
             android:layout_alignParentTop="true"
             android:layout_centerInParent="true"
-            android:layout_marginEnd="8dp"
+            android:paddingEnd="16dp"
             android:textAlignment="textEnd"
-            android:textSize="10sp"
-            android:textColor="@android:color/white"/>
+            android:textColor="@android:color/white"
+            style="?android:attr/textAppearanceSmall"/>
 
         <TextView
             android:id="@+id/balanceText"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignParentTop="true"
-            android:layout_centerInParent="true"
-            android:layout_gravity="center"
-            android:layout_marginTop="40dp"
-            android:textAllCaps="true"
-            android:text="@string/id_balance"
-            android:textAlignment="center"
-            android:textSize="12sp"
-            android:textStyle="bold" />
-
-        <TextView
-            android:id="@+id/valueBalanceText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@id/balanceText"
@@ -93,8 +79,8 @@
         android:layout_alignParentBottom="true"
         android:text="@string/id_transactions"
         android:textAlignment="center"
-        android:textSize="12sp"
-        android:textAllCaps="true" />
+        android:textAllCaps="true"
+        style="?android:attr/textAppearanceSmall" />
 
     <ImageView
         android:id="@+id/arrowImageView"

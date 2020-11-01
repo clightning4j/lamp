@@ -313,20 +313,19 @@ class MainActivity : UriResultActivity() {
     fun updateBalanceView(context: Context?, intent: Intent?) {
         if (!isLightningRunning()) return
         val listFunds = cli.exec(context!!, arrayOf("listfunds"), true).toJSONObject()
-        val listpeers = cli.exec(context!!, arrayOf("listpeers"), true).toJSONObject()
-        val fundInChannels: JSONObject = SimulatorPlugin.fundsInChannel(listpeers) as JSONObject
+        val listPeers = cli.exec(context!!, arrayOf("listpeers"), true).toJSONObject()
 
-        var onChainFunds = 0
         val outputs: JSONArray = listFunds["outputs"] as JSONArray
-        for (i in 0 until outputs.length()) {
-            val output = outputs.getJSONObject(i)
-            onChainFunds += output["value"] as Int
-        }
+        val channels: JSONArray = listFunds["channels"] as JSONArray
+        val peers: JSONArray = listPeers["peers"] as JSONArray
+
+        balanceText.text = "${SimulatorPlugin.funds(listPeers)} msat"
+
         recyclerView.adapter = BalanceAdapter(
             arrayListOf(
-                Balance("Lightning balance", "", "${SimulatorPlugin.offchain(listFunds)} msat"),
-                Balance("Spendable in channels", "", "${fundInChannels["to_us"].toString()} msat"),
-                Balance("Bitcoin on chain", "${outputs.length()} Transactions", "${onChainFunds} sat")
+                Balance("Spendable in channels", "${peers.length()} Peers", "${SimulatorPlugin.funds(listPeers)} msat"),
+                Balance("Locked in channels", "${channels.length()} Channels", "${SimulatorPlugin.offchain(listFunds)} msat"),
+                Balance("Bitcoin on chain", "${outputs.length()} Transactions", "${SimulatorPlugin.onchain(listFunds)} sat")
             ), null
         )
     }
