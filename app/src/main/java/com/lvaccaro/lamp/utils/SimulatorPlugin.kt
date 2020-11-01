@@ -8,6 +8,31 @@ object SimulatorPlugin {
 
     private val TAG = SimulatorPlugin::class.java.canonicalName
 
+    fun onchain(jsonObject: JSONObject): Int {
+        var onChainFunds = 0
+        if (jsonObject.has("outputs")) {
+            val outputs: JSONArray = jsonObject["outputs"] as JSONArray
+            for (i in 0 until outputs.length()) {
+                val output = outputs.getJSONObject(i)
+                onChainFunds += output["value"] as Int
+            }
+        }
+        return onChainFunds
+    }
+
+    fun offchain(jsonObject: JSONObject): Int {
+        var offChainFunds = 0
+        if (jsonObject.has("channels")) {
+            val channels: JSONArray = jsonObject["channels"] as JSONArray
+            for (i in 0 until channels.length()) {
+                val channel = channels.getJSONObject(i)
+                offChainFunds = channel["channel_sat"] as Int
+            }
+        }
+        return offChainFunds
+    }
+
+
     fun funds(jsonObject: JSONObject): JSONObject {
         val response = JSONObject()
         var onChainFunds = 0

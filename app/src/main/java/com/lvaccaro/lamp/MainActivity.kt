@@ -26,12 +26,14 @@ import androidx.core.app.ActivityCompat
 import androidx.core.net.toUri
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.preference.PreferenceManager
-import com.google.android.material.button.MaterialButton
-import com.google.android.material.floatingactionbutton.FloatingActionButton
+import androidx.recyclerview.widget.DividerItemDecoration
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.zxing.WriterException
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel
 import com.google.zxing.qrcode.encoder.Encoder
 import com.lvaccaro.lamp.activities.*
+import com.lvaccaro.lamp.adapters.Balance
+import com.lvaccaro.lamp.adapters.BalanceAdapter
 import com.lvaccaro.lamp.fragments.HistoryFragment
 import com.lvaccaro.lamp.fragments.InvoiceBuildFragment
 import com.lvaccaro.lamp.fragments.WithdrawFragment
@@ -42,9 +44,7 @@ import com.lvaccaro.lamp.handlers.ShutdownNode
 import com.lvaccaro.lamp.services.LightningService
 import com.lvaccaro.lamp.services.TorService
 import com.lvaccaro.lamp.utils.Archive
-import com.lvaccaro.lamp.views.PowerImageView
 import com.lvaccaro.lamp.utils.SimulatorPlugin
-import com.lvaccaro.lamp.utils.LampKeys
 import com.lvaccaro.lamp.utils.UI
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.content_main_off.*
@@ -96,6 +96,13 @@ class MainActivity : UriResultActivity() {
         floatingActionButton.setOnClickListener {
             val intent = Intent(this, ScanActivity::class.java)
             startActivityForResult(intent, REQUEST_SCAN)
+        }
+
+        recyclerView.apply {
+            layoutManager = LinearLayoutManager(context)
+            val itemDecoration = DividerItemDecoration(context, DividerItemDecoration.VERTICAL)
+            itemDecoration.setDrawable(getDrawable(R.drawable.divider)!!)
+            addItemDecoration(itemDecoration)
         }
 
         downloadmanager = getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
@@ -315,19 +322,23 @@ class MainActivity : UriResultActivity() {
         if (!isLightningRunning()) return
         val listFunds = cli.exec(context!!, arrayOf("listfunds"), true).toJSONObject()
         val listpeers = cli.exec(context!!, arrayOf("listpeers"), true).toJSONObject()
-        val balance = SimulatorPlugin.funds(listFunds)
-        /*viewOnRunning.findViewById<TextView>(R.id.off_chain).text =
-            balance["off_chain"].toString()
-        viewOnRunning.findViewById<TextView>(R.id.on_chain).text =
-            balance["on_chain"].toString()
         val fundInChannels: JSONObject = SimulatorPlugin.fundsInChannel(listpeers) as JSONObject
-        viewOnRunning.findViewById<TextView>(R.id.value_balance_text).text =
-            fundInChannels["to_us"].toString()
-        val message: String? = intent?.extras?.get("message")?.toString()
-        if (message != null && message.isNotEmpty()) {
-            showMessageOnToast(message)
-        }*/
+
+        var onChainFunds = 0
+        val outputs: JSONArray = listFunds["outputs"] as JSONArray
+        for (i in 0 until outputs.length()) {
+            val output = outputs.getJSONObject(i)
+            onChainFunds += output["value"] as Int
+        }
+        recyclerView.adapter = BalanceAdapter(
+            arrayListOf(
+                Balance("Lightning balance", "", "${SimulatorPlugin.offchain(listFunds)} msat"),
+                Balance("Spendable in channels", "", "${fundInChannels["to_us"].toString()} msat"),
+                Balance("Bitcoin on chain", "${outputs.length()} Transactions", "${onChainFunds} sat")
+            ), null
+        )
     }
+
 
     private fun isServiceRunning(name: String): Boolean {
         val manager = getSystemService(ACTIVITY_SERVICE) as ActivityManager

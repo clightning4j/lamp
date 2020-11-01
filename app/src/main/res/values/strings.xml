@@ -67,5 +67,6 @@
     <string name="id_update">Update</string>
     <string name="id_receive">Receive</string>
     <string name="id_send">Send</string>
+    <string name="id_balance">Balance</string>
 
 </resources>
