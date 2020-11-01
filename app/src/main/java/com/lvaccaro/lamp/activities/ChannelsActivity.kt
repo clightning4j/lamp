@@ -47,15 +47,15 @@ class ChannelViewHolder(inflater: LayoutInflater, parent: ViewGroup) :
 
     fun bind(channel: JSONObject) {
         val cid = channel.getString("channel_id")
-        val msatoshi_to_us = channel.getInt("msatoshi_to_us")/1000
-        val msatoshi_total = channel.getInt("msatoshi_total")/1000
+        val msatoshi_to_us = channel.getDouble("msatoshi_to_us")/1000
+        val msatoshi_total = channel.getDouble("msatoshi_total")/1000
         itemView.findViewById<TextView>(R.id.cid).text = "CID: ${cid.subSequence(0,8)}..."
         itemView.findViewById<TextView>(R.id.status).text = channel.getString("state")
         itemView.findViewById<TextView>(R.id.mysats).text = "My balance: ${msatoshi_to_us.toString()} sat"
         itemView.findViewById<TextView>(R.id.availablesats).text = "Available to receive: ${msatoshi_total.toString()} sat"
         itemView.findViewById<ProgressBar>(R.id.progressBar).apply {
-            max = msatoshi_total
-            progress = msatoshi_to_us
+            max = msatoshi_total.toInt()
+            progress = msatoshi_to_us.toInt()
         }
     }
 }

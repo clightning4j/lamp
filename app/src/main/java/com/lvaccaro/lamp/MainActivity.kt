@@ -73,8 +73,6 @@ class MainActivity : UriResultActivity() {
         powerImageView.setOnClickListener { this.onPowerClick() }
         arrowImageView.setOnClickListener { this.onHistoryClick() }
 
-        //restoreBalanceValue(savedInstanceState)
-
         registerLocalReceiver()
 
         floatingActionButton.setOnClickListener {
@@ -286,12 +284,12 @@ class MainActivity : UriResultActivity() {
         val channels: JSONArray = listFunds["channels"] as JSONArray
         val peers: JSONArray = listPeers["peers"] as JSONArray
 
-        balanceText.text = "${SimulatorPlugin.funds(listPeers)} msat"
+        balanceText.text = "${(SimulatorPlugin.funds(listPeers).toDouble()/1000)} sat"
 
         recyclerView.adapter = BalanceAdapter(
             arrayListOf(
-                Balance("Spendable in channels", "${peers.length()} Peers", "${SimulatorPlugin.funds(listPeers)} msat"),
-                Balance("Locked in channels", "${channels.length()} Channels", "${SimulatorPlugin.offchain(listFunds)} msat"),
+                Balance("Spendable in channels", "${peers.length()} Peers", "${SimulatorPlugin.funds(listPeers).toDouble()/1000} sat"),
+                Balance("Locked in channels", "${channels.length()} Channels", "${SimulatorPlugin.offchain(listFunds).toDouble()/1000} sat"),
                 Balance("Bitcoin on chain", "${outputs.length()} Transactions", "${SimulatorPlugin.onchain(listFunds)} sat")
             ), null
         )
