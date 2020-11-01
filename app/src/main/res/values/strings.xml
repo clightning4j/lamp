@@ -65,5 +65,7 @@
     <string name="id_lamp_settings">Lamp settings</string>
     <string name="id_run_lightning_on_Lamp_startup">Run lightning on Lamp startup</string>
     <string name="id_update">Update</string>
+    <string name="id_receive">Receive</string>
+    <string name="id_send">Send</string>
 
 </resources>

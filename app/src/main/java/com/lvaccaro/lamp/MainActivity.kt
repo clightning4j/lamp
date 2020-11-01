@@ -46,6 +46,9 @@ import com.lvaccaro.lamp.views.PowerImageView
 import com.lvaccaro.lamp.utils.SimulatorPlugin
 import com.lvaccaro.lamp.utils.LampKeys
 import com.lvaccaro.lamp.utils.UI
+import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.content_main_off.*
+import kotlinx.android.synthetic.main.content_main_on.*
 import org.jetbrains.anko.doAsync
 import org.json.JSONArray
 import org.json.JSONObject
@@ -63,8 +66,6 @@ class MainActivity : UriResultActivity() {
     private var downloadCertID = 0L
     private var blockcount = 0
     private lateinit var downloadmanager: DownloadManager
-    private lateinit var powerImageView: PowerImageView
-    private lateinit var viewOnRunning: View
     private var isFirstStart = true
 
     private fun dir(): File {
@@ -75,25 +76,24 @@ class MainActivity : UriResultActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        powerImageView = findViewById(R.id.powerImageView)
+        contentMainOn.visibility = View.GONE
+        contentMainOff.visibility = View.VISIBLE
         powerImageView.setOnClickListener { this.onPowerClick() }
-        val arrowImageView = findViewById<ImageView>(R.id.arrowImageView)
         arrowImageView.setOnClickListener { this.onHistoryClick() }
-        viewOnRunning = findViewById(R.id.content_main_status_on)
-        restoreBalanceValue(savedInstanceState)
+
+        //restoreBalanceValue(savedInstanceState)
 
         registerLocalReceiver()
 
-        val addressTextView = findViewById<TextView>(R.id.textViewQr)
+        /*val addressTextView = findViewById<TextView>(R.id.textViewQr)
         addressTextView.setOnClickListener {
             UI.copyToClipboard(
                 this,
                 "address",
                 addressTextView.text.toString()
             )
-        }
+        }*/
 
-        val floatingActionButton = findViewById<FloatingActionButton>(R.id.floating_action_button)
         floatingActionButton.setOnClickListener {
             val intent = Intent(this, ScanActivity::class.java)
             startActivityForResult(intent, REQUEST_SCAN)
@@ -117,14 +117,14 @@ class MainActivity : UriResultActivity() {
             }
         }
 
-        viewOnRunning.findViewById<MaterialButton>(R.id.button_receive).setOnClickListener {
+        receiveButton.setOnClickListener {
             val bottomSheetDialog =
                 InvoiceBuildFragment()
             bottomSheetDialog.show(supportFragmentManager, "Custom Bottom Sheet")
 
         }
 
-        viewOnRunning.findViewById<MaterialButton>(R.id.button_send).setOnClickListener {
+        sendButton.setOnClickListener {
             startActivity(Intent(this, PayViewActivity::class.java))
         }
 
@@ -151,7 +151,7 @@ class MainActivity : UriResultActivity() {
                     Archive.delete(downloadDir)
                     Archive.deleteUncompressed(dir)
                     // Download new binaries release
-                    findViewById<TextView>(R.id.statusText).text =
+                    statusText.text =
                         "Downloading..."
                     powerImageView.animating()
                     download()
@@ -164,13 +164,13 @@ class MainActivity : UriResultActivity() {
         super.onResume()
 
         if (!File(rootDir(), "cli/lightning-cli").exists()) {
-            findViewById<TextView>(R.id.statusText).text =
+            statusText.text =
                 "Rub the lamp to download ${Archive.RELEASE} binaries."
             return
         }
 
         if (!isLightningRunning()) {
-            findViewById<TextView>(R.id.statusText).text =
+            statusText.text =
                 "Offline. Rub the lamp to start."
 
             val sharedPref = PreferenceManager.getDefaultSharedPreferences(applicationContext)
@@ -179,7 +179,9 @@ class MainActivity : UriResultActivity() {
             isFirstStart = false
             return
         }
-        viewOnRunning.visibility = View.VISIBLE
+
+        contentMainOn.visibility = View.VISIBLE
+        contentMainOff.visibility = View.GONE
         doAsync {
             getInfo()
             runIntent(NewChannelPayment.NOTIFICATION)
@@ -292,27 +294,27 @@ class MainActivity : UriResultActivity() {
     override fun onSaveInstanceState(outState: Bundle?, outPersistentState: PersistableBundle?) {
         super.onSaveInstanceState(outState, outPersistentState)
         Log.d(TAG, "onSaveInstanceState called")
-        val balanceOffChain = viewOnRunning.findViewById<TextView>(R.id.off_chain).text.toString()
+        /*val balanceOffChain = viewOnRunning.findViewById<TextView>(R.id.off_chain).text.toString()
         val balanceOnChain = viewOnRunning.findViewById<TextView>(R.id.on_chain).text.toString()
         val balanceOurChain =
             viewOnRunning.findViewById<TextView>(R.id.value_balance_text).text.toString()
         outState?.putString(LampKeys.OFF_CHAIN_BALANCE, balanceOffChain)
         outState?.putString(LampKeys.ON_CHAIN_BALANCE, balanceOnChain)
-        outState?.putString(LampKeys.OUR_CHAIN_BALANCE, balanceOurChain)
+        outState?.putString(LampKeys.OUR_CHAIN_BALANCE, balanceOurChain)*/
     }
 
     //FIXME(vincenzopalazzo) we don't need this with the actual implementation of UI
     //because inside the one create I notify the receive to update the fund label
     //but I add this in cases we will make change
     private fun restoreBalanceValue(savedInstanceState: Bundle?) {
-        viewOnRunning.findViewById<TextView>(R.id.off_chain).text =
+        /*viewOnRunning.findViewById<TextView>(R.id.off_chain).text =
             savedInstanceState?.getString(LampKeys.OFF_CHAIN_BALANCE) ?: "Unavaible"
 
         viewOnRunning.findViewById<TextView>(R.id.on_chain).text =
             savedInstanceState?.getString(LampKeys.ON_CHAIN_BALANCE) ?: "Unavaible"
 
         viewOnRunning.findViewById<TextView>(R.id.value_balance_text).text =
-            savedInstanceState?.getString(LampKeys.OUR_CHAIN_BALANCE) ?: "Unavaible"
+            savedInstanceState?.getString(LampKeys.OUR_CHAIN_BALANCE) ?: "Unavaible"*/
     }
 
     fun updateBalanceView(context: Context?, intent: Intent?) {
@@ -320,7 +322,7 @@ class MainActivity : UriResultActivity() {
         val listFunds = cli.exec(context!!, arrayOf("listfunds"), true).toJSONObject()
         val listpeers = cli.exec(context!!, arrayOf("listpeers"), true).toJSONObject()
         val balance = SimulatorPlugin.funds(listFunds)
-        viewOnRunning.findViewById<TextView>(R.id.off_chain).text =
+        /*viewOnRunning.findViewById<TextView>(R.id.off_chain).text =
             balance["off_chain"].toString()
         viewOnRunning.findViewById<TextView>(R.id.on_chain).text =
             balance["on_chain"].toString()
@@ -330,7 +332,7 @@ class MainActivity : UriResultActivity() {
         val message: String? = intent?.extras?.get("message")?.toString()
         if (message != null && message.isNotEmpty()) {
             showMessageOnToast(message)
-        }
+        }*/
     }
 
     private fun isServiceRunning(name: String): Boolean {
@@ -377,7 +379,7 @@ class MainActivity : UriResultActivity() {
         val tarFile = File(dir(), Archive.tarFilename())
         if (tarFile.exists()) {
             // Uncompress package
-            findViewById<TextView>(R.id.statusText).text =
+            statusText.text =
                 "Package already downloaded. Uncompressing..."
             powerImageView.animating()
             doAsync {
@@ -387,7 +389,7 @@ class MainActivity : UriResultActivity() {
                 }
             }
         } else {
-            findViewById<TextView>(R.id.statusText).text =
+            statusText.text =
                 "Downloading..."
             powerImageView.animating()
             download()
@@ -395,31 +397,17 @@ class MainActivity : UriResultActivity() {
     }
 
     private fun powerOff() {
+        contentMainOn.visibility = View.GONE
+        contentMainOff.visibility = View.VISIBLE
         powerImageView.off()
-        //powerImageView.visibility = View.VISIBLE
-        findViewById<TextView>(R.id.statusText).text = "Offline. Rub the lamp to turn on."
-        findViewById<ImageView>(R.id.qrcodeImageView).visibility = View.GONE
-        findViewById<TextView>(R.id.textViewQr).visibility = View.GONE
-        findViewById<ImageView>(R.id.arrowImageView).visibility = View.GONE
-        viewOnRunning.visibility = View.GONE
-        findViewById<FloatingActionButton>(R.id.floating_action_button).hide()
+        statusText.text = "Offline. Rub the lamp to turn on."
         invalidateOptionsMenu()
     }
 
     private fun powerOn() {
+        contentMainOn.visibility = View.VISIBLE
+        contentMainOff.visibility = View.GONE
         powerImageView.on()
-        //powerImageView.visibility = View.GONE
-        viewOnRunning.visibility = View.VISIBLE
-        findViewById<ImageView>(R.id.arrowImageView).visibility = View.VISIBLE
-        findViewById<TextView>(R.id.textViewQr).visibility = View.VISIBLE
-        //FIXME(vincenzopalazzo): This is only for the moment
-        //These component are set visible inside the command getinfo
-        //I removed it because now if the node has not expose with a binding address
-        //this value are not util, However this information are util for the people in the same network.
-
-        //findViewById<ImageView>(R.id.arrowImageView).visibility = View.VISIBLE
-        //findViewById<TextView>(R.id.textViewQr).visibility = View.VISIBLE
-        findViewById<FloatingActionButton>(R.id.floating_action_button).show()
         invalidateOptionsMenu()
         runIntent(NewChannelPayment.NOTIFICATION)
     }
@@ -447,21 +435,19 @@ class MainActivity : UriResultActivity() {
             runOnUiThread {
                 title = alias
                 powerImageView.on()
-                if (public) {
+                /*if (public) {
                     findViewById<ImageView>(R.id.arrowImageView).visibility = View.VISIBLE
                     findViewById<TextView>(R.id.textViewQr).apply {
                         text = txt
                         visibility = View.VISIBLE
                     }
-                }
-                //powerImageView.visibility = View.GONE
-                findViewById<FloatingActionButton>(R.id.floating_action_button).show()
+                }*/
                 val delta = blockcount - blockheight
-                findViewById<TextView>(R.id.statusText).text = if (delta > 0) "Syncing blocks -${delta}" else ""
+                syncText.text = if (delta > 0) "Syncing blocks -${delta}" else ""
             }
 
             // Generate qrcode
-            if (public) {
+            /*if (public) {
                 val qrcode = getQrCode(txt)
                 runOnUiThread {
                     findViewById<ImageView>(R.id.qrcodeImageView).apply {
@@ -469,7 +455,7 @@ class MainActivity : UriResultActivity() {
                         setImageBitmap(qrcode)
                     }
                 }
-            }
+            }*/
         } catch (e: Exception) {
             log.info("---" + e.localizedMessage + "---")
             runOnUiThread {
@@ -507,7 +493,7 @@ class MainActivity : UriResultActivity() {
 
             runOnUiThread {
                 getPreferences(Context.MODE_PRIVATE).edit().putString("RELEASE", Archive.RELEASE).apply()
-                findViewById<TextView>(R.id.statusText).text =
+                statusText.text =
                     "Download Completed. Uncompressing..."
             }
             val tarFile = File(dir(), Archive.tarFilename())
@@ -596,7 +582,7 @@ class MainActivity : UriResultActivity() {
             if (torEnabled) {
                 // start service on main thread
                 runOnUiThread {
-                    findViewById<TextView>(R.id.statusText).text =
+                    statusText.text =
                         "Starting tor..."
                     startTor()
                 }
@@ -613,7 +599,7 @@ class MainActivity : UriResultActivity() {
             }
             // start service on main thread
             runOnUiThread {
-                findViewById<TextView>(R.id.statusText).text =
+                statusText.text =
                     "Starting lightning..."
                 startLightning()
             }
@@ -745,7 +731,7 @@ class MainActivity : UriResultActivity() {
                 NewBlockHandler.NOTIFICATION ->  runOnUiThread {
                     val blockheight = intent.getIntExtra("height", 0)
                     val delta = blockcount - blockheight
-                    findViewById<TextView>(R.id.statusText).text = if (delta > 0) "Syncing blocks -${delta}" else ""
+                    statusText.text = if (delta > 0) "Syncing blocks -${delta}" else ""
                 }
                 BrokenStatus.NOTIFICATION -> runOnUiThread{
                     val message = intent.getStringExtra("message")
