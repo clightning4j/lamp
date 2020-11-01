@@ -284,32 +284,6 @@ class MainActivity : UriResultActivity() {
         }
     }
 
-    override fun onSaveInstanceState(outState: Bundle?, outPersistentState: PersistableBundle?) {
-        super.onSaveInstanceState(outState, outPersistentState)
-        Log.d(TAG, "onSaveInstanceState called")
-        /*val balanceOffChain = viewOnRunning.findViewById<TextView>(R.id.off_chain).text.toString()
-        val balanceOnChain = viewOnRunning.findViewById<TextView>(R.id.on_chain).text.toString()
-        val balanceOurChain =
-            viewOnRunning.findViewById<TextView>(R.id.value_balance_text).text.toString()
-        outState?.putString(LampKeys.OFF_CHAIN_BALANCE, balanceOffChain)
-        outState?.putString(LampKeys.ON_CHAIN_BALANCE, balanceOnChain)
-        outState?.putString(LampKeys.OUR_CHAIN_BALANCE, balanceOurChain)*/
-    }
-
-    //FIXME(vincenzopalazzo) we don't need this with the actual implementation of UI
-    //because inside the one create I notify the receive to update the fund label
-    //but I add this in cases we will make change
-    private fun restoreBalanceValue(savedInstanceState: Bundle?) {
-        /*viewOnRunning.findViewById<TextView>(R.id.off_chain).text =
-            savedInstanceState?.getString(LampKeys.OFF_CHAIN_BALANCE) ?: "Unavaible"
-
-        viewOnRunning.findViewById<TextView>(R.id.on_chain).text =
-            savedInstanceState?.getString(LampKeys.ON_CHAIN_BALANCE) ?: "Unavaible"
-
-        viewOnRunning.findViewById<TextView>(R.id.value_balance_text).text =
-            savedInstanceState?.getString(LampKeys.OUR_CHAIN_BALANCE) ?: "Unavaible"*/
-    }
-
     fun updateBalanceView(context: Context?, intent: Intent?) {
         if (!isLightningRunning()) return
         val listFunds = cli.exec(context!!, arrayOf("listfunds"), true).toJSONObject()
