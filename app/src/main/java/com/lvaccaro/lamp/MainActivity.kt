@@ -36,6 +36,7 @@ import com.lvaccaro.lamp.adapters.Balance
 import com.lvaccaro.lamp.adapters.BalanceAdapter
 import com.lvaccaro.lamp.fragments.HistoryFragment
 import com.lvaccaro.lamp.fragments.InvoiceBuildFragment
+import com.lvaccaro.lamp.fragments.PeerInfoFragment
 import com.lvaccaro.lamp.fragments.WithdrawFragment
 import com.lvaccaro.lamp.handlers.BrokenStatus
 import com.lvaccaro.lamp.handlers.NewBlockHandler
@@ -83,16 +84,6 @@ class MainActivity : UriResultActivity() {
 
         registerLocalReceiver()
 
-        /*val addressTextView = findViewById<TextView>(R.id.textViewQr)
-        addressTextView.setOnClickListener {
-            UI.copyToClipboard(
-                this,
-                "address",
-                addressTextView.text.toString()
-            )
-        }*/
-
-
         floatingActionButton.setOnClickListener {
             val intent = Intent(this, ScanActivity::class.java)
             startActivityForResult(intent, REQUEST_SCAN)
@@ -124,9 +115,7 @@ class MainActivity : UriResultActivity() {
         }
 
         receiveButton.setOnClickListener {
-            val bottomSheetDialog =
-                InvoiceBuildFragment()
-            bottomSheetDialog.show(supportFragmentManager, "Custom Bottom Sheet")
+            InvoiceBuildFragment().show(supportFragmentManager, "InvoiceBuildFragment")
 
         }
 
@@ -230,6 +219,7 @@ class MainActivity : UriResultActivity() {
                 removeItem(R.id.action_withdraw)
                 removeItem(R.id.action_new_address)
                 removeItem(R.id.action_stop)
+                removeItem(R.id.action_info)
             }
         }
         return super.onPrepareOptionsMenu(menu)
@@ -239,6 +229,10 @@ class MainActivity : UriResultActivity() {
         return when (item.itemId) {
             R.id.action_stop -> {
                 doAsync { stop() }
+                true
+            }
+            R.id.action_info -> {
+                PeerInfoFragment().show(supportFragmentManager, "PeerInfoFragment")
                 true
             }
             R.id.action_settings -> {
@@ -258,9 +252,7 @@ class MainActivity : UriResultActivity() {
                 true
             }
             R.id.action_withdraw -> {
-                val bottomSheetDialog =
-                    WithdrawFragment()
-                bottomSheetDialog.show(supportFragmentManager, "WithdrawFragment")
+                WithdrawFragment().show(supportFragmentManager, "WithdrawFragment")
                 true
             }
             R.id.action_new_address -> {
@@ -427,42 +419,15 @@ class MainActivity : UriResultActivity() {
 
             val res =
                 LightningCli().exec(this@MainActivity, arrayOf("getinfo"), true).toJSONObject()
-            val id = res["id"] as String
-            val addresses = res["address"] as JSONArray
-            // the node has an address? if not hide the UI node info
-            var public = addresses.length() != 0
             val alias = res["alias"] as String
-            var txt = ""
-            if (public) {
-                val address = addresses[0] as JSONObject
-                txt = id + "@" + address.getString("address")
-            }
             val blockheight = res["blockheight"] as Int
 
             runOnUiThread {
                 title = alias
                 powerImageView.on()
-                /*if (public) {
-                    findViewById<ImageView>(R.id.arrowImageView).visibility = View.VISIBLE
-                    findViewById<TextView>(R.id.textViewQr).apply {
-                        text = txt
-                        visibility = View.VISIBLE
-                    }
-                }*/
                 val delta = blockcount - blockheight
                 syncText.text = if (delta > 0) "Syncing blocks -${delta}" else ""
             }
-
-            // Generate qrcode
-            /*if (public) {
-                val qrcode = getQrCode(txt)
-                runOnUiThread {
-                    findViewById<ImageView>(R.id.qrcodeImageView).apply {
-                        visibility = View.VISIBLE
-                        setImageBitmap(qrcode)
-                    }
-                }
-            }*/
         } catch (e: Exception) {
             log.info("---" + e.localizedMessage + "---")
             runOnUiThread {
@@ -471,24 +436,6 @@ class MainActivity : UriResultActivity() {
                 powerOff()
                 UI.snackBar(this, e.localizedMessage)
             }
-        }
-    }
-
-    fun getQrCode(text: String): Bitmap {
-        val SCALE = 16
-        try {
-            val matrix = Encoder.encode(text, ErrorCorrectionLevel.M).matrix
-            val height = matrix.height * SCALE
-            val width = matrix.width * SCALE
-            val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
-            for (x in 0 until width)
-                for (y in 0 until height) {
-                    val point = matrix.get(x / SCALE, y / SCALE).toInt()
-                    bitmap.setPixel(x, y, if (point == 0x01) Color.BLACK else 0)
-                }
-            return bitmap
-        } catch (e: WriterException) {
-            throw RuntimeException(e)
         }
     }
 
@@ -683,7 +630,7 @@ class MainActivity : UriResultActivity() {
             val qr = ImageView(this)
             val address = res["address"].toString()
             textView.text = address
-            qr.setImageBitmap(getQrCode(address))
+            qr.setImageBitmap(UI.getQrCode(address))
             val layoutParams = LinearLayout.LayoutParams(300, 300)
             layoutParams.gravity = Gravity.CENTER_HORIZONTAL
             qr.layoutParams = layoutParams

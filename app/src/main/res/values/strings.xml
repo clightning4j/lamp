@@ -68,5 +68,8 @@
     <string name="id_receive">Receive</string>
     <string name="id_send">Send</string>
     <string name="id_balance">Balance</string>
+    <string name="id_share">share</string>
+    <string name="id_copy">copy</string>
+    <string name="id_node_info">Node info</string>
 
 </resources>
