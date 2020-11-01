@@ -76,8 +76,6 @@ class MainActivity : UriResultActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        contentMainOn.visibility = View.GONE
-        contentMainOff.visibility = View.VISIBLE
         powerImageView.setOnClickListener { this.onPowerClick() }
         arrowImageView.setOnClickListener { this.onHistoryClick() }
 
@@ -93,6 +91,7 @@ class MainActivity : UriResultActivity() {
                 addressTextView.text.toString()
             )
         }*/
+
 
         floatingActionButton.setOnClickListener {
             val intent = Intent(this, ScanActivity::class.java)
@@ -158,6 +157,8 @@ class MainActivity : UriResultActivity() {
                 }
                 .show()
         }
+
+        powerOff()
     }
 
     override fun onResume() {
@@ -392,8 +393,10 @@ class MainActivity : UriResultActivity() {
     private fun powerOff() {
         contentMainOn.visibility = View.GONE
         contentMainOff.visibility = View.VISIBLE
-        powerImageView.off()
+        val release = getPreferences(Context.MODE_PRIVATE).getString("RELEASE", "")
+        versionText.text = "Version: ${BuildConfig.VERSION_NAME} - ${release}"
         statusText.text = "Offline. Rub the lamp to turn on."
+        powerImageView.off()
         invalidateOptionsMenu()
     }
 
