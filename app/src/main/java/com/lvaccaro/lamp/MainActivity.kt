@@ -6,13 +6,10 @@ import android.app.ActivityManager
 import android.app.DownloadManager
 import android.content.*
 import android.content.pm.PackageManager
-import android.graphics.Bitmap
-import android.graphics.Color
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Environment
-import android.os.PersistableBundle
 import android.util.Log
 import android.view.Gravity
 import android.view.Menu
@@ -28,9 +25,6 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.google.zxing.WriterException
-import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel
-import com.google.zxing.qrcode.encoder.Encoder
 import com.lvaccaro.lamp.activities.*
 import com.lvaccaro.lamp.adapters.Balance
 import com.lvaccaro.lamp.adapters.BalanceAdapter
@@ -52,7 +46,6 @@ import kotlinx.android.synthetic.main.content_main_off.*
 import kotlinx.android.synthetic.main.content_main_on.*
 import org.jetbrains.anko.doAsync
 import org.json.JSONArray
-import org.json.JSONObject
 import java.io.File
 import java.util.logging.Logger
 
@@ -287,7 +280,7 @@ class MainActivity : UriResultActivity() {
     fun updateBalanceView(context: Context?, intent: Intent?) {
         if (!isLightningRunning()) return
         val listFunds = cli.exec(context!!, arrayOf("listfunds"), true).toJSONObject()
-        val listPeers = cli.exec(context!!, arrayOf("listpeers"), true).toJSONObject()
+        val listPeers = cli.exec(context, arrayOf("listpeers"), true).toJSONObject()
 
         val outputs: JSONArray = listFunds["outputs"] as JSONArray
         val channels: JSONArray = listFunds["channels"] as JSONArray
@@ -325,7 +318,7 @@ class MainActivity : UriResultActivity() {
 
     private fun onHistoryClick() {
         HistoryFragment()
-            .show(getSupportFragmentManager(), "History dialog")
+            .show(supportFragmentManager, "History dialog")
     }
 
     private fun onPowerClick() {
