@@ -2,15 +2,9 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
 xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
-        android:id="@+id/action_stop"
-        android:orderInCategory="100"
-        android:title="@string/id_stop"
-        android:icon="@android:drawable/ic_lock_power_off"
-        app:showAsAction="always" />
-    <item
         android:id="@+id/action_channels"
         android:orderInCategory="100"
-        android:title="@string/id_channels" />
+        android:title="@string/id_channels"/>
     <item
         android:id="@+id/action_new_address"
         android:orderInCategory="100"
@@ -31,4 +25,8 @@ xmlns:app="http://schemas.android.com/apk/res-auto">
         android:id="@+id/action_log"
         android:orderInCategory="100"
         android:title="@string/id_log"/>
+    <item
+        android:id="@+id/action_stop"
+        android:orderInCategory="100"
+        android:title="@string/id_stop" />
 </menu>
