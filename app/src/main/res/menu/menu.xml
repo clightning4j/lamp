@@ -8,12 +8,6 @@ xmlns:app="http://schemas.android.com/apk/res-auto">
         android:icon="@android:drawable/ic_lock_power_off"
         app:showAsAction="always" />
     <item
-        android:id="@+id/action_invoice"
-        android:orderInCategory="100"
-        android:title="@string/id_invoice"
-        android:icon="@drawable/ic_sats"
-        app:showAsAction="always" />
-    <item
         android:id="@+id/action_channels"
         android:orderInCategory="100"
         android:title="@string/id_channels" />

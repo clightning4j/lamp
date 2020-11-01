@@ -218,7 +218,6 @@ class MainActivity : UriResultActivity() {
         if (!isLightningRunning()) {
             menu?.apply {
                 removeItem(R.id.action_console)
-                removeItem(R.id.action_invoice)
                 removeItem(R.id.action_channels)
                 removeItem(R.id.action_withdraw)
                 removeItem(R.id.action_new_address)
@@ -244,12 +243,6 @@ class MainActivity : UriResultActivity() {
             }
             R.id.action_console -> {
                 startActivityForResult(Intent(this, ConsoleActivity::class.java), 100)
-                true
-            }
-            R.id.action_invoice -> {
-                val bottomSheetDialog =
-                    InvoiceBuildFragment()
-                bottomSheetDialog.show(supportFragmentManager, "Custom Bottom Sheet")
                 true
             }
             R.id.action_channels -> {
