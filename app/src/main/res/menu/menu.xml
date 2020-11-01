@@ -4,7 +4,9 @@ xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
         android:id="@+id/action_channels"
         android:orderInCategory="100"
-        android:title="@string/id_channels"/>
+        android:title="@string/id_channels"
+        android:icon="@drawable/ic_channels"
+        app:showAsAction="always"/>
     <item
         android:id="@+id/action_info"
         android:orderInCategory="100"
