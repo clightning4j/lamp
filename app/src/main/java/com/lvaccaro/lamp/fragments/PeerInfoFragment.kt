@@ -1,6 +1,5 @@
 package com.lvaccaro.lamp.fragments
 
-import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -10,13 +9,11 @@ import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
-import com.lvaccaro.lamp.activities.InvoiceActivity
 import com.lvaccaro.lamp.LightningCli
 import com.lvaccaro.lamp.R
 import com.lvaccaro.lamp.toJSONObject
 import com.lvaccaro.lamp.utils.UI
 import org.jetbrains.anko.doAsync
-import org.jetbrains.anko.runOnUiThread
 import org.json.JSONArray
 import org.json.JSONObject
 import java.lang.Exception

@@ -29,7 +29,6 @@ import com.lvaccaro.lamp.activities.*
 import com.lvaccaro.lamp.adapters.Balance
 import com.lvaccaro.lamp.adapters.BalanceAdapter
 import com.lvaccaro.lamp.fragments.HistoryFragment
-import com.lvaccaro.lamp.fragments.InvoiceBuildFragment
 import com.lvaccaro.lamp.fragments.PeerInfoFragment
 import com.lvaccaro.lamp.fragments.WithdrawFragment
 import com.lvaccaro.lamp.handlers.BrokenStatus
@@ -106,8 +105,7 @@ class MainActivity : UriResultActivity() {
         }
 
         receiveButton.setOnClickListener {
-            InvoiceBuildFragment().show(supportFragmentManager, "InvoiceBuildFragment")
-
+            startActivity(Intent(this, BuildInvoiceActivity::class.java))
         }
 
         sendButton.setOnClickListener {

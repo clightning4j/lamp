@@ -21,7 +21,7 @@ class LightningService : IntentService("LightningService") {
     var globber: Globber? = null
     val NOTIFICATION_ID = 573948
     val daemon = "lightningd"
-    lateinit var logObserver: FileObserver
+    var logObserver: FileObserver? = null
 
     override fun onHandleIntent(workIntent: Intent?) {
         val dataString = workIntent!!.dataString
@@ -138,7 +138,7 @@ class LightningService : IntentService("LightningService") {
         log.info("exit $daemon service")
 
         startForeground()
-        logObserver.startWatching();
+        logObserver?.startWatching();
         return Service.START_STICKY
     }
 
@@ -179,7 +179,7 @@ class LightningService : IntentService("LightningService") {
         globber?.interrupt()
         process = null
         globber = null
-        logObserver.startWatching()
+        logObserver?.startWatching()
         cancelNotification()
     }
 }

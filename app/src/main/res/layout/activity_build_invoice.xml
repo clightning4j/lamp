@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context=".activities.BuildInvoiceActivity">
+
+    <RelativeLayout
+        android:id="@+id/header"
+        android:layout_width="match_parent"
+        android:layout_height="130dp"
+        android:paddingRight="32dp"
+        android:paddingLeft="32dp"
+        android:background="@color/colorPrimaryDark">
+
+        <EditText
+            android:id="@+id/balanceText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:hint="any"
+            android:textSize="28dp"
+            android:textStyle="bold"
+            android:textAlignment="center"
+            android:inputType="numberDecimal" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="sat"
+            android:paddingEnd="8dp"
+            android:layout_alignBaseline="@id/balanceText"
+            android:layout_alignParentEnd="true"/>
+
+            <EditText
+                android:id="@+id/labelText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:hint="Local label"
+                android:textAlignment="center" />
+
+        <LinearLayout
+            android:id="@+id/copyShareLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:orientation="horizontal"
+            android:visibility="gone">
+
+            <Button
+                android:id="@+id/copyButton"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/id_copy"
+                android:elevation="0dp"
+                android:background="@android:color/transparent"
+                style="@style/Widget.AppCompat.Button.Borderless.Colored"/>
+
+            <Button
+                android:id="@+id/shareButton"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/id_share"
+                android:background="@android:color/transparent"
+                style="@style/Widget.AppCompat.Button.Borderless.Colored"/>
+        </LinearLayout>
+    </RelativeLayout>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/header"
+        android:layout_alignParentBottom="true" />
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/descriptionLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/header"
+        android:layout_marginStart="36dp"
+        android:layout_marginEnd="36dp">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/descriptionText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@android:color/white"
+            android:hint="Description"
+            android:textAlignment="center"/>
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/floatingActionButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentBottom="true"
+        android:layout_gravity="bottom|end"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="64dp"
+        app:backgroundTint="@color/colorAccent"
+        app:tint="@android:color/white"
+        app:srcCompat="@android:drawable/ic_media_play" />
+
+    <ImageView
+        android:id="@+id/qrImage"
+        android:layout_width="200dp"
+        android:layout_height="200dp"
+        android:layout_below="@id/descriptionLayout"
+        android:layout_centerHorizontal="true"
+        android:layout_margin="16dp"/>
+
+    <TextView
+        android:id="@+id/expiredTitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/expiredText"
+        android:text="@string/id_expired_in"
+        android:textAlignment="center"
+        android:textStyle="bold"
+        android:visibility="gone" />
+
+    <TextView
+        android:id="@+id/expiredText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:textAlignment="center"
+        android:visibility="gone"/>
+</RelativeLayout>

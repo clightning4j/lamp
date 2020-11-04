@@ -38,14 +38,6 @@
                 android:value="com.lvaccaro.lamp.MainActivity" />
         </activity>
         <activity
-            android:name=".activities.InvoiceActivity"
-            android:label="@string/id_invoice"
-            android:parentActivityName=".MainActivity">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.lvaccaro.lamp.MainActivity" />
-        </activity>
-        <activity
             android:name=".activities.LogActivity"
             android:label="@string/id_log"
             android:parentActivityName=".MainActivity"
@@ -73,6 +65,14 @@
         <activity
             android:name=".activities.ConsoleActivity"
             android:label="@string/id_console"
+            android:parentActivityName=".MainActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.lvaccaro.lamp.MainActivity" />
+        </activity>
+        <activity
+            android:name=".activities.BuildInvoiceActivity"
+            android:label="@string/id_invoice"
             android:parentActivityName=".MainActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
