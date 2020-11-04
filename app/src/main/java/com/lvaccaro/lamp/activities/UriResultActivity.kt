@@ -1,5 +1,6 @@
 package com.lvaccaro.lamp.activities
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
@@ -95,11 +96,9 @@ open class UriResultActivity() : AppCompatActivity() {
     }
 
     private fun showDecodePay(bolt11: String) {
-        val bundle = Bundle()
-        bundle.putString("bolt11", bolt11)
-        val fragment = DecodedInvoiceFragment()
-        fragment.arguments = bundle
-        fragment.show(supportFragmentManager, "DecodedInvoiceFragment")
+        val intent = Intent(this, SendActivity::class.java)
+        intent.putExtra("bolt11", bolt11)
+        startActivity(intent)
     }
 
     private fun showConnect(id: String) {

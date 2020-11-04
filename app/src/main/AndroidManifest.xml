@@ -19,10 +19,9 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".activities.PayViewActivity"
-            android:label="@string/title_activity_pay_view"
-            android:parentActivityName=".MainActivity"
-            android:theme="@style/AppTheme.NoActionBar">
+            android:name=".activities.SendActivity"
+            android:label="@string/id_send"
+            android:parentActivityName=".MainActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.lvaccaro.lamp.MainActivity" />

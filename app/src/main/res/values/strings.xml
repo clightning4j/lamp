@@ -71,5 +71,7 @@
     <string name="id_share">share</string>
     <string name="id_copy">copy</string>
     <string name="id_node_info">Node info</string>
+    <string name="id_route">Route</string>
+    <string name="id_pay">pay</string>
 
 </resources>

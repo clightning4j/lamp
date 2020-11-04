@@ -109,7 +109,7 @@ class MainActivity : UriResultActivity() {
         }
 
         sendButton.setOnClickListener {
-            startActivity(Intent(this, PayViewActivity::class.java))
+            startActivity(Intent(this, SendActivity::class.java))
         }
 
         if (Intent.ACTION_VIEW == intent.action) {
