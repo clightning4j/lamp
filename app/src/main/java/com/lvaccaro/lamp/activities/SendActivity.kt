@@ -88,9 +88,13 @@ class SendActivity : AppCompatActivity(), BalanceClickListener {
         }
     }
 
-    private fun pay(bolt11: String) {
+    private fun pay(bolt11: String, msatoshi: String?) {
         try {
-            cli.exec(this@SendActivity, arrayOf("pay", bolt11), true)
+            val command = arrayListOf("pay", bolt11)
+            if (msatoshi != null)
+                command.add(msatoshi)
+            var params: Array<String> = command.toArray(arrayOf<String>());
+            cli.exec(this@SendActivity, params, true)
             runOnUiThread {
                 UI.snackBar(this@SendActivity, "Payed invoice")
                 finish()
@@ -102,12 +106,25 @@ class SendActivity : AppCompatActivity(), BalanceClickListener {
     }
 
     private fun showInvoice(bolt11: String, invoice: JSONObject) {
-        val sat = invoice["msatoshi"].toString().toDouble() / 1000
-        balanceText.setText("$sat")
+        if (invoice.has("msatoshi")) {
+            val sat = invoice["msatoshi"].toString().toDouble() / 1000
+            balanceText.setText(sat.toInt().toString())
+        }
+        balanceText.isEnabled = !invoice.has("msatoshi")
         routeButton.isClickable = true
         payButton.isClickable = true
-        payButton.setOnClickListener { doAsync { pay(bolt11) } }
-        routeButton.setOnClickListener { doAsync { route(invoice["payee"].toString(), invoice["msatoshi"].toString()) } }
+        payButton.setOnClickListener {
+            if (balanceText.text.isEmpty()) return@setOnClickListener
+            var msatoshi: String? = null
+            if (!invoice.has("msatoshi"))
+                msatoshi = (balanceText.text.toString().toDouble() * 1000).toInt().toString()
+            doAsync { pay(bolt11, msatoshi) }
+        }
+        routeButton.setOnClickListener {
+            if (balanceText.text.isEmpty()) return@setOnClickListener
+            val msatoshi = balanceText.text.toString().toDouble() * 1000
+            doAsync { route(invoice["payee"].toString(), msatoshi.toInt().toString()) }
+        }
         recyclerView.adapter = HashMapAdapter(HashMapAdapter.from(invoice))
     }
 
