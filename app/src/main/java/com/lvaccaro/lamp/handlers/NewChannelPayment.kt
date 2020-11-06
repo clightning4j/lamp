@@ -4,23 +4,23 @@ import android.content.Context
 import android.content.Intent
 import android.util.Log
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import com.lvaccaro.lamp.utils.UI
 
 class NewChannelPayment: IEventHandler {
 
     companion object{
         val TAG = NewChannelPayment::class.java.canonicalName
         val NOTIFICATION: String = "NODE_NOTIFICATION_FUNDCHANNEL"
-        val PATTERN_ONE = "Balance"
-        val PATTERN_TWO = "->"
+        val PATTERN = "peer_out WIRE_FUNDING_LOCKED"
     }
 
     override fun doReceive(context: Context, information: String) {
-        if(information.contains(PATTERN_ONE) && information.contains(PATTERN_TWO)){
-            Log.d(TAG, "****** Action received ${NOTIFICATION} ******")
+        if(information.contains(PATTERN)){
             val intent = Intent()
             intent.action = NOTIFICATION
-            intent.putExtra("message", "Payment received") //FIXME(vincenzopalazzo): Fix the message
+            intent.putExtra("message", "New channel founded")
             LocalBroadcastManager.getInstance(context).sendBroadcast(intent)
+            UI.notification(context, "New channel founded", "")
         }
     }
 
