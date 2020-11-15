@@ -12,13 +12,13 @@ Run following commands:
 cd $HOME
 mkdir -p android_sdk/cmdline-tools
 cd android_sdk/cmdline-tools
-unzip ~/commandlinetools-linux-6609375_latest.zip
+unzip ~/commandlinetools-linux-*_latest.zip
 export ANDROID_SDK_ROOT=$HOME/android_sdk ###
-tools/bin/sdkmanager --install "cmdline-tools;latest"
-tools/bin/sdkmanager --install "build-tools;29.0.3"
-tools/bin/sdkmanager --install "platforms;android-28"
-rm -rf tools
-export PATH=$HOME/android_sdk/cmdline-tools/latest/bin:$OLDPATH ###
+cmdline-tools/bin/sdkmanager --install "cmdline-tools;latest"
+cmdline-tools/bin/sdkmanager --install "build-tools;29.0.3"
+cmdline-tools/bin/sdkmanager --install "platforms;android-28"
+rm -rf cmdline-tools
+export PATH=$HOME/android_sdk/cmdline-tools/latest/bin:$PATH ###
 yes | sdkmanager --licenses
 cd ~/src/lamp
 ./gradlew tasks
