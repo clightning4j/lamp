@@ -63,7 +63,8 @@ class LogObserver(val context: Context, val path: String, val nameFile: String) 
                 ShutdownNode(),
                 NewBlockHandler(),
                 BrokenStatus(),
-                NewTransaction()
+                NewTransaction(),
+                PaidInvoice()
             )
         )
     }
