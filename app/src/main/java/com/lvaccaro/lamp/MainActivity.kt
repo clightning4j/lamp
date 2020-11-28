@@ -280,14 +280,16 @@ class MainActivity : UriResultActivity() {
         val peers: JSONArray = listPeers["peers"] as JSONArray
 
         balanceText.text = "${(SimulatorPlugin.funds(listPeers).toDouble()/1000)} sat"
+        runOnUiThread {
+            recyclerView.adapter = BalanceAdapter(
+                arrayListOf(
+                    Balance("Spendable in channels", "${peers.length()} Peers", "${SimulatorPlugin.funds(listPeers).toDouble()/1000} sat"),
+                    Balance("Locked in channels", "${channels.length()} Channels", "${SimulatorPlugin.offchain(listFunds).toDouble()/1000} sat"),
+                    Balance("Bitcoin on chain", "${outputs.length()} Transactions", "${SimulatorPlugin.onchain(listFunds)} sat")
+                ), null
+            )
+        }
 
-        recyclerView.adapter = BalanceAdapter(
-            arrayListOf(
-                Balance("Spendable in channels", "${peers.length()} Peers", "${SimulatorPlugin.funds(listPeers).toDouble()/1000} sat"),
-                Balance("Locked in channels", "${channels.length()} Channels", "${SimulatorPlugin.offchain(listFunds).toDouble()/1000} sat"),
-                Balance("Bitcoin on chain", "${outputs.length()} Transactions", "${SimulatorPlugin.onchain(listFunds)} sat")
-            ), null
-        )
     }
 
     private fun isServiceRunning(name: String): Boolean {
@@ -654,8 +656,8 @@ class MainActivity : UriResultActivity() {
                     powerOff()
                     stopTorService()
                 }
-                NewTransaction.NOTIFICATION, NewChannelPayment.NOTIFICATION, PaidInvoice.NOTIFICATION -> runOnUiThread {
-                    doAsync { updateBalanceView(context) }
+                NewTransaction.NOTIFICATION, NewChannelPayment.NOTIFICATION, PaidInvoice.NOTIFICATION -> doAsync {
+                    updateBalanceView(context)
                 }
                 NodeUpHandler.NOTIFICATION  -> {
                     isRunning = true
