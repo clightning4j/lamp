@@ -1,15 +1,21 @@
 package com.lvaccaro.lamp.utils
 
+import android.app.Notification
+import android.app.Notification.VISIBILITY_PUBLIC
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.Color
+import android.os.Build
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat.startActivity
+import androidx.core.app.NotificationCompat
+import androidx.core.content.ContextCompat.getSystemService
 import com.google.android.material.snackbar.Snackbar
 import com.google.zxing.WriterException
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel
@@ -27,11 +33,19 @@ class UI {
             Toast.makeText(context, "Copied to clipboard", Toast.LENGTH_LONG).show()
         }
 
-        fun snackBar(context: AppCompatActivity, message: String, duration: Int = Snackbar.LENGTH_LONG){
+        fun snackBar(
+            context: AppCompatActivity,
+            message: String,
+            duration: Int = Snackbar.LENGTH_LONG
+        ){
             Snackbar.make(context.findViewById(android.R.id.content), message, duration).show()
         }
 
-        fun showMessageOnToast(context: Context, message: String, duration: Int = Toast.LENGTH_SHORT){
+        fun showMessageOnToast(
+            context: Context,
+            message: String,
+            duration: Int = Toast.LENGTH_SHORT
+        ){
             Toast.makeText(context, message, duration).show()
         }
 
@@ -68,6 +82,35 @@ class UI {
             } catch (e: WriterException) {
                 throw RuntimeException(e)
             }
+        }
+
+        fun notification(context: Context, title: String, body: String) {
+            val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            val channelId = "basic_notification"
+            val channelName = "basic_channel_notification"
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                val importance = NotificationManager.IMPORTANCE_DEFAULT
+                val notificationChannel = NotificationChannel(
+                    channelId,
+                    channelName,
+                    importance
+                )
+                notificationChannel.enableLights(true)
+                notificationChannel.lightColor = Color.YELLOW
+                notificationChannel.enableVibration(true)
+                notificationChannel.vibrationPattern =
+                    longArrayOf(100, 200, 300, 400, 500, 400, 300, 200, 400)
+                manager.createNotificationChannel(notificationChannel)
+            }
+            val notification = NotificationCompat.Builder(context, channelId)
+                .setContentTitle(title)
+                .setContentText(body)
+                .setSmallIcon(com.lvaccaro.lamp.R.drawable.ic_notification)
+                .setAutoCancel(true)
+                .setChannelId(channelId)
+                .build()
+            manager.notify(101, notification);
         }
     }
 

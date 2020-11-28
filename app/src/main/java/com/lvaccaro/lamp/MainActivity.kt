@@ -31,10 +31,7 @@ import com.lvaccaro.lamp.adapters.BalanceAdapter
 import com.lvaccaro.lamp.fragments.HistoryFragment
 import com.lvaccaro.lamp.fragments.PeerInfoFragment
 import com.lvaccaro.lamp.fragments.WithdrawFragment
-import com.lvaccaro.lamp.handlers.BrokenStatus
-import com.lvaccaro.lamp.handlers.NewBlockHandler
-import com.lvaccaro.lamp.handlers.NewChannelPayment
-import com.lvaccaro.lamp.handlers.ShutdownNode
+import com.lvaccaro.lamp.handlers.*
 import com.lvaccaro.lamp.services.LightningService
 import com.lvaccaro.lamp.services.TorService
 import com.lvaccaro.lamp.utils.Archive
@@ -273,7 +270,7 @@ class MainActivity : UriResultActivity() {
         }
     }
 
-    fun updateBalanceView(context: Context?, intent: Intent?) {
+    fun updateBalanceView(context: Context?) {
         if (!isLightningRunning()) return
         val listFunds = cli.exec(context!!, arrayOf("listfunds"), true).toJSONObject()
         val listPeers = cli.exec(context, arrayOf("listpeers"), true).toJSONObject()
@@ -623,6 +620,8 @@ class MainActivity : UriResultActivity() {
         intentFilter.addAction(NewChannelPayment.NOTIFICATION)
         intentFilter.addAction(NewBlockHandler.NOTIFICATION)
         intentFilter.addAction(BrokenStatus.NOTIFICATION)
+        intentFilter.addAction(NewTransaction.NOTIFICATION)
+        intentFilter.addAction(PaidInvoice.NOTIFICATION)
         localBroadcastManager.registerReceiver(notificationReceiver, intentFilter)
     }
 
@@ -639,7 +638,7 @@ class MainActivity : UriResultActivity() {
             Log.d(TAG, "onReceive action ${intent?.action}")
             when (intent?.action) {
                 NewChannelPayment.NOTIFICATION -> runOnUiThread {
-                    updateBalanceView(context, intent)
+                    doAsync { updateBalanceView(context) }
                 }
                 ShutdownNode.NOTIFICATION ->  runOnUiThread {
                     powerOff()
@@ -654,6 +653,9 @@ class MainActivity : UriResultActivity() {
                     UI.snackBar(this@MainActivity, message)
                     powerOff()
                     stopTorService()
+                }
+                NewTransaction.NOTIFICATION, NewChannelPayment.NOTIFICATION, PaidInvoice.NOTIFICATION -> runOnUiThread {
+                    doAsync { updateBalanceView(context) }
                 }
             }
         }
