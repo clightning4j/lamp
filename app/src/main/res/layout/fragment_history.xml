@@ -1,14 +1,48 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="#ffffff"
+    android:paddingBottom="16dp"
+    android:id="@+id/bottomSheet"
+    app:behavior_hideable="false"
+    app:behavior_peekHeight="70dp"
+    android:orientation="vertical"
+    app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
+
+
+    <ImageView
+        android:id="@+id/arrow_image"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:layout_gravity="bottom|center"
+        android:layout_marginTop="8dp"
+        app:srcCompat="@drawable/ic_arrow_up"
+        app:tint="@color/colorPrimary" />
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/id_history"
         android:textStyle="bold"
-        android:padding="8dp" />
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"/>
+
+    <TextView
+        android:id="@+id/loading_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/id_loading"
+        android:padding="16dp"/>
+
+    <TextView
+        android:id="@+id/no_transactions_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/id_no_transactions"
+        android:visibility="gone"
+        android:padding="16dp"/>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recycler_view"

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto">
@@ -66,31 +67,7 @@
         android:id="@+id/recyclerView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@id/header"
-        android:layout_alignParentBottom="true" />
-
-
-    <TextView
-        android:id="@+id/transactionsText"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:paddingBottom="16dp"
-        android:layout_alignParentBottom="true"
-        android:text="@string/id_transactions"
-        android:textAlignment="center"
-        android:textAllCaps="true"
-        style="?android:attr/textAppearanceSmall" />
-
-    <ImageView
-        android:id="@+id/arrowImageView"
-        android:layout_width="match_parent"
-        android:layout_height="70dp"
-        android:layout_gravity="bottom|center"
-        android:layout_alignParentBottom="true"
-        android:paddingBottom="20dp"
-        app:srcCompat="@drawable/ic_arrow"
-        app:tint="@color/colorPrimary" />
+        android:layout_marginTop="130dp" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/floatingActionButton"
@@ -106,4 +83,7 @@
         app:backgroundTint="@color/colorAccent"
         app:tint="@android:color/white"
         app:srcCompat="@drawable/ic_camera" />
-</RelativeLayout>
+
+    <include layout="@layout/fragment_history" />
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

@@ -28,7 +28,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.lvaccaro.lamp.activities.*
 import com.lvaccaro.lamp.adapters.Balance
 import com.lvaccaro.lamp.adapters.BalanceAdapter
-import com.lvaccaro.lamp.fragments.HistoryFragment
 import com.lvaccaro.lamp.fragments.PeerInfoFragment
 import com.lvaccaro.lamp.fragments.WithdrawFragment
 import com.lvaccaro.lamp.handlers.*
@@ -37,9 +36,11 @@ import com.lvaccaro.lamp.services.TorService
 import com.lvaccaro.lamp.utils.Archive
 import com.lvaccaro.lamp.utils.SimulatorPlugin
 import com.lvaccaro.lamp.utils.UI
+import com.lvaccaro.lamp.views.HistoryBottomSheet
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.content_main_off.*
 import kotlinx.android.synthetic.main.content_main_on.*
+import kotlinx.android.synthetic.main.fragment_history.*
 import org.jetbrains.anko.doAsync
 import org.json.JSONArray
 import java.io.File
@@ -68,7 +69,6 @@ class MainActivity : UriResultActivity() {
         setContentView(R.layout.activity_main)
 
         powerImageView.setOnClickListener { this.onPowerClick() }
-        arrowImageView.setOnClickListener { this.onHistoryClick() }
 
         registerLocalReceiver()
 
@@ -140,6 +140,8 @@ class MainActivity : UriResultActivity() {
                 }
                 .show()
         }
+
+        HistoryBottomSheet(this, bottomSheet)
         powerOff()
     }
 
@@ -289,7 +291,6 @@ class MainActivity : UriResultActivity() {
                 ), null
             )
         }
-
     }
 
     private fun isServiceRunning(name: String): Boolean {
@@ -308,11 +309,6 @@ class MainActivity : UriResultActivity() {
 
     private fun isTorRunning(): Boolean {
         return isServiceRunning(TorService::class.java.canonicalName)
-    }
-
-    private fun onHistoryClick() {
-        HistoryFragment()
-            .show(supportFragmentManager, "History dialog")
     }
 
     private fun onPowerClick() {
@@ -641,15 +637,15 @@ class MainActivity : UriResultActivity() {
                 NewChannelPayment.NOTIFICATION -> runOnUiThread {
                     doAsync { updateBalanceView(context) }
                 }
-                ShutdownNode.NOTIFICATION ->  runOnUiThread {
+                ShutdownNode.NOTIFICATION -> runOnUiThread {
                     powerOff()
                 }
-                NewBlockHandler.NOTIFICATION ->  runOnUiThread {
+                NewBlockHandler.NOTIFICATION -> runOnUiThread {
                     val blockheight = intent.getIntExtra("height", 0)
                     val delta = blockcount - blockheight
                     statusText.text = if (delta > 0) "Syncing blocks -${delta}" else ""
                 }
-                BrokenStatus.NOTIFICATION -> runOnUiThread{
+                BrokenStatus.NOTIFICATION -> runOnUiThread {
                     val message = intent.getStringExtra("message")
                     UI.snackBar(this@MainActivity, message)
                     isRunning = false
