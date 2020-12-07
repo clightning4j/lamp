@@ -1,27 +1,31 @@
-package com.lvaccaro.lamp.fragments
+package com.lvaccaro.lamp.views
 
+import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.lvaccaro.lamp.LightningCli
 import com.lvaccaro.lamp.R
+import com.lvaccaro.lamp.fragments.RecyclerViewFragment
 import com.lvaccaro.lamp.toJSONObject
 import org.jetbrains.anko.doAsync
+import org.jetbrains.anko.runOnUiThread
 import org.json.JSONArray
 import org.json.JSONObject
 import java.text.SimpleDateFormat
 import java.util.*
 
-
-class ListAdapter(val list: JSONArray)
+class ListAdapter(val list: JSONArray,
+                  private val onItemClick: ((JSONObject) -> Unit)?)
     : RecyclerView.Adapter<ItemViewHolder>() {
-
-    var onItemClick: ((JSONObject) -> Unit)? = null
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ItemViewHolder {
         val inflater = LayoutInflater.from(parent.context)
@@ -43,6 +47,7 @@ class ListAdapter(val list: JSONArray)
     override fun getItemCount(): Int = list.length()
 
 }
+
 class ItemViewHolder(inflater: LayoutInflater, parent: ViewGroup) :
     RecyclerView.ViewHolder(inflater.inflate(R.layout.list_tx, parent, false)) {
     private var mDateView: TextView? = null
@@ -77,41 +82,68 @@ class ItemViewHolder(inflater: LayoutInflater, parent: ViewGroup) :
     }
 }
 
-class HistoryFragment: BottomSheetDialogFragment() {
+class HistoryBottomSheet(val context: Context, val view: View?):
+    BottomSheetBehavior.BottomSheetCallback() {
 
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        val view = inflater.inflate(R.layout.fragment_history, container, false)
-        val recyclerView = view.findViewById<RecyclerView>(R.id.recycler_view)
+    private val bottomSheetBehavior: BottomSheetBehavior<LinearLayout>
+    private val recyclerView: RecyclerView
+
+    init {
+        bottomSheetBehavior = BottomSheetBehavior.from<LinearLayout>(view as LinearLayout)
+        bottomSheetBehavior.addBottomSheetCallback(this)
+        recyclerView = view.findViewById<RecyclerView>(R.id.recycler_view)
         recyclerView.layoutManager = LinearLayoutManager(context)
+    }
 
-        doAsync {
-            val list = getData()
-            activity?.runOnUiThread {
-                val adapter = ListAdapter(list)
-                recyclerView.adapter = adapter
-                adapter.onItemClick = { json ->
-                    val bundle = Bundle()
-                    bundle.putString("title", json.getString("type"))
-                    bundle.putString("data", json.toString())
-                    val fragment =
-                        RecyclerViewFragment()
-                    fragment.arguments = bundle
-                    fragment.show(activity!!.supportFragmentManager, "RecyclerViewFragment")
-                }
+    override fun onStateChanged(bottomSheet: View, newState: Int) {
+        val imageView = view?.findViewById<ImageView>(R.id.arrow_image)
+        when (newState) {
+            BottomSheetBehavior.STATE_COLLAPSED -> {
+                imageView?.setImageDrawable(context.getDrawable(R.drawable.ic_arrow_up))
+            }
+            BottomSheetBehavior.STATE_HIDDEN -> {}
+            BottomSheetBehavior.STATE_EXPANDED -> {
+                imageView?.setImageDrawable(context.getDrawable(R.drawable.ic_arrow_down))
+                doAsync { reload() } }
+            BottomSheetBehavior.STATE_DRAGGING -> {}
+            BottomSheetBehavior.STATE_SETTLING -> { }
+        }
+    }
+
+    override fun onSlide(bottomSheet: View, slideOffset: Float) {
+    }
+
+    private fun slideUpDown() {
+        if (bottomSheetBehavior.state != BottomSheetBehavior.STATE_EXPANDED) {
+            bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
+        } else {
+            bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
+        }
+    }
+
+    fun reload() {
+        val list = getData()
+        context.runOnUiThread {
+            recyclerView.adapter = ListAdapter(list) {
+                val bundle = Bundle()
+                bundle.putString("title", it.getString("type"))
+                bundle.putString("data", it.toString())
+                val fragment = RecyclerViewFragment()
+                fragment.arguments = bundle
+                fragment.show((context as AppCompatActivity).supportFragmentManager, "RecyclerViewFragment")
+            }
+            view?.apply {
+                findViewById<TextView>(R.id.loading_text)?.visibility = View.GONE
+                findViewById<TextView>(R.id.no_transactions_text)?.visibility = if (list.length() == 0) View.VISIBLE else View.GONE
             }
         }
-        return view
     }
 
     private fun getData(): JSONArray {
         val listinvoices = LightningCli()
-            .exec(context!!, arrayOf("listinvoices"), true).toJSONObject()
+            .exec(context, arrayOf("listinvoices"), true).toJSONObject()
         val listsendpays = LightningCli()
-            .exec(context!!, arrayOf("listsendpays"), true).toJSONObject()
+            .exec(context, arrayOf("listsendpays"), true).toJSONObject()
 
         val invoices = listinvoices["invoices"] as JSONArray
         val payments = listsendpays["payments"] as JSONArray
