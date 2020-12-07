@@ -73,5 +73,7 @@
     <string name="id_node_info">Node info</string>
     <string name="id_route">Route</string>
     <string name="id_pay">pay</string>
+    <string name="id_loading">loading..</string>
+    <string name="id_no_transactions">No transactions</string>
 
 </resources>
