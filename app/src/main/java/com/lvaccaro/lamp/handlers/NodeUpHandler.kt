@@ -18,9 +18,9 @@ class NodeUpHandler: IEventHandler{
 
     override fun doReceive(context: Context, information: String) {
         if(information.contains(PATTERN_ONE)){
-            Log.d(TAG, "****** Action received ${NewChannelPayment.NOTIFICATION} ******")
+            Log.d(TAG, "****** Action received ${NOTIFICATION} ******")
             val intent = Intent()
-            intent.action = NodeUpHandler.NOTIFICATION
+            intent.action = NOTIFICATION
             intent.putExtra("message", "Node running")
             LocalBroadcastManager.getInstance(context).sendBroadcast(intent)
         }

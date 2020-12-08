@@ -279,8 +279,8 @@ class MainActivity : UriResultActivity() {
         val channels: JSONArray = listFunds["channels"] as JSONArray
         val peers: JSONArray = listPeers["peers"] as JSONArray
 
-        balanceText.text = "${(SimulatorPlugin.funds(listPeers).toDouble()/1000)} sat"
         runOnUiThread {
+            balanceText.text = "${(SimulatorPlugin.funds(listPeers).toDouble()/1000)} sat"
             recyclerView.adapter = BalanceAdapter(
                 arrayListOf(
                     Balance("Spendable in channels", "${peers.length()} Peers", "${SimulatorPlugin.funds(listPeers).toDouble()/1000} sat"),
@@ -623,6 +623,7 @@ class MainActivity : UriResultActivity() {
         intentFilter.addAction(BrokenStatus.NOTIFICATION)
         intentFilter.addAction(NewTransaction.NOTIFICATION)
         intentFilter.addAction(PaidInvoice.NOTIFICATION)
+        intentFilter.addAction(NodeUpHandler.NOTIFICATION)
         localBroadcastManager.registerReceiver(notificationReceiver, intentFilter)
     }
 
@@ -638,8 +639,8 @@ class MainActivity : UriResultActivity() {
         override fun onReceive(context: Context?, intent: Intent?) {
             Log.d(TAG, "onReceive action ${intent?.action}")
             when (intent?.action) {
-                NewChannelPayment.NOTIFICATION -> runOnUiThread {
-                    doAsync { updateBalanceView(context) }
+                NewChannelPayment.NOTIFICATION -> doAsync {
+                    updateBalanceView(context)
                 }
                 ShutdownNode.NOTIFICATION ->  runOnUiThread {
                     powerOff()
