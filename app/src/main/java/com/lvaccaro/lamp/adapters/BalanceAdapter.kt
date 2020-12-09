@@ -10,8 +10,9 @@ data class Balance (val title: String, val subtitle: String, val value: String)
 
 typealias BalanceClickListener = (Int) -> Unit
 
-class BalanceAdapter(val list: ArrayList<Balance>,
-                     private val onClickListener: BalanceClickListener?
+class BalanceAdapter(
+    val list: ArrayList<Balance>,
+    private val onClickListener: BalanceClickListener?
 )
     : RecyclerView.Adapter<BalanceViewHolder>() {
 

@@ -276,18 +276,23 @@ class MainActivity : UriResultActivity() {
         if (!isLightningRunning()) return
         val listFunds = cli.exec(context!!, arrayOf("listfunds"), true).toJSONObject()
         val listPeers = cli.exec(context, arrayOf("listpeers"), true).toJSONObject()
+        val chainInfo = cli.exec(this, arrayOf("getchaininfo"), true).toJSONObject()
+        val getInfo = cli.exec(this, arrayOf("getinfo"), true).toJSONObject()
 
         val outputs: JSONArray = listFunds["outputs"] as JSONArray
         val channels: JSONArray = listFunds["channels"] as JSONArray
         val peers: JSONArray = listPeers["peers"] as JSONArray
 
+        blockcount = chainInfo["blockcount"] as Int
+        val blockheight = getInfo["blockheight"] as Int
         balanceText.text = "${(SimulatorPlugin.funds(listPeers).toDouble()/1000)} sat"
         runOnUiThread {
             recyclerView.adapter = BalanceAdapter(
                 arrayListOf(
                     Balance("Spendable in channels", "${peers.length()} Peers", "${SimulatorPlugin.funds(listPeers).toDouble()/1000} sat"),
                     Balance("Locked in channels", "${channels.length()} Channels", "${SimulatorPlugin.offchain(listFunds).toDouble()/1000} sat"),
-                    Balance("Bitcoin on chain", "${outputs.length()} Transactions", "${SimulatorPlugin.onchain(listFunds)} sat")
+                    Balance("Bitcoin on chain", "${outputs.length()} TransactionSyncs", "${SimulatorPlugin.onchain(listFunds)} sat"),
+                    Balance("Blocks height", "synching blocks -${blockcount - blockheight}", "${blockcount}")
                 ), null
             )
         }
@@ -369,20 +374,11 @@ class MainActivity : UriResultActivity() {
 
     private fun getInfo() {
         try {
-            val resChainInfo =
-                LightningCli().exec(this@MainActivity, arrayOf("getchaininfo"), true).toJSONObject()
-            blockcount = resChainInfo["blockcount"] as Int
-
-            val res =
-                LightningCli().exec(this@MainActivity, arrayOf("getinfo"), true).toJSONObject()
+            val res = cli.exec(this@MainActivity, arrayOf("getinfo"), true).toJSONObject()
             val alias = res["alias"] as String
-            val blockheight = res["blockheight"] as Int
-
             runOnUiThread {
                 title = alias
                 powerImageView.on()
-                val delta = blockcount - blockheight
-                syncText.text = if (delta > 0) "Syncing blocks -${delta}" else ""
             }
         } catch (e: Exception) {
             log.info("---" + e.localizedMessage + "---")
@@ -642,8 +638,12 @@ class MainActivity : UriResultActivity() {
                 }
                 NewBlockHandler.NOTIFICATION -> runOnUiThread {
                     val blockheight = intent.getIntExtra("height", 0)
-                    val delta = blockcount - blockheight
-                    statusText.text = if (delta > 0) "Syncing blocks -${delta}" else ""
+                    val adapter = recyclerView.adapter as BalanceAdapter?
+                    val balance = Balance("Blocks height", "synching blocks -${blockcount - blockheight}", "${blockcount}")
+                    if (adapter?.list?.isNotEmpty() ?: false) {
+                        adapter?.list?.set(3, balance)
+                        adapter?.notifyItemChanged(3)
+                    }
                 }
                 BrokenStatus.NOTIFICATION -> runOnUiThread {
                     val message = intent.getStringExtra("message")
