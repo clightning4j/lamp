@@ -36,9 +36,6 @@ import java.io.LineNumberReader
  * ---- Node crash
  * Pattern log: **BROKEN**
  *
- * -- Node up
- * Patter log: "lightningd: Server started with public key"
- *
  *
  * @author https://github.com/vincenzopalazzo
  */
@@ -58,8 +55,8 @@ class LogObserver(val context: Context, val path: String, val nameFile: String) 
     private var lineNumberReader: LineNumberReader? = null
 
 
-    private fun initHandler() {
-        actionHandler = ArrayList()
+    fun initHandler() {
+        actionHandler = ArrayList<IEventHandler>()
         actionHandler.addAll(
             arrayOf(
                 NewChannelPayment(),
@@ -74,9 +71,9 @@ class LogObserver(val context: Context, val path: String, val nameFile: String) 
 
     override fun onEvent(event: Int, file: String?) {
         if(file == null) return
-        if (file == nameFile) {
+        if (file?.equals(nameFile)) {
             when (event) {
-                MODIFY -> readNewLines()
+                FileObserver.MODIFY -> readNewLines()
             }
         }
     }
@@ -97,7 +94,7 @@ class LogObserver(val context: Context, val path: String, val nameFile: String) 
     }
 
     private fun readLogLine(line: String) {
-        actionHandler.forEach { it.doReceive(context, line) }
+        actionHandler.forEach { it -> it.doReceive(context, line) }
         actualLine++
     }
 

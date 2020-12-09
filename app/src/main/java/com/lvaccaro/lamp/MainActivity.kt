@@ -57,7 +57,6 @@ class MainActivity : UriResultActivity() {
     private var blockcount = 0
     private lateinit var downloadmanager: DownloadManager
     private var isFirstStart = true
-    private var isRunning = false
 
     private fun dir(): File {
         return getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS)!!
@@ -111,7 +110,7 @@ class MainActivity : UriResultActivity() {
         }
 
         if (Intent.ACTION_VIEW == intent.action) {
-            if (arrayListOf("bitcoin", "lightning").contains(intent.data.scheme)) {
+            if (arrayListOf<String>("bitcoin", "lightning").contains(intent.data.scheme)) {
                 val text = intent.data.toString().split(":").last()
                 parse(text)
             }
@@ -140,6 +139,7 @@ class MainActivity : UriResultActivity() {
                 }
                 .show()
         }
+
         powerOff()
     }
 
@@ -292,10 +292,11 @@ class MainActivity : UriResultActivity() {
 
     }
 
+
     private fun isServiceRunning(name: String): Boolean {
         val manager = getSystemService(ACTIVITY_SERVICE) as ActivityManager
         for (service in manager.getRunningServices(Int.MAX_VALUE)) {
-            if (name == service.service.className) {
+            if (name.equals(service.service.className)) {
                 return true
             }
         }
@@ -453,9 +454,10 @@ class MainActivity : UriResultActivity() {
     }
 
     private fun waitLightningBootstrap(): Boolean {
-        for (i in 0..15) {
+        val logFile = File(rootDir(), "lightningd.log")
+        for (i in 0..10) {
             try {
-                if (isRunning)
+                if (logFile.readText().contains("lightningd: Server started with public key"))
                     return true
             } catch (err: Exception) {
                 Log.d(TAG, err.localizedMessage)
@@ -543,7 +545,6 @@ class MainActivity : UriResultActivity() {
 
     private fun stopLightningService() {
         stopService(Intent(this, LightningService::class.java))
-        isRunning = false
     }
 
     private fun startTor() {
@@ -652,15 +653,11 @@ class MainActivity : UriResultActivity() {
                 BrokenStatus.NOTIFICATION -> runOnUiThread{
                     val message = intent.getStringExtra("message")
                     UI.snackBar(this@MainActivity, message)
-                    isRunning = false
                     powerOff()
                     stopTorService()
                 }
                 NewTransaction.NOTIFICATION, NewChannelPayment.NOTIFICATION, PaidInvoice.NOTIFICATION -> doAsync {
                     updateBalanceView(context)
-                }
-                NodeUpHandler.NOTIFICATION  -> {
-                    isRunning = true
                 }
             }
         }
