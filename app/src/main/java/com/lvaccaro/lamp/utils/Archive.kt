@@ -13,7 +13,7 @@ import java.io.FileOutputStream
 class Archive {
 
     companion object {
-        val RELEASE = "release_clightning_0.9.1"
+        val RELEASE = "v0.9.2"
 
         fun arch(): String {
             var abi: String?
