@@ -5,6 +5,7 @@ import android.content.Intent
 import android.util.Log
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.lvaccaro.lamp.utils.UI
+import org.jetbrains.anko.runOnUiThread
 
 class NewChannelPayment: IEventHandler {
 
@@ -20,7 +21,9 @@ class NewChannelPayment: IEventHandler {
             intent.action = NOTIFICATION
             intent.putExtra("message", "New channel founded")
             LocalBroadcastManager.getInstance(context).sendBroadcast(intent)
-            UI.notification(context, "New channel founded", "")
+            context.runOnUiThread {
+                UI.notification(context, "New channel founded", "")
+            }
         }
     }
 
