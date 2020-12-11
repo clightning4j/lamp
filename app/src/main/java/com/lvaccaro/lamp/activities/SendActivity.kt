@@ -22,6 +22,7 @@ import com.lvaccaro.lamp.utils.UI
 import com.lvaccaro.lamp.utils.Validator
 import kotlinx.android.synthetic.main.activity_send.*
 import org.jetbrains.anko.doAsync
+import org.json.JSONException
 import org.json.JSONObject
 
 
@@ -81,7 +82,7 @@ class SendActivity : AppCompatActivity(), BalanceClickListener {
         try {
             val res = cli.exec(this, arrayOf("getroute", peer, msatoshi, "10"), true)
                 .toJSONObject()
-            runOnUiThread { UI.textAlertDialog(this, "Error", res.toString()) }
+            runOnUiThread { UI.textAlertDialog(this, "Route", res.toString()) }
         } catch (ex: Exception) {
             val errorMessage = JSONObject(ex.localizedMessage)
             runOnUiThread { UI.textAlertDialog(this, "Error", errorMessage["message"].toString()) }
@@ -100,8 +101,11 @@ class SendActivity : AppCompatActivity(), BalanceClickListener {
                 finish()
             }
         } catch (ex: Exception) {
-            val errorMessage = JSONObject(ex.localizedMessage)
-            runOnUiThread { UI.textAlertDialog(this, "Error", errorMessage["message"].toString()) }
+            var errorMessage = ex.localizedMessage
+            try {
+                errorMessage = JSONObject(ex.localizedMessage)["message"] as String
+            } catch(e: JSONException) { }
+            runOnUiThread { UI.textAlertDialog(this, "Error", errorMessage) }
         }
     }
 
