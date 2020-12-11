@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.lvaccaro.lamp.utils.UI
+import org.jetbrains.anko.runOnUiThread
 
 class PaidInvoice: IEventHandler {
 
@@ -19,8 +20,10 @@ class PaidInvoice: IEventHandler {
             intent.action = NOTIFICATION
             intent.putExtra("message", "Paid invoice")
             LocalBroadcastManager.getInstance(context).sendBroadcast(intent)
-            UI.notification(context, "Paid invoice", "")
-            UI.showMessageOnToast(context,"Paid invoice")
+            context.runOnUiThread {
+                UI.notification(context, "Paid invoice", "")
+                UI.showMessageOnToast(context, "Paid invoice")
+            }
         }
     }
 }

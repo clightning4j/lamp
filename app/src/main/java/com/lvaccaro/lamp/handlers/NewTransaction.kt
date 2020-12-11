@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.lvaccaro.lamp.utils.UI
+import org.jetbrains.anko.runOnUiThread
 
 class NewTransaction: IEventHandler {
 
@@ -22,8 +23,10 @@ class NewTransaction: IEventHandler {
             intent.putExtra("message", "new transaction")
             intent.putExtra("amount", amount)
             LocalBroadcastManager.getInstance(context).sendBroadcast(intent)
-            UI.notification(context, "New onchain transaction", "${amount}")
-            UI.showMessageOnToast(context,"New onchain transaction ${amount}")
+            context.runOnUiThread {
+                UI.notification(context, "New onchain transaction", "${amount}")
+                UI.showMessageOnToast(context, "New onchain transaction ${amount}")
+            }
         }
     }
 }
