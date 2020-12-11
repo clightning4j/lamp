@@ -11,6 +11,7 @@ import com.lvaccaro.lamp.R
 import com.lvaccaro.lamp.toJSONObject
 import com.lvaccaro.lamp.utils.UI
 import kotlinx.android.synthetic.main.activity_build_invoice.*
+import kotlinx.android.synthetic.main.list_balance.view.*
 import kotlinx.android.synthetic.main.list_tx.*
 import org.jetbrains.anko.contentView
 import org.jetbrains.anko.doAsync
@@ -30,10 +31,29 @@ class BuildInvoiceActivity : AppCompatActivity() {
         setContentView(R.layout.activity_build_invoice)
         balanceText.requestFocus()
 
-        floatingActionButton.setOnClickListener {
+        lightningButton.setOnClickListener {
             val amount = balanceText.text.toString()
             var sat = if (amount.isEmpty()) "any" else (amount.toDouble() * 1000).toLong().toString()
             doAsync { invoice(sat, labelText.text.toString(), descriptionText.text.toString()) }
+        }
+
+        btcButton.setOnClickListener {
+            doAsync { generate() }
+        }
+    }
+
+    fun generate() {
+        try {
+            val res = cli.exec(this, arrayOf("newaddr"), true).toJSONObject()
+            runOnUiThread { showAddress(res["address"] as String) }
+        } catch (e: Exception) {
+            runOnUiThread {
+                Toast.makeText(
+                    this,
+                    e.localizedMessage,
+                    Toast.LENGTH_LONG
+                ).show()
+            }
         }
     }
 
@@ -59,12 +79,35 @@ class BuildInvoiceActivity : AppCompatActivity() {
         }
     }
 
+    fun showAddress(address: String) {
+        labelText.visibility = View.GONE
+        descriptionText.visibility = View.GONE
+        btclnLayout.visibility = View.GONE
+        copyShareLayout.visibility = View.VISIBLE
+
+        copyButton.setOnClickListener { UI.copyToClipboard(this, "address", address) }
+        shareButton.setOnClickListener { UI.share(this, "address", address) }
+
+        // hide keyboard
+        val inputMethodManager = getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
+        inputMethodManager.hideSoftInputFromWindow(contentView?.windowToken, 0)
+
+        // show bolt11
+        val qr = UI.getQrCode(address)
+        qrImage.setImageBitmap(qr)
+
+        expiredTitle.visibility = View.VISIBLE
+        expiredText.visibility = View.VISIBLE
+        expiredTitle.text = "Address"
+        expiredText.text = address
+    }
+
     fun showInvoice(bolt11: String) {
         balanceText.isEnabled = false
         labelText.isEnabled = false
         descriptionText.isEnabled = false
-        floatingActionButton.visibility = View.GONE
         labelText.visibility = View.GONE
+        btclnLayout.visibility = View.GONE
         copyShareLayout.visibility = View.VISIBLE
 
         copyButton.setOnClickListener { UI.copyToClipboard(this, "bolt11", bolt11) }
