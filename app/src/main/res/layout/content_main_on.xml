@@ -33,7 +33,17 @@
             android:text="-"
             android:textSize="28dp"
             android:textStyle="bold"
-            android:textAlignment="center" />
+            android:textAlignment="center"
+            android:textColor="@android:color/white" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Total balance"
+            android:paddingEnd="8dp"
+            android:layout_above="@id/balanceText"
+            android:layout_centerInParent="true"
+            android:textColor="@android:color/white"/>
 
         <LinearLayout
             android:layout_width="match_parent"
