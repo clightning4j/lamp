@@ -23,7 +23,18 @@
             android:textSize="28dp"
             android:textStyle="bold"
             android:textAlignment="center"
-            android:inputType="numberDecimal" />
+            android:inputType="numberDecimal"
+            android:textColor="@android:color/white"
+            app:backgroundTint="@android:color/white" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Receive amount"
+            android:paddingEnd="8dp"
+            android:layout_above="@id/balanceText"
+            android:layout_centerInParent="true"
+            android:textColor="@android:color/white"/>
 
         <TextView
             android:layout_width="wrap_content"
@@ -31,15 +42,35 @@
             android:text="sat"
             android:paddingEnd="8dp"
             android:layout_alignBaseline="@id/balanceText"
-            android:layout_alignParentEnd="true"/>
+            android:layout_alignParentEnd="true"
+            android:textColor="@android:color/white"/>
 
-            <EditText
-                android:id="@+id/labelText"
-                android:layout_width="match_parent"
+        <LinearLayout
+            android:id="@+id/btclnLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/btcButton"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_alignParentBottom="true"
-                android:hint="Local label"
-                android:textAlignment="center" />
+                android:layout_weight="1"
+                android:text="BTC"
+                android:elevation="0dp"
+                android:background="@android:color/transparent"
+                style="@style/Widget.AppCompat.Button.Borderless.Colored"/>
+
+            <Button
+                android:id="@+id/lightningButton"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="LIGHTNING"
+                android:background="@android:color/transparent"
+                style="@style/Widget.AppCompat.Button.Borderless.Colored"/>
+        </LinearLayout>
 
         <LinearLayout
             android:id="@+id/copyShareLayout"
@@ -70,18 +101,29 @@
         </LinearLayout>
     </RelativeLayout>
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recyclerView"
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/labelLayout"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:layout_below="@id/header"
-        android:layout_alignParentBottom="true" />
+        android:layout_marginStart="36dp"
+        android:layout_marginEnd="36dp">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/labelText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@android:color/white"
+            android:hint="Local label"
+            android:textAlignment="center"/>
+
+    </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/descriptionLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/header"
+        android:layout_below="@id/labelLayout"
         android:layout_marginStart="36dp"
         android:layout_marginEnd="36dp">
 
@@ -94,21 +136,6 @@
             android:textAlignment="center"/>
 
     </com.google.android.material.textfield.TextInputLayout>
-
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/floatingActionButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentBottom="true"
-        android:layout_gravity="bottom|end"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginBottom="64dp"
-        app:backgroundTint="@color/colorAccent"
-        app:tint="@android:color/white"
-        app:srcCompat="@android:drawable/ic_media_play" />
 
     <ImageView
         android:id="@+id/qrImage"
@@ -133,6 +160,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
+        android:singleLine="false"
         android:textAlignment="center"
-        android:visibility="gone"/>
+        android:visibility="gone" />
 </RelativeLayout>
