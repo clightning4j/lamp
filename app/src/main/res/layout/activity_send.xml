@@ -23,7 +23,18 @@
             android:textStyle="bold"
             android:textAlignment="center"
             android:inputType="numberDecimal"
-            android:enabled="false"/>
+            android:enabled="false"
+            android:textColor="@android:color/white"
+            app:backgroundTint="@android:color/white"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Send amount"
+            android:paddingEnd="8dp"
+            android:layout_above="@id/balanceText"
+            android:layout_centerInParent="true"
+            android:textColor="@android:color/white"/>
 
         <TextView
             android:layout_width="wrap_content"
@@ -31,7 +42,8 @@
             android:text="sat"
             android:paddingEnd="8dp"
             android:layout_alignBaseline="@id/balanceText"
-            android:layout_alignParentEnd="true"/>
+            android:layout_alignParentEnd="true"
+            android:textColor="@android:color/white"/>
 
         <LinearLayout
             android:id="@+id/copyShareLayout"
