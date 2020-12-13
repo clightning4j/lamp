@@ -130,7 +130,6 @@ class TorService : IntentService("TorService") {
             pid = f.getInt(p)
             f.setAccessible(false)
         } catch (e: Throwable) {
-            pid = -1
         }
         return pid
     }
