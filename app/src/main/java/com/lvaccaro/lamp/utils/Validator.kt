@@ -15,7 +15,7 @@ class Validator {
 
     companion object {
 
-        val TAG = Validator.javaClass.canonicalName
+        val TAG = Validator::class.java.canonicalName
 
         fun isBitcoinURL(text: String): Boolean {
             val result = doParseBitcoinURL(text)
