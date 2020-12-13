@@ -8,7 +8,7 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager
 class ShutdownNode: IEventHandler {
 
     companion object{
-        val TAG = ShutdownNode.javaClass.canonicalName
+        val TAG = ShutdownNode::class.java.canonicalName
         val NOTIFICATION: String = "SHUTDOWN_NODE_NOTIFICATION"
         val PATTERN = "lightningd: JSON-RPC shutdown"
     }

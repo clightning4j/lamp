@@ -104,7 +104,7 @@ class TorService : IntentService("TorService") {
     }
 
     private fun cancelNotification() {
-        Log.d(this.javaClass.canonicalName, "******** Cancel notification called ********")
+        Log.d(this::class.java.canonicalName, "******** Cancel notification called ********")
         val nm = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         nm.cancel(NOTIFICATION_ID)
     }
@@ -125,7 +125,7 @@ class TorService : IntentService("TorService") {
     fun getPid(p: Process): Int {
         var pid = -1
         try {
-            val f: Field = p.javaClass.getDeclaredField("pid")
+            val f: Field = p::class.java.getDeclaredField("pid")
             f.setAccessible(true)
             pid = f.getInt(p)
             f.setAccessible(false)
