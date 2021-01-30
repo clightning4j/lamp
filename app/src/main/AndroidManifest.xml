@@ -37,7 +37,7 @@
                 android:value="com.lvaccaro.lamp.MainActivity" />
         </activity>
         <activity
-            android:name=".activities.LogActivity"
+            android:name=".logview.LogActivity"
             android:label="@string/id_log"
             android:parentActivityName=".MainActivity"
             android:theme="@style/AppTheme.NoActionBar">

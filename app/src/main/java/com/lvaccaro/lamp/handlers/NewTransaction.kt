@@ -25,7 +25,7 @@ class NewTransaction: IEventHandler {
             LocalBroadcastManager.getInstance(context).sendBroadcast(intent)
             context.runOnUiThread {
                 UI.notification(context, "New onchain transaction", "${amount}")
-                UI.showMessageOnToast(context, "New onchain transaction ${amount}")
+                UI.toast(context, "New onchain transaction ${amount}")
             }
         }
     }

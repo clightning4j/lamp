@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".activities.LogActivity">
+    tools:context=".logview.LogActivity">
 
 
     <RelativeLayout
@@ -25,27 +25,30 @@
 
         </com.google.android.material.appbar.AppBarLayout>
 
-        <EditText
-            android:id="@+id/edit_text_container_log"
-            app:layout_behavior="@string/appbar_scrolling_view_behavior"
+        <ScrollView
+            android:id="@+id/container_log"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:inputType="textMultiLine|textNoSuggestions"
-            android:ems="10"
-            android:textSize="12sp"
+            android:layout_height="match_parent"
+            android:nestedScrollingEnabled="false"
             android:layout_below="@+id/app_bar"
-            android:clickable="false"
-            android:gravity="bottom"
-            android:cursorVisible="false"
-            android:focusable="false"
-            android:focusableInTouchMode="false"/>
-
-        <androidx.core.widget.ContentLoadingProgressBar
-            android:id="@+id/loading_status"
-            style="@style/Widget.AppCompat.ProgressBar.Horizontal"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"/>
+            android:fillViewport="true">
+            <EditText
+                android:id="@+id/edit_text_container_log"
+                app:layout_behavior="@string/appbar_scrolling_view_behavior"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textMultiLine|textNoSuggestions"
+                android:ems="10"
+                android:textSize="12sp"
+                android:clickable="false"
+                android:gravity="top"
+                android:cursorVisible="false"
+                android:textIsSelectable="true"
+                android:focusable="false"
+                android:fadeScrollbars="false"
+                android:descendantFocusability="blocksDescendants"
+                android:focusableInTouchMode="false"/>
+        </ScrollView>
 
 
     </RelativeLayout>

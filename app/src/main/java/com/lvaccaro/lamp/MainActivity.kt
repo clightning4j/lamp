@@ -31,6 +31,7 @@ import com.lvaccaro.lamp.adapters.BalanceAdapter
 import com.lvaccaro.lamp.fragments.PeerInfoFragment
 import com.lvaccaro.lamp.fragments.WithdrawFragment
 import com.lvaccaro.lamp.handlers.*
+import com.lvaccaro.lamp.logview.LogActivity
 import com.lvaccaro.lamp.services.LightningService
 import com.lvaccaro.lamp.services.TorService
 import com.lvaccaro.lamp.utils.Archive

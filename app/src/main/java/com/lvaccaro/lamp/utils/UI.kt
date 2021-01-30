@@ -38,11 +38,7 @@ class UI {
             Snackbar.make(context.findViewById(android.R.id.content), message, duration).show()
         }
 
-        fun showMessageOnToast(
-            context: Context,
-            message: String,
-            duration: Int = Toast.LENGTH_SHORT
-        ){
+        fun toast(context: Context, message: String, duration: Int = Toast.LENGTH_SHORT){
             Toast.makeText(context, message, duration).show()
         }
 

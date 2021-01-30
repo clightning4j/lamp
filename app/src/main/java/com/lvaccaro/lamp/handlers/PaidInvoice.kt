@@ -22,7 +22,7 @@ class PaidInvoice: IEventHandler {
             LocalBroadcastManager.getInstance(context).sendBroadcast(intent)
             context.runOnUiThread {
                 UI.notification(context, "Paid invoice", "")
-                UI.showMessageOnToast(context, "Paid invoice")
+                UI.toast(context, "Paid invoice")
             }
         }
     }

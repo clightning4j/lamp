@@ -10,18 +10,17 @@ import com.lvaccaro.lamp.R
 import com.lvaccaro.lamp.rootDir
 import java.io.File
 import java.lang.reflect.Field
-import java.util.logging.Logger
 
 
 class TorService : IntentService("TorService") {
 
-    val log = Logger.getLogger(TorService::class.java.name)
     companion object{
+        private val TAG = TorService::class.java.canonicalName
         val NOTIFICATION_ID = 432432
     }
-    val daemon = "tor"
-    var process: Process? = null
-    var globber: Globber? = null
+    private val daemon = "tor"
+    private var process: Process? = null
+    private var globber: Globber? = null
 
     override fun onHandleIntent(workIntent: Intent?) {
         val dataString = workIntent!!.dataString
@@ -29,7 +28,7 @@ class TorService : IntentService("TorService") {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND)
-        log.info("start $daemon service")
+        Log.i(TAG, "start $daemon service")
         val torDir = File(rootDir(), ".tor")
         val torHiddenServiceDir = File(rootDir(), ".torHiddenService")
         val  binaryDir = rootDir()
@@ -71,7 +70,7 @@ class TorService : IntentService("TorService") {
         }
 
         //return super.onStartCommand(intent, flags, startId)
-        log.info("exit $daemon service")
+        Log.i(TAG, "exit $daemon service")
 
         startForeground()
         return Service.START_STICKY
@@ -104,14 +103,14 @@ class TorService : IntentService("TorService") {
     }
 
     private fun cancelNotification() {
-        Log.d(this::class.java.canonicalName, "******** Cancel notification called ********")
+        Log.d(TAG, "******** Cancel notification called ********")
         val nm = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         nm.cancel(NOTIFICATION_ID)
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        log.info("destroying $daemon service")
+        Log.i(TAG, "destroying $daemon service")
         if (process != null) {
             android.os.Process.sendSignal(getPid(process!!), 15)
         }
@@ -130,6 +129,7 @@ class TorService : IntentService("TorService") {
             pid = f.getInt(p)
             f.setAccessible(false)
         } catch (e: Throwable) {
+            Log.w(TAG, "Exception generated in getPid is: ".plus(e.localizedMessage))
         }
         return pid
     }
