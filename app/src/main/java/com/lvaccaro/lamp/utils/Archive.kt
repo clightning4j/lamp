@@ -39,7 +39,7 @@ class Archive {
 
         fun url(): String {
             val TAR_FILENAME = tarFilename()
-            return "https://github.com/lvaccaro/lightning_ndk/releases/download/${RELEASE}/${TAR_FILENAME}"
+            return "https://github.com/lightningamp/lightning_ndk/releases/download/${RELEASE}/${TAR_FILENAME}"
         }
 
         fun delete(downloadDir: File): Boolean {
