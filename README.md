@@ -1,7 +1,9 @@
 # Lamp 
 <strong> [c-Lightning](https://github.com/ElementsProject/lightning) Android Mobile Porting </strong>
 
-[![Build Status](https://travis-ci.com/lvaccaro/lamp.svg?branch=master)](https://travis-ci.com/lvaccaro/lamp)
+[![build](https://github.com/lvaccaro/lamp/workflows/android-master/badge.svg)](https://github.com/lvaccaro/lamp/actions)
+[![release](https://github.com/lvaccaro/lamp/workflows/release/badge.svg)](https://github.com/lvaccaro/lamp/actions)
+
 [![MIT license](https://img.shields.io/github/license/lvaccaro/lamp)](https://github.com/lvaccaro/lamp/blob/master/LICENSE)
 
 
