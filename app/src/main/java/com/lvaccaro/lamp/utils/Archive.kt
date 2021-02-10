@@ -5,15 +5,12 @@ import org.apache.commons.compress.archivers.tar.TarArchiveEntry
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream
 import org.apache.commons.compress.compressors.xz.XZCompressorInputStream
 import org.apache.commons.compress.utils.IOUtils
-import java.io.BufferedInputStream
-import java.io.File
-import java.io.FileInputStream
-import java.io.FileOutputStream
+import java.io.*
 
 class Archive {
 
     companion object {
-        val RELEASE = "v0.9.2"
+        const val RELEASE = "v0.9.3"
 
         fun arch(): String {
             var abi: String?
@@ -33,7 +30,7 @@ class Archive {
 
         fun tarFilename(): String {
             val ARCH = arch()
-            val PACKAGE = "bitcoin"
+            val PACKAGE = "lightning_ndk"
             return "${ARCH}_${PACKAGE}.tar.xz"
         }
 
@@ -60,31 +57,28 @@ class Archive {
             mkdir(File(outputDir, "plugins"))
             mkdir(File(outputDir, "lightningd"))
             mkdir(File(outputDir, "cli"))
-
             val input = TarArchiveInputStream(
-                BufferedInputStream(
-                    XZCompressorInputStream(
-                        BufferedInputStream(FileInputStream(inputFile))
+                    BufferedInputStream(
+                            XZCompressorInputStream(
+                                    BufferedInputStream(FileInputStream(inputFile))
+                            )
                     )
-                )
             )
             var counter = 0
             var entry = input.nextEntry
             while (entry != null) {
-
                 val name = entry.name
-                val f = File(outputDir, name)
-
-                var out = FileOutputStream(f)
+                val file: File?
+                file = File(outputDir, name)
+                val out = FileOutputStream(file)
                 try {
                     IOUtils.copy(input, out)
                 } finally {
                     IOUtils.closeQuietly(out)
                 }
-
                 val mode = (entry as TarArchiveEntry).mode
                 //noinspection ResultOfMethodCallIgnored
-                f.setExecutable(true, mode and 1 == 0)
+                file.setExecutable(true, mode and 1 == 0)
                 entry = input.nextEntry
                 counter++
             }
@@ -92,7 +86,7 @@ class Archive {
             inputFile.delete()
         }
 
-        fun mkdir(dir: File) {
+        private fun mkdir(dir: File) {
             if (!dir.exists()) {
                 dir.mkdir()
             }

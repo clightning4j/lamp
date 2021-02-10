@@ -155,9 +155,7 @@ class MainActivity : UriResultActivity() {
         }
 
         if (!isLightningRunning()) {
-            statusText.text =
-                "Offline. Rub the lamp to start."
-
+            statusText.text = "Offline. Rub the lamp to start."
             val sharedPref = PreferenceManager.getDefaultSharedPreferences(applicationContext)
             if (isFirstStart && sharedPref.getBoolean("autostart", true))
                 start()
@@ -332,14 +330,22 @@ class MainActivity : UriResultActivity() {
         val tarFile = File(dir(), Archive.tarFilename())
         if (tarFile.exists()) {
             // Uncompress package
-            statusText.text =
-                "Package already downloaded. Uncompressing..."
+            statusText.text = "Package already downloaded. Uncompressing..."
             powerImageView.animating()
             doAsync {
-                Archive.uncompressXZ(tarFile, rootDir())
-                runOnUiThread {
-                    powerOff()
+                try {
+                    Archive.uncompressXZ(tarFile, rootDir())
+                } catch(ex: Exception) {
+                    Log.e(TAG, "Error during uncompressXZ operation %s".format(ex.localizedMessage))
+                    runOnUiThread {
+                        UI.snackBar(this@MainActivity, "Error During download lightning node")
+                    }
+                }finally {
+                    runOnUiThread {
+                        powerOff()
+                    }
                 }
+
             }
         } else {
             statusText.text =
