@@ -24,8 +24,7 @@ typealias ChannelClickListener = (JSONObject) -> Unit
 
 class ChannelAdapter(val list: ArrayList<JSONObject>,
                      private val onClickListener: ChannelClickListener
-)
-    : RecyclerView.Adapter<ChannelViewHolder>() {
+) : RecyclerView.Adapter<ChannelViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ChannelViewHolder {
         val inflater = LayoutInflater.from(parent.context)
@@ -43,19 +42,19 @@ class ChannelAdapter(val list: ArrayList<JSONObject>,
 }
 
 class ChannelViewHolder(inflater: LayoutInflater, parent: ViewGroup) :
-    RecyclerView.ViewHolder(inflater.inflate(R.layout.list_channel, parent, false)) {
+        RecyclerView.ViewHolder(inflater.inflate(R.layout.list_channel, parent, false)) {
 
     fun bind(channel: JSONObject) {
         val cid = channel.getString("channel_id")
-        val msatoshi_to_us = channel.getDouble("msatoshi_to_us")/1000
-        val msatoshi_total = channel.getDouble("msatoshi_total")/1000
-        itemView.findViewById<TextView>(R.id.cid).text = "CID: ${cid.subSequence(0,8)}..."
+        val msatoshiToUs = channel.getDouble("msatoshi_to_us") / 1000
+        val msatoshiTotal = channel.getDouble("msatoshi_total") / 1000
+        itemView.findViewById<TextView>(R.id.cid).text = "CID: ${cid.subSequence(0, 8)}..."
         itemView.findViewById<TextView>(R.id.status).text = channel.getString("state")
-        itemView.findViewById<TextView>(R.id.mysats).text = "My balance: ${msatoshi_to_us.toString()} sat"
-        itemView.findViewById<TextView>(R.id.availablesats).text = "Available to receive: ${msatoshi_total.toString()} sat"
+        itemView.findViewById<TextView>(R.id.mysats).text = "My balance: $msatoshiToUs sat"
+        itemView.findViewById<TextView>(R.id.availablesats).text = "Available to receive: $msatoshiTotal sat"
         itemView.findViewById<ProgressBar>(R.id.progressBar).apply {
-            max = msatoshi_total.toInt()
-            progress = msatoshi_to_us.toInt()
+            max = msatoshiTotal.toInt()
+            progress = msatoshiToUs.toInt()
         }
     }
 }
@@ -72,8 +71,8 @@ class ChannelsActivity : AppCompatActivity() {
         recyclerView = findViewById(R.id.recycler_view)
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.adapter = ChannelAdapter(
-            ArrayList(),
-            this::showChannel
+                ArrayList(),
+                this::showChannel
         )
 
         doAsync { refresh() }
@@ -90,9 +89,9 @@ class ChannelsActivity : AppCompatActivity() {
     private fun refresh() {
         try {
             val res = LightningCli().exec(
-                this@ChannelsActivity,
-                arrayOf("listpeers"),
-                true
+                    this@ChannelsActivity,
+                    arrayOf("listpeers"),
+                    true
             ).toJSONObject()
 
             val channels = ArrayList<JSONObject>()
@@ -121,9 +120,9 @@ class ChannelsActivity : AppCompatActivity() {
         } catch (e: Exception) {
             runOnUiThread {
                 Toast.makeText(
-                    this@ChannelsActivity,
-                    "Channel funded",
-                    Toast.LENGTH_LONG
+                        this@ChannelsActivity,
+                        "Channel funded",
+                        Toast.LENGTH_LONG
                 ).show()
             }
         }
@@ -139,7 +138,7 @@ class ChannelsActivity : AppCompatActivity() {
         return when (item.itemId) {
             R.id.action_add -> {
                 val bottomSheetDialog =
-                    FundChannelFragment()
+                        FundChannelFragment()
                 bottomSheetDialog.show(supportFragmentManager, "Fund channel")
                 true
             }

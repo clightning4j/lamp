@@ -94,7 +94,7 @@ class SendActivity : AppCompatActivity(), BalanceClickListener {
             val command = arrayListOf("pay", bolt11)
             if (msatoshi != null)
                 command.add(msatoshi)
-            var params: Array<String> = command.toArray(arrayOf<String>());
+            val params: Array<String> = command.toArray(arrayOf<String>());
             cli.exec(this@SendActivity, params, true)
             runOnUiThread {
                 UI.snackBar(this@SendActivity, "Payed invoice")

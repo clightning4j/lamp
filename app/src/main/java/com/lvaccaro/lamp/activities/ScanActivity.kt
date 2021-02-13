@@ -73,7 +73,7 @@ class ScanActivity : AppCompatActivity(), ZXingScannerView.ResultHandler {
         Log.d(TAG, rawResult?.text)
         val result = rawResult?.text ?: ""
         if (result.isEmpty()) {
-            mScannerView.resumeCameraPreview(this);
+            mScannerView.resumeCameraPreview(this)
             return
         }
 

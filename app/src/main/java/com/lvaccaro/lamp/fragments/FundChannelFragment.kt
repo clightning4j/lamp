@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.Toast
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.switchmaterial.SwitchMaterial
 import com.google.android.material.textfield.TextInputEditText
 import com.lvaccaro.lamp.LightningCli
@@ -16,27 +17,27 @@ import com.lvaccaro.lamp.utils.UI
 import org.jetbrains.anko.doAsync
 import java.lang.Exception
 
-class FundChannelFragment: BottomSheetDialogFragment() {
+class FundChannelFragment : BottomSheetDialogFragment() {
 
     override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
+            inflater: LayoutInflater,
+            container: ViewGroup?,
+            savedInstanceState: Bundle?
     ): View? {
         val view = inflater.inflate(R.layout.fragment_fundchannel, container, false)
         val uri = arguments?.getString("uri")
         view.findViewById<TextInputEditText>(R.id.node_text).setText(uri ?: "")
         view.findViewById<Button>(R.id.button).setOnClickListener {
             val uri = view.findViewById<TextInputEditText>(R.id.node_text).text.toString()
-            val isMax =  view.findViewById<SwitchMaterial>(R.id.fundmax_switch).isChecked
+            val isMax = view.findViewById<SwitchMaterial>(R.id.fundmax_switch).isChecked
             var isPrivate = view.findViewById<SwitchMaterial>(R.id.private_switch).isChecked
             val satoshi = view.findViewById<TextInputEditText>(R.id.satoshi_text).text.toString()
             doAsync {
                 fund(
-                    uri,
-                    if (isMax) "all" else satoshi,
-                    "normal",
-                    if (isPrivate) "false" else "true"
+                        uri,
+                        if (isMax) "all" else satoshi,
+                        "normal",
+                        if (isPrivate) "false" else "true"
                 )
             }
         }
@@ -45,17 +46,18 @@ class FundChannelFragment: BottomSheetDialogFragment() {
 
     fun fund(id: String, amount: String, feerate: String, announce: String) {
         try {
-            LightningCli().exec(
-                context!!,
-                arrayOf("fundchannel", id, amount, feerate, announce),
-                true
+            val resultCommand = LightningCli().exec(
+                    context!!,
+                    arrayOf("fundchannel", id, amount, feerate, announce),
+                    true
             ).toJSONObject()
+            val txId = resultCommand["txid"] as String
             activity?.runOnUiThread {
-                Toast.makeText(
-                    context,
-                    "Channel funded",
-                    Toast.LENGTH_LONG
-                ).show()
+                Snackbar.make(requireView(), "Channel funded", Snackbar.LENGTH_LONG)
+                        .setAction("Copy TxId") {
+                            UI.copyToClipboard(activity!!, "TX_ID", txId)
+                        }
+                        .show()
                 dismiss()
             }
         } catch (e: Exception) {
