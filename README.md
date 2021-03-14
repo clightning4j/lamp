@@ -22,7 +22,7 @@ Touch the lamp to download and run c-lightning from cross-compiled binaries for 
 
 This is the default behaviour.
 
-Lamp is using [the C Esplora plugin for C-lightning](https://github.com/lightningamp/esplora_clnd_plugin) as the Bitcoin backend of the lightning node (to fetch chain/blocks/transactions informations and send transactions).
+Lamp is using [the C Esplora plugin for C-lightning](https://github.com/lightningamp/esplora_clnd_plugin) as the Bitcoin backend of the lightning node (to fetch chain/blocks/transactions information and send transactions).
 
 You can point it to your own [Esplora](github.com/Blockstream/esplora) instance in the settings, and it uses [blockstream.info](https://blockstream.info) by default.
 
