@@ -18,7 +18,6 @@ import com.google.zxing.WriterException
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel
 import com.google.zxing.qrcode.encoder.Encoder
 
-
 class UI {
 
     companion object {
@@ -34,11 +33,11 @@ class UI {
             context: AppCompatActivity,
             message: String,
             duration: Int = Snackbar.LENGTH_LONG
-        ){
+        ) {
             Snackbar.make(context.findViewById(android.R.id.content), message, duration).show()
         }
 
-        fun toast(context: Context, message: String, duration: Int = Toast.LENGTH_SHORT){
+        fun toast(context: Context, message: String, duration: Int = Toast.LENGTH_SHORT) {
             Toast.makeText(context, message, duration).show()
         }
 
@@ -103,8 +102,7 @@ class UI {
                 .setAutoCancel(true)
                 .setChannelId(channelId)
                 .build()
-            manager.notify(101, notification);
+            manager.notify(101, notification)
         }
     }
-
 }

@@ -20,7 +20,6 @@ import java.lang.Exception
 import java.text.SimpleDateFormat
 import java.util.*
 
-
 class BuildInvoiceActivity : AppCompatActivity() {
 
     private val cli = LightningCli()
@@ -59,13 +58,15 @@ class BuildInvoiceActivity : AppCompatActivity() {
 
     fun invoice(amount: String, label: String, description: String) {
         try {
-            val res = cli.exec(this,
+            val res = cli.exec(
+                this,
                 arrayOf(
                     "invoice",
                     amount,
                     label,
                     description
-                ), true
+                ),
+                true
             ).toJSONObject()
             runOnUiThread { showInvoice(res["bolt11"] as String) }
         } catch (e: Exception) {

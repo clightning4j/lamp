@@ -1,0 +1,27 @@
+[*.{kt,kts}]
+disabled_rules=import-ordering
+
+# Note that in this case 'import-ordering' rule will be active and 'indent' will be disabled
+[api/*.{kt,kts}]
+disabled_rules=indent
+
+# Comma-separated list of rules to disable (Since 0.34.0)
+# Note that rules in any ruleset other than the standard ruleset will need to be prefixed
+# by the ruleset identifier.
+disabled_rules=no-wildcard-imports,experimental:annotation,my-custom-ruleset
+
+# Defines the imports layout. The layout can be composed by the following symbols:
+# "*" - wildcard. There must be at least one entry of a single wildcard to match all other imports. Matches anything after a specified symbol/import as well.
+# "|" - blank line. Supports only single blank lines between imports. No blank line is allowed in the beginning or end of the layout.
+# "^" - alias import, e.g. "^android.*" will match all android alias imports, "^" will match all other alias imports.
+# import paths - these can be full paths, e.g. "java.util.List.*" as well as wildcard paths, e.g. "kotlin.**"
+# Examples (we use ij_kotlin_imports_layout to set an imports layout for both ktlint and IDEA via a single property):
+ij_kotlin_imports_layout=* # alphabetical with capital letters before lower case letters (e.g. Z before a), no blank lines
+ij_kotlin_imports_layout=*,java.**,javax.**,kotlin.**,^ # default IntelliJ IDEA style, same as alphabetical, but with "java", "javax", "kotlin" and alias imports in the end of the imports list
+ij_kotlin_imports_layout=android.**,|,^org.junit.**,kotlin.io.Closeable.*,|,*,^ # custom imports layout
+
+# According to https://kotlinlang.org/docs/reference/coding-conventions.html#names-for-test-methods it is acceptable to write method names
+# in natural language. When using natural language, the description tends to be longer. Allow lines containing an identifier between
+# backticks to be longer than the maximum line length. (Since 0.41.0)
+[**/test/**.kt]
+ktlint_ignore_back_ticked_identifier=true

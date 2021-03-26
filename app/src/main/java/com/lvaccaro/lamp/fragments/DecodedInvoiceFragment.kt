@@ -27,7 +27,7 @@ class DecodedInvoiceFragment : BottomSheetDialogFragment() {
         savedInstanceState: Bundle?
     ): View? {
         val view = inflater.inflate(R.layout.fragment_decoded_invoice, container, false)
-        val bolt11 =  arguments?.getString("bolt11") ?: ""
+        val bolt11 = arguments?.getString("bolt11") ?: ""
 
         val recyclerView = view.findViewById<RecyclerView>(R.id.recycler_view)
         recyclerView.layoutManager = LinearLayoutManager(context)
@@ -59,7 +59,7 @@ class DecodedInvoiceFragment : BottomSheetDialogFragment() {
         // Pay invoice
         val context = activity!!
         try {
-           cli.exec(context, arrayOf("pay", bolt11), true)
+            cli.exec(context, arrayOf("pay", bolt11), true)
                 .toJSONObject()
             context.runOnUiThread {
                 Toast.makeText(context, "Invoice paid", Toast.LENGTH_LONG).show()

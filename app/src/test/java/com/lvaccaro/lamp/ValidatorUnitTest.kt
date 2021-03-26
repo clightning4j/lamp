@@ -101,7 +101,7 @@ class ValidatorUnitTest {
     }
 
     @Test
-    fun validateBitcoinURI_testFour(){
+    fun validateBitcoinURI_testFour() {
         val uri = "bitcoin:175tWpb8K1S7NmH4Zx6rewF9WQrcZv245W?req-somethingyoudontunderstand=50&req-somethingelseyoudontget=999"
         val resultParsing = Validator.doParseBitcoinURL(uri)
         assertEquals("175tWpb8K1S7NmH4Zx6rewF9WQrcZv245W", resultParsing.get(LampKeys.ADDRESS_KEY))
@@ -109,7 +109,7 @@ class ValidatorUnitTest {
         assertEquals("999", resultParsing.get("req-somethingelseyoudontget"))
     }
 
-    @Test //P2PKH
+    @Test // P2PKH
     fun validateBitcoinAddress_testOne() {
         val resultBitcoin = Validator.isBitcoinAddress("17VZNX1SN5NtKa8UQFxwQbFeFc3iqRYhem")
         val resultTestnet = Validator.isBitcoinAddress("mipcBbFg9gMiCh81Kj8tqqdgoZub1ZJRfn")
@@ -130,7 +130,6 @@ class ValidatorUnitTest {
         assertEquals(true, resultRegtest)
         assertEquals(true, resultRegtestTwo)
     }
-
 
     @Test
     fun validateBitcoinAddress_testThree() {

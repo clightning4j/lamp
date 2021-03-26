@@ -27,11 +27,11 @@ class ConsoleActivity : AppCompatActivity() {
         findViewById<ImageButton>(R.id.send).setOnClickListener {
             val textContent = editTextCmd.text.toString()
             if (textContent != "") {
-                if(textContent.equals("clean", true)){
-                    //Command to clean console
+                if (textContent.equals("clean", true)) {
+                    // Command to clean console
                     editTextResult.setText("")
                     editTextCmd.setText("")
-                }else{
+                } else {
                     CommandTask().execute(textContent)
                 }
             }
@@ -52,9 +52,9 @@ class ConsoleActivity : AppCompatActivity() {
             try {
                 return LightningCli()
                     .exec(this@ConsoleActivity, args, true).toText()
-            }catch (e: Exception) {
+            } catch (e: Exception) {
                 e.printStackTrace()
-                return e.localizedMessage ?: "Error, params: ${args}"
+                return e.localizedMessage ?: "Error, params: $args"
             }
         }
 

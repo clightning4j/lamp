@@ -47,7 +47,6 @@ import org.json.JSONArray
 import java.io.File
 import java.util.logging.Logger
 
-
 class MainActivity : UriResultActivity() {
 
     private val REQUEST_SCAN = 102
@@ -179,7 +178,8 @@ class MainActivity : UriResultActivity() {
 
     override fun onRequestPermissionsResult(
         requestCode: Int,
-        permissions: Array<String>, grantResults: IntArray
+        permissions: Array<String>,
+        grantResults: IntArray
     ) {
         when (requestCode) {
             WRITE_REQUEST_CODE -> {
@@ -281,13 +281,14 @@ class MainActivity : UriResultActivity() {
         val peers: JSONArray = listPeers["peers"] as JSONArray
 
         runOnUiThread {
-            balanceText.text = "${(SimulatorPlugin.funds(listPeers).toDouble()/1000)} sat"
+            balanceText.text = "${(SimulatorPlugin.funds(listPeers).toDouble() / 1000)} sat"
             recyclerView.adapter = BalanceAdapter(
                 arrayListOf(
-                    Balance("Spendable in channels", "${peers.length()} Peers", "${SimulatorPlugin.funds(listPeers).toDouble()/1000} sat"),
-                    Balance("Locked in channels", "${channels.length()} Channels", "${SimulatorPlugin.offchain(listFunds).toDouble()/1000} sat"),
+                    Balance("Spendable in channels", "${peers.length()} Peers", "${SimulatorPlugin.funds(listPeers).toDouble() / 1000} sat"),
+                    Balance("Locked in channels", "${channels.length()} Channels", "${SimulatorPlugin.offchain(listFunds).toDouble() / 1000} sat"),
                     Balance("Bitcoin on chain", "${outputs.length()} Transactions", "${SimulatorPlugin.onchain(listFunds)} sat")
-                ), null
+                ),
+                null
             )
         }
     }
@@ -336,17 +337,16 @@ class MainActivity : UriResultActivity() {
             doAsync {
                 try {
                     Archive.uncompressXZ(tarFile, rootDir())
-                } catch(ex: Exception) {
+                } catch (ex: Exception) {
                     Log.e(TAG, "Error during uncompressXZ operation %s".format(ex.localizedMessage))
                     runOnUiThread {
                         UI.snackBar(this@MainActivity, "Error During download lightning node")
                     }
-                }finally {
+                } finally {
                     runOnUiThread {
                         powerOff()
                     }
                 }
-
             }
         } else {
             statusText.text =
@@ -360,7 +360,7 @@ class MainActivity : UriResultActivity() {
         contentMainOn.visibility = View.GONE
         contentMainOff.visibility = View.VISIBLE
         val release = getPreferences(Context.MODE_PRIVATE).getString("RELEASE", "")
-        versionText.text = "Version: ${BuildConfig.VERSION_NAME} - ${release}"
+        versionText.text = "Version: ${BuildConfig.VERSION_NAME} - $release"
         statusText.text = "Offline. Rub the lamp to turn on."
         powerImageView.off()
         invalidateOptionsMenu()
@@ -389,7 +389,7 @@ class MainActivity : UriResultActivity() {
                 title = alias
                 powerImageView.on()
                 val delta = blockcount - blockheight
-                syncText.text = if (delta > 0) "Syncing blocks -${delta}" else ""
+                syncText.text = if (delta > 0) "Syncing blocks -$delta" else ""
             }
         } catch (e: Exception) {
             log.info("---" + e.localizedMessage + "---")
@@ -637,7 +637,7 @@ class MainActivity : UriResultActivity() {
 
     private val notificationReceiver = object : BroadcastReceiver() {
         // I can create a mediator that I can use to call all method inside the
-        //lightning-cli and return a json if the answer i ok or I throw an execeptions
+        // lightning-cli and return a json if the answer i ok or I throw an execeptions
 
         override fun onReceive(context: Context?, intent: Intent?) {
             Log.d(TAG, "onReceive action ${intent?.action}")
@@ -651,7 +651,7 @@ class MainActivity : UriResultActivity() {
                 NewBlockHandler.NOTIFICATION -> runOnUiThread {
                     val blockheight = intent.getIntExtra("height", 0)
                     val delta = blockcount - blockheight
-                    statusText.text = if (delta > 0) "Syncing blocks -${delta}" else ""
+                    statusText.text = if (delta > 0) "Syncing blocks -$delta" else ""
                 }
                 BrokenStatus.NOTIFICATION -> runOnUiThread {
                     val message = intent.getStringExtra("message")
@@ -663,7 +663,7 @@ class MainActivity : UriResultActivity() {
                 NewTransaction.NOTIFICATION, NewChannelPayment.NOTIFICATION, PaidInvoice.NOTIFICATION -> doAsync {
                     updateBalanceView(context)
                 }
-                NodeUpHandler.NOTIFICATION  -> {
+                NodeUpHandler.NOTIFICATION -> {
                     isRunning = true
                 }
             }

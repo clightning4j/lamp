@@ -35,18 +35,24 @@ class LogActivity : AppCompatActivity() {
         containerLog.fullScroll(View.FOCUS_DOWN)
 
         logViewModel = ViewModelProvider(this).get(LogViewModel::class.java)
-        logViewModel.lastResult.observe(this, Observer<String> { lastResult ->
-            run {
-                editText.append(lastResult.trim())
+        logViewModel.lastResult.observe(
+            this,
+            Observer<String> { lastResult ->
+                run {
+                    editText.append(lastResult.trim())
+                }
             }
-        })
+        )
 
-        logViewModel.daemon.observe(this, Observer<String> { _ ->
-            run {
-                editText.text.clear()
-                logViewModel.onStartToReadLogFile(rootDir())
+        logViewModel.daemon.observe(
+            this,
+            Observer<String> { _ ->
+                run {
+                    editText.text.clear()
+                    logViewModel.onStartToReadLogFile(rootDir())
+                }
             }
-        })
+        )
         logViewModel.onStartToReadLogFile(rootDir())
     }
 
@@ -63,7 +69,7 @@ class LogActivity : AppCompatActivity() {
                 true
             }
             R.id.action_tor -> {
-                UI.toast(this,"Tor log are loading")
+                UI.toast(this, "Tor log are loading")
                 logViewModel.setLogDaemon("tor")
                 true
             }

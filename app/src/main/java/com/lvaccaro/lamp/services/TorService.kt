@@ -11,10 +11,9 @@ import com.lvaccaro.lamp.rootDir
 import java.io.File
 import java.lang.reflect.Field
 
-
 class TorService : IntentService("TorService") {
 
-    companion object{
+    companion object {
         private val TAG = TorService::class.java.canonicalName
         val NOTIFICATION_ID = 432432
     }
@@ -31,7 +30,7 @@ class TorService : IntentService("TorService") {
         Log.i(TAG, "start $daemon service")
         val torDir = File(rootDir(), ".tor")
         val torHiddenServiceDir = File(rootDir(), ".torHiddenService")
-        val  binaryDir = rootDir()
+        val binaryDir = rootDir()
         if (!torDir.exists()) {
             torDir.mkdir()
         }
@@ -65,11 +64,11 @@ class TorService : IntentService("TorService") {
             globber = Globber(
                 process!!.inputStream,
                 logFile
-            );
+            )
             globber?.start()
         }
 
-        //return super.onStartCommand(intent, flags, startId)
+        // return super.onStartCommand(intent, flags, startId)
         Log.i(TAG, "exit $daemon service")
 
         startForeground()
@@ -79,8 +78,10 @@ class TorService : IntentService("TorService") {
     fun startForeground() {
         val intent = Intent(this, MainActivity::class.java)
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-        val pendingIntent = PendingIntent.getActivity(this,
-            NOTIFICATION_ID, intent, PendingIntent.FLAG_ONE_SHOT)
+        val pendingIntent = PendingIntent.getActivity(
+            this,
+            NOTIFICATION_ID, intent, PendingIntent.FLAG_ONE_SHOT
+        )
 
         val notification = Notification.Builder(this)
             .setContentTitle("$daemon is running")

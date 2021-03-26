@@ -20,8 +20,8 @@ class RecyclerViewFragment : BottomSheetDialogFragment() {
         savedInstanceState: Bundle?
     ): View? {
         val view = inflater.inflate(R.layout.fragment_recyclerview, container, false)
-        val title =  arguments?.getString("title")
-        val data =  arguments?.getString("data")
+        val title = arguments?.getString("title")
+        val data = arguments?.getString("data")
         val recyclerView = view.findViewById<RecyclerView>(R.id.recycler_view)
         recyclerView.apply {
             layoutManager = LinearLayoutManager(context)
@@ -32,5 +32,4 @@ class RecyclerViewFragment : BottomSheetDialogFragment() {
         view.findViewById<TextView>(R.id.title).text = title
         return view
     }
-
 }

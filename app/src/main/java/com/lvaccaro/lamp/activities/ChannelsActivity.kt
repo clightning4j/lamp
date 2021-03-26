@@ -22,10 +22,11 @@ import kotlin.collections.ArrayList
 
 typealias ChannelClickListener = (JSONObject) -> Unit
 
-class ChannelAdapter(val list: ArrayList<JSONObject>,
-                     private val onClickListener: ChannelClickListener
-)
-    : RecyclerView.Adapter<ChannelViewHolder>() {
+class ChannelAdapter(
+    val list: ArrayList<JSONObject>,
+    private val onClickListener: ChannelClickListener
+) :
+    RecyclerView.Adapter<ChannelViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ChannelViewHolder {
         val inflater = LayoutInflater.from(parent.context)
@@ -39,7 +40,6 @@ class ChannelAdapter(val list: ArrayList<JSONObject>,
     }
 
     override fun getItemCount(): Int = list.size
-
 }
 
 class ChannelViewHolder(inflater: LayoutInflater, parent: ViewGroup) :
@@ -47,12 +47,12 @@ class ChannelViewHolder(inflater: LayoutInflater, parent: ViewGroup) :
 
     fun bind(channel: JSONObject) {
         val cid = channel.getString("channel_id")
-        val msatoshi_to_us = channel.getDouble("msatoshi_to_us")/1000
-        val msatoshi_total = channel.getDouble("msatoshi_total")/1000
+        val msatoshi_to_us = channel.getDouble("msatoshi_to_us") / 1000
+        val msatoshi_total = channel.getDouble("msatoshi_total") / 1000
         itemView.findViewById<TextView>(R.id.cid).text = "CID: ${cid.subSequence(0,8)}..."
         itemView.findViewById<TextView>(R.id.status).text = channel.getString("state")
-        itemView.findViewById<TextView>(R.id.mysats).text = "My balance: ${msatoshi_to_us.toString()} sat"
-        itemView.findViewById<TextView>(R.id.availablesats).text = "Available to receive: ${msatoshi_total.toString()} sat"
+        itemView.findViewById<TextView>(R.id.mysats).text = "My balance: $msatoshi_to_us sat"
+        itemView.findViewById<TextView>(R.id.availablesats).text = "Available to receive: $msatoshi_total sat"
         itemView.findViewById<ProgressBar>(R.id.progressBar).apply {
             max = msatoshi_total.toInt()
             progress = msatoshi_to_us.toInt()
@@ -109,7 +109,7 @@ class ChannelsActivity : AppCompatActivity() {
 
             runOnUiThread {
                 val total = channels.sumBy { it.getInt("msatoshi_to_us") / 1000 }
-                findViewById<TextView>(R.id.total_text).text = "${total} sat in channels"
+                findViewById<TextView>(R.id.total_text).text = "$total sat in channels"
                 val recyclerView = findViewById<RecyclerView>(R.id.recycler_view)
                 val adapter = recyclerView.adapter as ChannelAdapter
                 adapter.apply {
@@ -146,5 +146,4 @@ class ChannelsActivity : AppCompatActivity() {
             else -> super.onOptionsItemSelected(item)
         }
     }
-
 }

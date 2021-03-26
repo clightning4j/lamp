@@ -26,7 +26,7 @@ class ChannelFragment : BottomSheetDialogFragment() {
         savedInstanceState: Bundle?
     ): View? {
         val view = inflater.inflate(R.layout.fragment_channel, container, false)
-        val data =  arguments?.getString("channel") ?: ""
+        val data = arguments?.getString("channel") ?: ""
         val channel = JSONObject(data)
 
         val recyclerView = view.findViewById<RecyclerView>(R.id.recycler_view)

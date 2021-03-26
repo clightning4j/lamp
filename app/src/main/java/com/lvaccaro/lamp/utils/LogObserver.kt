@@ -57,7 +57,6 @@ class LogObserver(val context: Context, val path: String, val nameFile: String) 
     private var actualLine = 0
     private var lineNumberReader: LineNumberReader? = null
 
-
     private fun initHandler() {
         actionHandler = ArrayList()
         actionHandler.addAll(
@@ -74,7 +73,7 @@ class LogObserver(val context: Context, val path: String, val nameFile: String) 
     }
 
     override fun onEvent(event: Int, file: String?) {
-        if(file == null) return
+        if (file == null) return
         if (file == nameFile) {
             when (event) {
                 MODIFY -> readNewLines()
@@ -83,14 +82,14 @@ class LogObserver(val context: Context, val path: String, val nameFile: String) 
     }
 
     private fun readNewLines() {
-        if(lineNumberReader == null)
+        if (lineNumberReader == null)
             initFileLog()
 
-        //FIXME(vicenzopalazzo): This is real util?
-        if(lineNumberReader == null) return
+        // FIXME(vicenzopalazzo): This is real util?
+        if (lineNumberReader == null) return
         lineNumberReader?.lineNumber = actualLine
         var line: String? = lineNumberReader?.readLine()
-        while (line != null){
+        while (line != null) {
             readLogLine(line)
             Log.d(TAG, line)
             line = lineNumberReader?.readLine()
@@ -105,7 +104,7 @@ class LogObserver(val context: Context, val path: String, val nameFile: String) 
     private fun initFileLog() {
         logFile = File(path, nameFile)
         lineNumberReader = LineNumberReader(logFile.reader())
-        //FIXME: level api that are enable this line about is Android nougat
+        // FIXME: level api that are enable this line about is Android nougat
         // for the actual version of lightning_ndk I don't need to insert the check of the version
         actualLine = lineNumberReader!!.lines().count().toInt()
     }
