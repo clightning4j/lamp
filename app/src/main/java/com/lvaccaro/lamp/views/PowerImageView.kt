@@ -6,7 +6,7 @@ import android.util.AttributeSet
 import androidx.appcompat.widget.AppCompatImageView
 import com.lvaccaro.lamp.R
 
-class PowerImageView: AppCompatImageView {
+class PowerImageView : AppCompatImageView {
 
     private var light = false
 

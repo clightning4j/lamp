@@ -1,6 +1,11 @@
 package com.lvaccaro.lamp.services
 
-import android.app.*
+import android.app.IntentService
+import android.app.Notification
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.PendingIntent
+import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.os.Build
@@ -61,10 +66,11 @@ class LightningService : IntentService("LightningService") {
             String.format("--network=%s", network),
             String.format("--log-level=%s", logLevel),
             String.format("--lightning-dir=%s", lightningDir.path),
-            //String.format("--plugin-dir=%s", File(binaryDir.path , "plugins").path),
+            // String.format("--plugin-dir=%s", File(binaryDir.path , "plugins").path),
             String.format("--ignore-fee-limits=%b", ignoreFeeLimits),
             // 10 days to catch a cheating attempt
-            String.format("--watchtime-blocks=%s", 10 * 24 * 6))
+            String.format("--watchtime-blocks=%s", 10 * 24 * 6)
+        )
 
         if (alias.isNotEmpty()) {
             options.add(String.format("--alias=%s", alias))
@@ -74,21 +80,29 @@ class LightningService : IntentService("LightningService") {
             val fileCert = File(getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS)!!, "cacert.pem")
             // set esplora plugin
             val endpoint = sharedPref.getString("esplora-api-endpoint", null) ?: "https://blockstream.info"
-            options.addAll(arrayListOf<String>(
-                String.format("--disable-plugin=%s", "bcli"),
-                String.format("--esplora-cainfo=%s", fileCert.absolutePath),
-                String.format("--esplora-api-endpoint=$endpoint/%s",
-                    if ("testnet".equals(network)) "testnet/api" else "api")))
+            options.addAll(
+                arrayListOf<String>(
+                    String.format("--disable-plugin=%s", "bcli"),
+                    String.format("--esplora-cainfo=%s", fileCert.absolutePath),
+                    String.format(
+                        "--esplora-api-endpoint=$endpoint/%s",
+                        if ("testnet".equals(network)) "testnet/api" else "api"
+                    )
+                )
+            )
         } else {
-            options.addAll(arrayListOf<String>(
-                // set bitcoind rpc config
-                String.format("--disable-plugin=%s", "esplora"),
-                String.format("--bitcoin-datadir=%s", bitcoinDir.path),
-                String.format("--bitcoin-cli=%s/bitcoin-cli", binaryDir.canonicalPath),
-                String.format("--bitcoin-rpcconnect=%s", rpcconnect),
-                String.format("--bitcoin-rpcuser=%s", rpcuser),
-                String.format("--bitcoin-rpcport=%s", rpcport),
-                String.format("--bitcoin-rpcpassword=%s", rpcpassword)))
+            options.addAll(
+                arrayListOf<String>(
+                    // set bitcoind rpc config
+                    String.format("--disable-plugin=%s", "esplora"),
+                    String.format("--bitcoin-datadir=%s", bitcoinDir.path),
+                    String.format("--bitcoin-cli=%s/bitcoin-cli", binaryDir.canonicalPath),
+                    String.format("--bitcoin-rpcconnect=%s", rpcconnect),
+                    String.format("--bitcoin-rpcuser=%s", rpcuser),
+                    String.format("--bitcoin-rpcport=%s", rpcport),
+                    String.format("--bitcoin-rpcpassword=%s", rpcpassword)
+                )
+            )
         }
 
         if (torEnabled) {
@@ -98,7 +112,7 @@ class LightningService : IntentService("LightningService") {
             val torHiddenServiceDir = File(rootDir(), ".torHiddenService/hostname")
             val address = torHiddenServiceDir.readLines().first()
             announceaddr = address
-            //addr = "$address:127.0.0.1:9051"
+            // addr = "$address:127.0.0.1:9051"
             options.add("--always-use-proxy=true")
         }
 
@@ -119,9 +133,9 @@ class LightningService : IntentService("LightningService") {
         val pb = ProcessBuilder(options)
         pb.directory(binaryDir)
         pb.redirectErrorStream(true)
-        logObserver = LogObserver(applicationContext, rootDir().absolutePath,"$daemon.log")
-        val logFile = File(rootDir(),"$daemon.log")
-        if(logFile.exists()){
+        logObserver = LogObserver(applicationContext, rootDir().absolutePath, "$daemon.log")
+        val logFile = File(rootDir(), "$daemon.log")
+        if (logFile.exists()) {
             logFile.delete()
         }
         logFile.createNewFile()
@@ -131,14 +145,14 @@ class LightningService : IntentService("LightningService") {
         process = pb.start()
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
             // Redirection output to file
-            globber = Globber(process!!.inputStream, logFile);
+            globber = Globber(process!!.inputStream, logFile)
             globber?.start()
         }
-        //return super.onStartCommand(intent, flags, startId)
+        // return super.onStartCommand(intent, flags, startId)
         log.info("exit $daemon service")
 
         startForeground()
-        logObserver?.startWatching();
+        logObserver?.startWatching()
         return Service.START_STICKY
     }
 

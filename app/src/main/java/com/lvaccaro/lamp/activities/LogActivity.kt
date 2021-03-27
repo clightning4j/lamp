@@ -29,7 +29,7 @@ class LogActivity : AppCompatActivity() {
     private val maxBufferToLoad = 200
     private var sizeBuffer = 0
 
-    //UI component
+    // UI component
     private lateinit var editText: EditText
     private lateinit var progressBar: ProgressBar
 
@@ -78,13 +78,13 @@ class LogActivity : AppCompatActivity() {
         }
     }
 
-    private fun shareLogByIntent(){
+    private fun shareLogByIntent() {
         doAsync {
             val shareIntent = Intent(Intent.ACTION_SEND).apply {
                 type = "text/plain"
                 val logFile = File(rootDir(), "$daemon.log")
                 if (!logFile.exists()) {
-                    runOnUiThread{
+                    runOnUiThread {
                         UI.showMessageOnToast(applicationContext, "No log file found")
                     }
                     return@doAsync
@@ -94,8 +94,8 @@ class LogActivity : AppCompatActivity() {
                 val lines = logFile.readLines()
                 val sizeNow = lines.size
                 var difference = 0
-                if(sizeNow > 450) sizeNow - 200
-                for(at in difference until sizeNow){
+                if (sizeNow > 450) sizeNow - 200
+                for (at in difference until sizeNow) {
                     val line = lines[at]
                     body.append(line).append("\n")
                 }
@@ -105,7 +105,7 @@ class LogActivity : AppCompatActivity() {
                 startActivity(Intent.createChooser(shareIntent, null))
                 return@doAsync
             }
-            runOnUiThread{
+            runOnUiThread {
                 UI.showMessageOnToast(applicationContext, "Intent resolving error")
             }
         }
@@ -131,13 +131,13 @@ class LogActivity : AppCompatActivity() {
 
     private fun read(randomAccessFile: RandomAccessFile, et: EditText) {
         Log.d(TAG, "Start to read the file with RandomAccessFile")
-        //Set the position at the end of the file
+        // Set the position at the end of the file
         val fileSize = randomAccessFile.length() - 1
         randomAccessFile.seek(fileSize)
-        //The maximum dimension of this object is one line
+        // The maximum dimension of this object is one line
         val lineBuilder = StringBuilder()
-        //This contains the each line of the logger, the line of the logger are fixed
-        //to the propriety *maxBufferToLoad*
+        // This contains the each line of the logger, the line of the logger are fixed
+        // to the propriety *maxBufferToLoad*
         val logBuilder = StringBuilder()
         for (pointer in fileSize downTo 1) {
             randomAccessFile.seek(pointer)

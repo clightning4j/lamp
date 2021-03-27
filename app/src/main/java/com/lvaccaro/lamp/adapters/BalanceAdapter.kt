@@ -6,14 +6,15 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.lvaccaro.lamp.R
 
-data class Balance (val title: String, val subtitle: String, val value: String)
+data class Balance(val title: String, val subtitle: String, val value: String)
 
 typealias BalanceClickListener = (Int) -> Unit
 
-class BalanceAdapter(val list: ArrayList<Balance>,
-                     private val onClickListener: BalanceClickListener?
-)
-    : RecyclerView.Adapter<BalanceViewHolder>() {
+class BalanceAdapter(
+    val list: ArrayList<Balance>,
+    private val onClickListener: BalanceClickListener?
+) :
+    RecyclerView.Adapter<BalanceViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BalanceViewHolder {
         val inflater = LayoutInflater.from(parent.context)
@@ -27,7 +28,6 @@ class BalanceAdapter(val list: ArrayList<Balance>,
     }
 
     override fun getItemCount(): Int = list.size
-
 }
 
 class BalanceViewHolder(inflater: LayoutInflater, parent: ViewGroup) :

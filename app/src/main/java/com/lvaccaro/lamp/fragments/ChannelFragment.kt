@@ -11,8 +11,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.lvaccaro.lamp.LightningCli
 import com.lvaccaro.lamp.R
-import com.lvaccaro.lamp.toJSONObject
 import com.lvaccaro.lamp.adapters.HashMapAdapter
+import com.lvaccaro.lamp.toJSONObject
 import com.lvaccaro.lamp.utils.UI
 import org.jetbrains.anko.doAsync
 import org.json.JSONObject
@@ -26,7 +26,7 @@ class ChannelFragment : BottomSheetDialogFragment() {
         savedInstanceState: Bundle?
     ): View? {
         val view = inflater.inflate(R.layout.fragment_channel, container, false)
-        val data =  arguments?.getString("channel") ?: ""
+        val data = arguments?.getString("channel") ?: ""
         val channel = JSONObject(data)
 
         val recyclerView = view.findViewById<RecyclerView>(R.id.recycler_view)

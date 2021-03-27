@@ -57,6 +57,18 @@ Read the following instructions at [Tor on clightning](https://lightning.readthe
 
  * [in Linux using cmdline tools](doc/cmdline-tools-setup.md)
 
+## Code Style
+[![ktlint](https://img.shields.io/badge/code%20style-%E2%9D%A4-FF4081.svg)](https://ktlint.github.io/)
+
+> We live in a world where robots can drive a car, so we shouldn't just write code, we should write elegant code.
+
+This repository use [ktlint](https://github.com/pinterest/ktlint) to maintains the code of the repository elegant, so 
+before submit the code check the Kotlin format with the following command on the root of the directory
+
+```bash
+./gradlew formatKotlin
+```
+
 ## References
 
 - [ABCore](https://github.com/greenaddress/abcore) Android Bitcoin Core wallet

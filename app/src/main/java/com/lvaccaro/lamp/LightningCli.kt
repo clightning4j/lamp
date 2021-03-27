@@ -25,11 +25,12 @@ class LightningCli {
             String.format("%s/cli/%s", binaryDir.canonicalPath, command),
             String.format("--network=%s", network),
             String.format("--lightning-dir=%s", lightningDir.path),
-            String.format("--%s", if (json == true) "json" else "raw" ))
+            String.format("--%s", if (json == true) "json" else "raw")
+        )
 
         val pb = ProcessBuilder((args + options).asList())
         pb.directory(binaryDir)
-        //pb.redirectErrorStream(true)
+        // pb.redirectErrorStream(true)
 
         val process = pb.start()
         val code = process.waitFor()
@@ -38,7 +39,7 @@ class LightningCli {
             val input = process.inputStream.toText()
             log.info(error)
             log.info(input)
-            throw Exception(if(!error.isEmpty()) error else input)
+            throw Exception(if (!error.isEmpty()) error else input)
         }
         return process.inputStream
     }
@@ -46,7 +47,7 @@ class LightningCli {
 
 // extension to convert inputStream in text
 fun InputStream.toText(): String {
-    val reader =  bufferedReader()
+    val reader = bufferedReader()
     val builder = StringBuilder()
     var line = reader.readLine()
     while (line != null) {

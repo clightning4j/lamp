@@ -20,7 +20,7 @@ import com.lvaccaro.lamp.utils.UI
 import org.jetbrains.anko.doAsync
 import java.lang.Exception
 
-class WithdrawFragment: BottomSheetDialogFragment() {
+class WithdrawFragment : BottomSheetDialogFragment() {
 
     val cli = LightningCli()
 
@@ -50,7 +50,7 @@ class WithdrawFragment: BottomSheetDialogFragment() {
             val address = view.findViewById<TextView>(R.id.addressText).text.toString()
 
             val sendAll = view.findViewById<SwitchMaterial>(R.id.switch_send_all).isChecked
-            if(sendAll) satoshi = "all"
+            if (sendAll) satoshi = "all"
 
             doAsync { withdraw(address, satoshi) }
         }
@@ -60,17 +60,19 @@ class WithdrawFragment: BottomSheetDialogFragment() {
     fun withdraw(address: String, satoshi: String) {
         try {
             val res = cli.exec(
-                context!!, arrayOf(
+                context!!,
+                arrayOf(
                     "withdraw",
                     address,
                     satoshi
-                ), true
+                ),
+                true
             ).toJSONObject()
             val txid = res["txid"].toString()
             activity?.runOnUiThread {
                 AlertDialog.Builder(context!!)
                     .setTitle("Transaction Sent")
-                    .setMessage("Tx ID: ${txid}")
+                    .setMessage("Tx ID: $txid")
                     .setPositiveButton("clipboard") { dialog, which ->
                         UI.copyToClipboard(context!!, "address", address)
                     }.setNegativeButton("continue") { dialog, which -> }

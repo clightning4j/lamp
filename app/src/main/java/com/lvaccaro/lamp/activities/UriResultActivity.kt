@@ -6,10 +6,9 @@ import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import com.lvaccaro.lamp.fragments.FundChannelFragment
-import com.lvaccaro.lamp.fragments.DecodedInvoiceFragment
-import com.lvaccaro.lamp.fragments.WithdrawFragment
 import com.lvaccaro.lamp.LightningCli
+import com.lvaccaro.lamp.fragments.FundChannelFragment
+import com.lvaccaro.lamp.fragments.WithdrawFragment
 import com.lvaccaro.lamp.services.CLightningException
 import com.lvaccaro.lamp.toJSONObject
 import com.lvaccaro.lamp.utils.LampKeys
@@ -46,7 +45,7 @@ open class UriResultActivity() : AppCompatActivity() {
                 val bolt11 = Validator.getBolt11(text)
                 runOnUiThread { showDecodePay(bolt11) }
             } else if (isURINodeConnect) {
-                Log.d(TAG, "*** Node URI connect ${text}")
+                Log.d(TAG, "*** Node URI connect $text")
                 resultCommand = runCommandCLightning(LampKeys.CONNECT_COMMAND, arrayOf(text))
                 runOnUiThread { showConnect(resultCommand!!["id"].toString()) }
             } else {
@@ -54,18 +53,18 @@ open class UriResultActivity() : AppCompatActivity() {
                 resultCommand.put("message", "No action found")
             }
         } catch (ex: CLightningException) {
-            //FIXME: This have sense?
+            // FIXME: This have sense?
             Log.e(TAG, ex.localizedMessage)
             resultCommand = JSONObject(ex.localizedMessage)
             ex.printStackTrace()
         } finally {
-            if(resultCommand == null){
+            if (resultCommand == null) {
                 return
             }
             var message = ""
-            if(resultCommand.has(LampKeys.MESSAGE_JSON_KEY)){
+            if (resultCommand.has(LampKeys.MESSAGE_JSON_KEY)) {
                 message = resultCommand.get(LampKeys.MESSAGE_JSON_KEY).toString()
-            }else if(resultCommand.has("id")){
+            } else if (resultCommand.has("id")) {
                 message = "Connected to node"
             }
             runOnUiThread {
@@ -82,13 +81,13 @@ open class UriResultActivity() : AppCompatActivity() {
             val payload = ArrayList<String>()
             payload.add(command)
             payload.addAll(parameter)
-            payload.forEach { Log.d(TAG, "***** ${it}") }
+            payload.forEach { Log.d(TAG, "***** $it") }
             val rpcResult =
                 cli.exec(this, payload.toTypedArray()).toJSONObject()
             Log.d(TAG, rpcResult.toString())
             return rpcResult
         } catch (ex: Exception) {
-            //FIXME: This have sense?
+            // FIXME: This have sense?
             val answer = JSONObject(ex.localizedMessage)
             showMessageOnToast(answer[LampKeys.MESSAGE_JSON_KEY].toString(), Toast.LENGTH_LONG)
             throw CLightningException(ex.cause)
@@ -123,14 +122,14 @@ open class UriResultActivity() : AppCompatActivity() {
         val bundle = Bundle()
         val address = param?.get(LampKeys.ADDRESS_KEY) ?: ""
         val networkCheck = Validator.isCorrectNetwork(cli, this.applicationContext, address)
-        if(networkCheck != null){
+        if (networkCheck != null) {
             showMessageOnToast(networkCheck, Toast.LENGTH_LONG)
             return
         }
         var amount = ""
-        if(param!!.contains(LampKeys.AMOUNT_KEY)){
-            //FIXME(vincenzopalazzo): create a converted class to set the set the correct ammounet.
-            //For instance, Validator.toMilliSatoshi()
+        if (param!!.contains(LampKeys.AMOUNT_KEY)) {
+            // FIXME(vincenzopalazzo): create a converted class to set the set the correct ammounet.
+            // For instance, Validator.toMilliSatoshi()
             amount = (param!![LampKeys.AMOUNT_KEY]!!.toDouble() * 100000000).toLong().toString()
         }
         bundle.putString(LampKeys.ADDRESS_KEY, address)
@@ -140,8 +139,8 @@ open class UriResultActivity() : AppCompatActivity() {
     }
 
     protected fun showMessageOnToast(message: String, duration: Int = Toast.LENGTH_LONG) {
-        if(message.isEmpty()) return
-        runOnUiThread{
+        if (message.isEmpty()) return
+        runOnUiThread {
             Toast.makeText(
                 this, message,
                 duration
