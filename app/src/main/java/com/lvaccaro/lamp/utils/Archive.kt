@@ -10,7 +10,7 @@ import java.io.*
 class Archive {
 
     companion object {
-        const val RELEASE = "v0.9.3"
+        const val RELEASE = "v0.10.0_miami"
 
         fun arch(): String {
             var abi: String?
@@ -36,7 +36,8 @@ class Archive {
 
         fun url(): String {
             val TAR_FILENAME = tarFilename()
-            return "https://github.com/lightningamp/lightning_ndk/releases/download/${RELEASE}/${TAR_FILENAME}"
+            //return "https://github.com/lightningamp/lightning_ndk/releases/download/${RELEASE}/${TAR_FILENAME}"
+            return "https://github.com/vincenzopalazzo/lightning_ndk/releases/download/${RELEASE}/${TAR_FILENAME}"
         }
 
         fun delete(downloadDir: File): Boolean {
