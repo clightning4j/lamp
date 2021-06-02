@@ -449,7 +449,7 @@ class MainActivity : UriResultActivity() {
                     return true
             } catch (err: Exception) {
             }
-            Thread.sleep(2000)
+            Thread.sleep(5000)
         }
         return false
     }
@@ -462,7 +462,7 @@ class MainActivity : UriResultActivity() {
             } catch (err: Exception) {
                 Log.d(TAG, err.localizedMessage)
             }
-            Thread.sleep(2000)
+            Thread.sleep(5000)
         }
         return false
     }
