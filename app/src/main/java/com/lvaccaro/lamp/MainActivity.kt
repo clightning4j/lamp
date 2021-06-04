@@ -118,8 +118,8 @@ class MainActivity : UriResultActivity() {
         }
 
         // Check lightning_ndk release version
-        val release = getPreferences(Context.MODE_PRIVATE).getString("RELEASE", Archive.RELEASE)
-        if (release != Archive.RELEASE) {
+        val release = getPreferences(Context.MODE_PRIVATE).getString("RELEASE", Archive.RELEASE.version)
+        if (release != Archive.RELEASE.version) {
             AlertDialog.Builder(this)
                 .setTitle(R.string.id_update)
                 .setMessage("New lightning_ndk version is available: ${Archive.RELEASE}. Make a backup from Settings. Tap Update to start download.")
@@ -358,8 +358,8 @@ class MainActivity : UriResultActivity() {
     private fun powerOff() {
         contentMainOn.visibility = View.GONE
         contentMainOff.visibility = View.VISIBLE
-        val release = getPreferences(Context.MODE_PRIVATE).getString("RELEASE", "")
-        versionText.text = "Version: ${BuildConfig.VERSION_NAME} - ${release}"
+        //val release = getPreferences(Context.MODE_PRIVATE).getString("RELEASE", "")
+        versionText.text = "Version: ${BuildConfig.VERSION_NAME} - ${Archive.RELEASE}"
         statusText.text = "Offline. Rub the lamp to turn on."
         powerImageView.off()
         invalidateOptionsMenu()
@@ -408,7 +408,7 @@ class MainActivity : UriResultActivity() {
                 return
 
             runOnUiThread {
-                getPreferences(Context.MODE_PRIVATE).edit().putString("RELEASE", Archive.RELEASE).apply()
+                getPreferences(Context.MODE_PRIVATE).edit().putString("RELEASE", Archive.RELEASE.version).apply()
                 statusText.text =
                     "Download Completed. Uncompressing..."
             }

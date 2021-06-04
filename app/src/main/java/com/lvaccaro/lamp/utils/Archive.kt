@@ -9,8 +9,14 @@ import java.io.*
 
 class Archive {
 
+    class Release(val name: String, val version: String) {
+        override fun toString(): String {
+            return "%s %s".format(name, version).trim()
+        }
+    }
+
     companion object {
-        const val RELEASE = "v0.9.3"
+        val RELEASE = Release("Miami","v0.10.0")
 
         fun arch(): String {
             var abi: String?
@@ -36,7 +42,7 @@ class Archive {
 
         fun url(): String {
             val TAR_FILENAME = tarFilename()
-            return "https://github.com/lightningamp/lightning_ndk/releases/download/${RELEASE}/${TAR_FILENAME}"
+            return "https://github.com/lightningamp/lightning_ndk/releases/download/${RELEASE.version}/${TAR_FILENAME}"
         }
 
         fun delete(downloadDir: File): Boolean {
