@@ -3,7 +3,6 @@
 
 [![build](https://github.com/clightning4j/lamp/workflows/android-master/badge.svg)](https://github.com/clightning4j/lamp/actions)
 [![release](https://github.com/clightning4j/lamp/workflows/release/badge.svg)](https://github.com/clightning4j/lamp/actions)
-
 [![MIT license](https://img.shields.io/github/license/clightning4j/lamp)](https://github.com/clightning4j/lamp/blob/master/LICENSE)
 
 
@@ -14,7 +13,6 @@ Touch the lamp to download and run c-lightning from cross-compiled binaries for 
 ![screenshot1](doc/img/Screen2.png)
 ![screenshot2](doc/img/Screen1.png)
 ![screenshot3](doc/img/Screen3.png)
-
 
 ## Bitcoin Setup
 
@@ -56,6 +54,9 @@ Read the following instructions at [Tor on clightning](https://lightning.readthe
 ## Building
 
  * [in Linux using cmdline tools](doc/cmdline-tools-setup.md)
+ 
+## Store Supported
+[![](https://gitlab.com/IzzyOnDroid/repo/-/raw/master/assets/IzzyOnDroid.png)](https://apt.izzysoft.de/fdroid/index/apk/com.lvaccaro.lamp)
 
 ## Code Style
 [![ktlint](https://img.shields.io/badge/code%20style-%E2%9D%A4-FF4081.svg)](https://ktlint.github.io/)
