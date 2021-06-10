@@ -383,7 +383,7 @@ class MainActivity : UriResultActivity() {
     private fun powerOff() {
         contentMainOn.visibility = View.GONE
         contentMainOff.visibility = View.VISIBLE
-        //val release = getPreferences(Context.MODE_PRIVATE).getString("RELEASE", "")
+        // val release = getPreferences(Context.MODE_PRIVATE).getString("RELEASE", "")
         versionText.text = "Version: ${BuildConfig.VERSION_NAME} - ${Archive.RELEASE}"
         statusText.text = "Offline. Rub the lamp to turn on."
         powerImageView.off()

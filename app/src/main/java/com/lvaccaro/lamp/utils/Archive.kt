@@ -19,7 +19,7 @@ class Archive {
     }
 
     companion object {
-        val RELEASE = Release("Miami","v0.10.0")
+        val RELEASE = Release("Miami", "v0.10.0")
 
         fun arch(): String {
             var abi: String?
@@ -45,7 +45,7 @@ class Archive {
 
         fun url(): String {
             val TAR_FILENAME = tarFilename()
-            return "https://github.com/clightning4j/lightning_ndk/releases/download/${RELEASE.version}/${TAR_FILENAME}"
+            return "https://github.com/clightning4j/lightning_ndk/releases/download/${RELEASE.version}/$TAR_FILENAME"
         }
 
         fun delete(downloadDir: File): Boolean {
