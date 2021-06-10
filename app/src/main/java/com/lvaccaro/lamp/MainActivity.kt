@@ -4,7 +4,11 @@ import android.Manifest
 import android.app.Activity
 import android.app.ActivityManager
 import android.app.DownloadManager
-import android.content.*
+import android.content.BroadcastReceiver
+import android.content.ClipboardManager
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
@@ -25,27 +29,47 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.lvaccaro.lamp.activities.*
+import com.lvaccaro.lamp.activities.BuildInvoiceActivity
+import com.lvaccaro.lamp.activities.ChannelsActivity
+import com.lvaccaro.lamp.activities.ConsoleActivity
+import com.lvaccaro.lamp.activities.LogActivity
+import com.lvaccaro.lamp.activities.ScanActivity
+import com.lvaccaro.lamp.activities.SendActivity
+import com.lvaccaro.lamp.activities.SettingsActivity
+import com.lvaccaro.lamp.activities.UriResultActivity
 import com.lvaccaro.lamp.adapters.Balance
 import com.lvaccaro.lamp.adapters.BalanceAdapter
 import com.lvaccaro.lamp.fragments.PeerInfoFragment
 import com.lvaccaro.lamp.fragments.WithdrawFragment
-import com.lvaccaro.lamp.handlers.*
+import com.lvaccaro.lamp.handlers.BrokenStatus
+import com.lvaccaro.lamp.handlers.NewBlockHandler
+import com.lvaccaro.lamp.handlers.NewChannelPayment
+import com.lvaccaro.lamp.handlers.NewTransaction
+import com.lvaccaro.lamp.handlers.NodeUpHandler
+import com.lvaccaro.lamp.handlers.PaidInvoice
+import com.lvaccaro.lamp.handlers.ShutdownNode
 import com.lvaccaro.lamp.services.LightningService
 import com.lvaccaro.lamp.services.TorService
 import com.lvaccaro.lamp.utils.Archive
 import com.lvaccaro.lamp.utils.SimulatorPlugin
 import com.lvaccaro.lamp.utils.UI
 import com.lvaccaro.lamp.views.HistoryBottomSheet
-import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.android.synthetic.main.content_main_off.*
-import kotlinx.android.synthetic.main.content_main_on.*
-import kotlinx.android.synthetic.main.fragment_history.*
+import kotlinx.android.synthetic.main.activity_main.contentMainOff
+import kotlinx.android.synthetic.main.activity_main.contentMainOn
+import kotlinx.android.synthetic.main.content_main_off.powerImageView
+import kotlinx.android.synthetic.main.content_main_off.statusText
+import kotlinx.android.synthetic.main.content_main_off.versionText
+import kotlinx.android.synthetic.main.content_main_on.balanceText
+import kotlinx.android.synthetic.main.content_main_on.floatingActionButton
+import kotlinx.android.synthetic.main.content_main_on.receiveButton
+import kotlinx.android.synthetic.main.content_main_on.recyclerView
+import kotlinx.android.synthetic.main.content_main_on.sendButton
+import kotlinx.android.synthetic.main.content_main_on.syncText
+import kotlinx.android.synthetic.main.fragment_history.bottomSheet
 import org.jetbrains.anko.doAsync
 import org.json.JSONArray
 import java.io.File
 import java.util.logging.Logger
-
 
 class MainActivity : UriResultActivity() {
 
@@ -178,7 +202,8 @@ class MainActivity : UriResultActivity() {
 
     override fun onRequestPermissionsResult(
         requestCode: Int,
-        permissions: Array<String>, grantResults: IntArray
+        permissions: Array<String>,
+        grantResults: IntArray
     ) {
         when (requestCode) {
             WRITE_REQUEST_CODE -> {
@@ -280,13 +305,14 @@ class MainActivity : UriResultActivity() {
         val peers: JSONArray = listPeers["peers"] as JSONArray
 
         runOnUiThread {
-            balanceText.text = "${(SimulatorPlugin.funds(listPeers).toDouble()/1000)} sat"
+            balanceText.text = "${(SimulatorPlugin.funds(listPeers).toDouble() / 1000)} sat"
             recyclerView.adapter = BalanceAdapter(
                 arrayListOf(
-                    Balance("Spendable in channels", "${peers.length()} Peers", "${SimulatorPlugin.funds(listPeers).toDouble()/1000} sat"),
-                    Balance("Locked in channels", "${channels.length()} Channels", "${SimulatorPlugin.offchain(listFunds).toDouble()/1000} sat"),
+                    Balance("Spendable in channels", "${peers.length()} Peers", "${SimulatorPlugin.funds(listPeers).toDouble() / 1000} sat"),
+                    Balance("Locked in channels", "${channels.length()} Channels", "${SimulatorPlugin.offchain(listFunds).toDouble() / 1000} sat"),
                     Balance("Bitcoin on chain", "${outputs.length()} Transactions", "${SimulatorPlugin.onchain(listFunds)} sat")
-                ), null
+                ),
+                null
             )
         }
     }
@@ -335,17 +361,16 @@ class MainActivity : UriResultActivity() {
             doAsync {
                 try {
                     Archive.uncompressXZ(tarFile, rootDir())
-                } catch(ex: Exception) {
+                } catch (ex: Exception) {
                     Log.e(TAG, "Error during uncompressXZ operation %s".format(ex.localizedMessage))
                     runOnUiThread {
                         UI.snackBar(this@MainActivity, "Error During download lightning node")
                     }
-                }finally {
+                } finally {
                     runOnUiThread {
                         powerOff()
                     }
                 }
-
             }
         } else {
             statusText.text =
@@ -358,7 +383,7 @@ class MainActivity : UriResultActivity() {
     private fun powerOff() {
         contentMainOn.visibility = View.GONE
         contentMainOff.visibility = View.VISIBLE
-        //val release = getPreferences(Context.MODE_PRIVATE).getString("RELEASE", "")
+        // val release = getPreferences(Context.MODE_PRIVATE).getString("RELEASE", "")
         versionText.text = "Version: ${BuildConfig.VERSION_NAME} - ${Archive.RELEASE}"
         statusText.text = "Offline. Rub the lamp to turn on."
         powerImageView.off()
@@ -388,7 +413,7 @@ class MainActivity : UriResultActivity() {
                 title = alias
                 powerImageView.on()
                 val delta = blockcount - blockheight
-                syncText.text = if (delta > 0) "Syncing blocks -${delta}" else ""
+                syncText.text = if (delta > 0) "Syncing blocks -$delta" else ""
             }
         } catch (e: Exception) {
             log.info("---" + e.localizedMessage + "---")
@@ -636,7 +661,7 @@ class MainActivity : UriResultActivity() {
 
     private val notificationReceiver = object : BroadcastReceiver() {
         // I can create a mediator that I can use to call all method inside the
-        //lightning-cli and return a json if the answer i ok or I throw an execeptions
+        // lightning-cli and return a json if the answer i ok or I throw an execeptions
 
         override fun onReceive(context: Context?, intent: Intent?) {
             Log.d(TAG, "onReceive action ${intent?.action}")
@@ -650,7 +675,7 @@ class MainActivity : UriResultActivity() {
                 NewBlockHandler.NOTIFICATION -> runOnUiThread {
                     val blockheight = intent.getIntExtra("height", 0)
                     val delta = blockcount - blockheight
-                    statusText.text = if (delta > 0) "Syncing blocks -${delta}" else ""
+                    statusText.text = if (delta > 0) "Syncing blocks -$delta" else ""
                 }
                 BrokenStatus.NOTIFICATION -> runOnUiThread {
                     val message = intent.getStringExtra("message")
@@ -662,7 +687,7 @@ class MainActivity : UriResultActivity() {
                 NewTransaction.NOTIFICATION, NewChannelPayment.NOTIFICATION, PaidInvoice.NOTIFICATION -> doAsync {
                     updateBalanceView(context)
                 }
-                NodeUpHandler.NOTIFICATION  -> {
+                NodeUpHandler.NOTIFICATION -> {
                     isRunning = true
                 }
             }

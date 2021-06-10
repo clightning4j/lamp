@@ -8,7 +8,7 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager
 /**
  * @author https://github.com/vincenzopalazzo
  */
-class NodeUpHandler: IEventHandler{
+class NodeUpHandler : IEventHandler {
 
     companion object {
         val TAG = NodeUpHandler::class.java.canonicalName
@@ -17,13 +17,12 @@ class NodeUpHandler: IEventHandler{
     }
 
     override fun doReceive(context: Context, information: String) {
-        if(information.contains(PATTERN_ONE)){
-            Log.d(TAG, "****** Action received ${NOTIFICATION} ******")
+        if (information.contains(PATTERN_ONE)) {
+            Log.d(TAG, "****** Action received $NOTIFICATION ******")
             val intent = Intent()
             intent.action = NOTIFICATION
             intent.putExtra("message", "Node running")
             LocalBroadcastManager.getInstance(context).sendBroadcast(intent)
         }
     }
-
 }

@@ -21,11 +21,13 @@ import org.jetbrains.anko.runOnUiThread
 import org.json.JSONArray
 import org.json.JSONObject
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Date
 
-class ListAdapter(val list: JSONArray,
-                  private val onItemClick: ((JSONObject) -> Unit)?)
-    : RecyclerView.Adapter<ItemViewHolder>() {
+class ListAdapter(
+    val list: JSONArray,
+    private val onItemClick: ((JSONObject) -> Unit)?
+) :
+    RecyclerView.Adapter<ItemViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ItemViewHolder {
         val inflater = LayoutInflater.from(parent.context)
@@ -45,7 +47,6 @@ class ListAdapter(val list: JSONArray,
     }
 
     override fun getItemCount(): Int = list.length()
-
 }
 
 class ItemViewHolder(inflater: LayoutInflater, parent: ViewGroup) :
@@ -71,7 +72,7 @@ class ItemViewHolder(inflater: LayoutInflater, parent: ViewGroup) :
         val createdAt = payment["created_at"] as Int
         val msatoshi = payment["msatoshi"] as Int
         val id = payment["id"] as Int
-        bind(msatoshi, createdAt, "Payment ID ${id.toString()}", true)
+        bind(msatoshi, createdAt, "Payment ID $id", true)
     }
 
     fun bind(msatoshi: Int, paidAt: Int, label: String, incoming: Boolean) {
@@ -82,7 +83,7 @@ class ItemViewHolder(inflater: LayoutInflater, parent: ViewGroup) :
     }
 }
 
-class HistoryBottomSheet(val context: Context, val view: View?):
+class HistoryBottomSheet(val context: Context, val view: View?) :
     BottomSheetBehavior.BottomSheetCallback() {
 
     private val bottomSheetBehavior: BottomSheetBehavior<LinearLayout>
@@ -104,7 +105,8 @@ class HistoryBottomSheet(val context: Context, val view: View?):
             BottomSheetBehavior.STATE_HIDDEN -> {}
             BottomSheetBehavior.STATE_EXPANDED -> {
                 imageView?.setImageDrawable(context.getDrawable(R.drawable.ic_arrow_down))
-                doAsync { reload() } }
+                doAsync { reload() }
+            }
             BottomSheetBehavior.STATE_DRAGGING -> {}
             BottomSheetBehavior.STATE_SETTLING -> { }
         }

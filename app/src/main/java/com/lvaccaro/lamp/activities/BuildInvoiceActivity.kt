@@ -10,16 +10,24 @@ import com.lvaccaro.lamp.LightningCli
 import com.lvaccaro.lamp.R
 import com.lvaccaro.lamp.toJSONObject
 import com.lvaccaro.lamp.utils.UI
-import kotlinx.android.synthetic.main.activity_build_invoice.*
-import kotlinx.android.synthetic.main.list_balance.view.*
-import kotlinx.android.synthetic.main.list_tx.*
+import kotlinx.android.synthetic.main.activity_build_invoice.balanceText
+import kotlinx.android.synthetic.main.activity_build_invoice.btcButton
+import kotlinx.android.synthetic.main.activity_build_invoice.btclnLayout
+import kotlinx.android.synthetic.main.activity_build_invoice.copyButton
+import kotlinx.android.synthetic.main.activity_build_invoice.copyShareLayout
+import kotlinx.android.synthetic.main.activity_build_invoice.descriptionText
+import kotlinx.android.synthetic.main.activity_build_invoice.expiredText
+import kotlinx.android.synthetic.main.activity_build_invoice.expiredTitle
+import kotlinx.android.synthetic.main.activity_build_invoice.labelText
+import kotlinx.android.synthetic.main.activity_build_invoice.lightningButton
+import kotlinx.android.synthetic.main.activity_build_invoice.qrImage
+import kotlinx.android.synthetic.main.activity_build_invoice.shareButton
 import org.jetbrains.anko.contentView
 import org.jetbrains.anko.doAsync
 import org.json.JSONObject
 import java.lang.Exception
 import java.text.SimpleDateFormat
-import java.util.*
-
+import java.util.Date
 
 class BuildInvoiceActivity : AppCompatActivity() {
 
@@ -59,13 +67,15 @@ class BuildInvoiceActivity : AppCompatActivity() {
 
     fun invoice(amount: String, label: String, description: String) {
         try {
-            val res = cli.exec(this,
+            val res = cli.exec(
+                this,
                 arrayOf(
                     "invoice",
                     amount,
                     label,
                     description
-                ), true
+                ),
+                true
             ).toJSONObject()
             runOnUiThread { showInvoice(res["bolt11"] as String) }
         } catch (e: Exception) {

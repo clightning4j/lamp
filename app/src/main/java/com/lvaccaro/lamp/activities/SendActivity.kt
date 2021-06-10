@@ -25,7 +25,6 @@ import org.jetbrains.anko.doAsync
 import org.json.JSONException
 import org.json.JSONObject
 
-
 class SendActivity : AppCompatActivity(), BalanceClickListener {
 
     private val cli = LightningCli()
@@ -53,7 +52,9 @@ class SendActivity : AppCompatActivity(), BalanceClickListener {
                 Balance("Scan QR", "", ""),
                 Balance("Paste from clipboard", "", ""),
                 Balance("Manual typing", "", "")
-            ), this)
+            ),
+            this
+        )
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -94,7 +95,7 @@ class SendActivity : AppCompatActivity(), BalanceClickListener {
             val command = arrayListOf("pay", bolt11)
             if (msatoshi != null)
                 command.add(msatoshi)
-            var params: Array<String> = command.toArray(arrayOf<String>());
+            var params: Array<String> = command.toArray(arrayOf<String>())
             cli.exec(this@SendActivity, params, true)
             runOnUiThread {
                 UI.snackBar(this@SendActivity, "Payed invoice")
@@ -104,7 +105,7 @@ class SendActivity : AppCompatActivity(), BalanceClickListener {
             var errorMessage = ex.localizedMessage
             try {
                 errorMessage = JSONObject(ex.localizedMessage)["message"] as String
-            } catch(e: JSONException) { }
+            } catch (e: JSONException) { }
             runOnUiThread { UI.textAlertDialog(this, "Error", errorMessage) }
         }
     }
@@ -156,14 +157,14 @@ class SendActivity : AppCompatActivity(), BalanceClickListener {
             )
             input.layoutParams = lp
             alertDialog.setView(input)
-            alertDialog.setPositiveButton( android.R.string.ok ) { dialog, which ->
+            alertDialog.setPositiveButton(android.R.string.ok) { dialog, which ->
                 val text = input.text.toString()
                 if (text.isEmpty() || !Validator.isBolt11(text))
                     UI.snackBar(this, "No valid content found")
                 else
                     doAsync { decode(text) }
             }
-            alertDialog.setNegativeButton( android.R.string.cancel ) { dialog, which -> dialog.cancel() }
+            alertDialog.setNegativeButton(android.R.string.cancel) { dialog, which -> dialog.cancel() }
             alertDialog.show()
         }
     }

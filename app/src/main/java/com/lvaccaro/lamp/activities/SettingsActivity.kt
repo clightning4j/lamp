@@ -9,13 +9,18 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
-import com.lvaccaro.lamp.MainActivity
 import com.lvaccaro.lamp.R
 import com.lvaccaro.lamp.rootDir
 import com.lvaccaro.lamp.utils.Archive
 import org.apache.commons.compress.utils.IOUtils
 import org.jetbrains.anko.doAsync
-import java.io.*
+import java.io.BufferedInputStream
+import java.io.BufferedOutputStream
+import java.io.File
+import java.io.FileInputStream
+import java.io.FileOutputStream
+import java.io.IOException
+import java.io.OutputStream
 import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
 import java.util.zip.ZipOutputStream
@@ -49,7 +54,7 @@ class SettingsActivity : AppCompatActivity() {
             return when (preference?.key) {
                 "clearlogs" -> {
                     val resultOperation = File(activity?.rootDir(), "lightningd.log").deleteRecursively() &&
-                            File(activity?.rootDir(), "tor.log").deleteRecursively()
+                        File(activity?.rootDir(), "tor.log").deleteRecursively()
 
                     File(activity?.rootDir(), ".lightning").listFiles()
                         ?.filter { it.name.matches("crash.log.*".toRegex()) }
@@ -58,7 +63,7 @@ class SettingsActivity : AppCompatActivity() {
                         ?.filter { it.name.matches("crash.log.*".toRegex()) }
                         ?.map { it.delete() }
 
-                    if(resultOperation)
+                    if (resultOperation)
                         showToast("Erased logs", Toast.LENGTH_LONG)
                     else
                         showToast("Error during Erasing logs", Toast.LENGTH_LONG)
@@ -66,9 +71,9 @@ class SettingsActivity : AppCompatActivity() {
                 }
                 "cleardata" -> {
                     var resultOperation = File(activity?.rootDir(), ".lightning").deleteRecursively() &&
-                            File(activity?.rootDir(), ".bitcoin").deleteRecursively() &&
-                            File(activity?.rootDir(), ".tor").deleteRecursively() &&
-                            File(activity?.rootDir(), ".torHiddenService").deleteRecursively()
+                        File(activity?.rootDir(), ".bitcoin").deleteRecursively() &&
+                        File(activity?.rootDir(), ".tor").deleteRecursively() &&
+                        File(activity?.rootDir(), ".torHiddenService").deleteRecursively()
 
                     if (resultOperation) {
                         showToast("Erased datadir", Toast.LENGTH_LONG)
@@ -86,12 +91,12 @@ class SettingsActivity : AppCompatActivity() {
                     val resultOperation = Archive.deleteUncompressed(dir)
                     activity?.let { it.getPreferences(Context.MODE_PRIVATE).edit().remove("RELEASE").apply() }
 
-                    if(resultOperation){
+                    if (resultOperation) {
                         showToast(
                             "Erased binary in: ${dir.path} and downloaded files",
                             Toast.LENGTH_LONG
                         )
-                    }else{
+                    } else {
                         showToast(
                             "Error during erasing binary in: ${dir.path} and downloaded files",
                             Toast.LENGTH_LONG
@@ -119,7 +124,7 @@ class SettingsActivity : AppCompatActivity() {
                     showToast("The change require the node restart", Toast.LENGTH_LONG)
                     true
                 }
-                "enabled-esplora" ->{
+                "enabled-esplora" -> {
                     showToast("The change require the node restart", Toast.LENGTH_LONG)
                     true
                 }
@@ -144,7 +149,7 @@ class SettingsActivity : AppCompatActivity() {
                 val currFile = File(outputDir, entry.name)
 
                 if (entry.isDirectory) {
-                    currFile.mkdirs();
+                    currFile.mkdirs()
                 } else {
                     val parent: File = currFile.parentFile
 
@@ -160,8 +165,10 @@ class SettingsActivity : AppCompatActivity() {
                     } catch (e: IOException) {
                         activity?.runOnUiThread {
                             Toast.makeText(
-                                context!!, "Error while copying '" + currFile.absolutePath
-                                        + "': " + e.message + "'", Toast.LENGTH_LONG
+                                context!!,
+                                "Error while copying '" + currFile.absolutePath +
+                                    "': " + e.message + "'",
+                                Toast.LENGTH_LONG
                             ).show()
                         }
                         return

@@ -5,7 +5,10 @@ import org.apache.commons.compress.archivers.tar.TarArchiveEntry
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream
 import org.apache.commons.compress.compressors.xz.XZCompressorInputStream
 import org.apache.commons.compress.utils.IOUtils
-import java.io.*
+import java.io.BufferedInputStream
+import java.io.File
+import java.io.FileInputStream
+import java.io.FileOutputStream
 
 class Archive {
 
@@ -16,7 +19,7 @@ class Archive {
     }
 
     companion object {
-        val RELEASE = Release("Miami","v0.10.0")
+        val RELEASE = Release("Miami", "v0.10.0")
 
         fun arch(): String {
             var abi: String?
@@ -37,12 +40,12 @@ class Archive {
         fun tarFilename(): String {
             val ARCH = arch()
             val PACKAGE = "lightning_ndk"
-            return "${ARCH}_${PACKAGE}.tar.xz"
+            return "${ARCH}_$PACKAGE.tar.xz"
         }
 
         fun url(): String {
             val TAR_FILENAME = tarFilename()
-            return "https://github.com/clightning4j/lightning_ndk/releases/download/${RELEASE.version}/${TAR_FILENAME}"
+            return "https://github.com/clightning4j/lightning_ndk/releases/download/${RELEASE.version}/$TAR_FILENAME"
         }
 
         fun delete(downloadDir: File): Boolean {
@@ -51,11 +54,11 @@ class Archive {
 
         fun deleteUncompressed(dir: File): Boolean {
             return File(dir, "cli").deleteRecursively() &&
-                    File(dir, "lightningd").deleteRecursively() &&
-                    File(dir, "plugins").deleteRecursively() &&
-                    File(dir, "bitcoin-cli").delete() &&
-                    File(dir, "bitcoind").delete() &&
-                    File(dir, "tor").delete()
+                File(dir, "lightningd").deleteRecursively() &&
+                File(dir, "plugins").deleteRecursively() &&
+                File(dir, "bitcoin-cli").delete() &&
+                File(dir, "bitcoind").delete() &&
+                File(dir, "tor").delete()
         }
 
         fun uncompressXZ(inputFile: File, outputDir: File) {
@@ -64,11 +67,11 @@ class Archive {
             mkdir(File(outputDir, "lightningd"))
             mkdir(File(outputDir, "cli"))
             val input = TarArchiveInputStream(
-                    BufferedInputStream(
-                            XZCompressorInputStream(
-                                    BufferedInputStream(FileInputStream(inputFile))
-                            )
+                BufferedInputStream(
+                    XZCompressorInputStream(
+                        BufferedInputStream(FileInputStream(inputFile))
                     )
+                )
             )
             var counter = 0
             var entry = input.nextEntry

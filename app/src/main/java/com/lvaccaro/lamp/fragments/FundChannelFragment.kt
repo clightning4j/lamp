@@ -16,7 +16,7 @@ import com.lvaccaro.lamp.utils.UI
 import org.jetbrains.anko.doAsync
 import java.lang.Exception
 
-class FundChannelFragment: BottomSheetDialogFragment() {
+class FundChannelFragment : BottomSheetDialogFragment() {
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -28,7 +28,7 @@ class FundChannelFragment: BottomSheetDialogFragment() {
         view.findViewById<TextInputEditText>(R.id.node_text).setText(uri ?: "")
         view.findViewById<Button>(R.id.button).setOnClickListener {
             val uri = view.findViewById<TextInputEditText>(R.id.node_text).text.toString()
-            val isMax =  view.findViewById<SwitchMaterial>(R.id.fundmax_switch).isChecked
+            val isMax = view.findViewById<SwitchMaterial>(R.id.fundmax_switch).isChecked
             var isPrivate = view.findViewById<SwitchMaterial>(R.id.private_switch).isChecked
             val satoshi = view.findViewById<TextInputEditText>(R.id.satoshi_text).text.toString()
             doAsync {

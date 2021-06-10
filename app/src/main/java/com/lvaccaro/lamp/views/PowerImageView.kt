@@ -6,12 +6,12 @@ import android.util.AttributeSet
 import androidx.appcompat.widget.AppCompatImageView
 import com.lvaccaro.lamp.R
 
-class PowerImageView: AppCompatImageView {
+class PowerImageView : AppCompatImageView {
 
     private var light = false
 
-    constructor(context: Context?): super(context!!)
-    constructor(context: Context?, attrs: AttributeSet?): super(context!!, attrs)
+    constructor(context: Context?) : super(context!!)
+    constructor(context: Context?, attrs: AttributeSet?) : super(context!!, attrs)
     constructor(context: Context?, attrs: AttributeSet?, defStyleAttr: Int) : super(context!!, attrs, defStyleAttr)
 
     fun on() {

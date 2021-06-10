@@ -18,7 +18,7 @@ import org.json.JSONArray
 import org.json.JSONObject
 import java.lang.Exception
 
-class PeerInfoFragment: BottomSheetDialogFragment() {
+class PeerInfoFragment : BottomSheetDialogFragment() {
 
     var address = ""
 
@@ -37,7 +37,6 @@ class PeerInfoFragment: BottomSheetDialogFragment() {
         doAsync { getInfo(view) }
         return view
     }
-
 
     fun getInfo(view: View) {
         try {
