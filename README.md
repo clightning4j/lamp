@@ -10,9 +10,11 @@
 
 Touch the lamp to download and run c-lightning from cross-compiled binaries for Android are available [here](https://github.com/clightning4j/lightning_ndk/releases).
 
-![screenshot1](doc/img/Screen2.png)
-![screenshot2](doc/img/Screen1.png)
-![screenshot3](doc/img/Screen3.png)
+<span> 
+    <img src="doc/img/Screen1.png" width="230" height="350" />
+    <img src="doc/img/Screen2.png" width="230" height="350" />
+    <img src="doc/img/Screen3.png" width="230" height="350" />
+</span>
 
 ## Bitcoin Setup
 
@@ -56,7 +58,9 @@ Read the following instructions at [Tor on clightning](https://lightning.readthe
  * [in Linux using cmdline tools](doc/cmdline-tools-setup.md)
  
 ## Store Supported
-[![](https://gitlab.com/IzzyOnDroid/repo/-/raw/master/assets/IzzyOnDroid.png)](https://apt.izzysoft.de/fdroid/index/apk/com.lvaccaro.lamp)
+[<img src="https://gitlab.com/IzzyOnDroid/repo/-/raw/master/assets/IzzyOnDroid.png" width="200" height="80" />](https://apt.izzysoft.de/fdroid/index/apk/com.lvaccaro.lamp)
+
+
 
 ## Code Style
 [![ktlint](https://img.shields.io/badge/code%20style-%E2%9D%A4-FF4081.svg)](https://ktlint.github.io/)
